@@ -167,7 +167,7 @@ Campos administrativos usam fundo cinza claro, altura mínima de 42px e borda tr
 
 ### Navigation
 
-A navegação administrativa ocupa uma faixa rosa claro (`primary-soft`) de largura total, separada e abaixo do cabeçalho da marca e do perfil, sem cantos arredondados. Os itens ficam centralizados com intervalo de 12px e preenchimento da faixa de 10px por 27px; o item ativo mantém a cápsula branca e o texto vermelho. Até 650px, o preenchimento lateral passa para 16px, o intervalo para 8px e os itens se alinham ao início com rolagem horizontal. Os atalhos usam ícones com fundo rosa no estado ativo. Até 650px, os botões da navegação, ícones, perfil e ações em texto têm altura mínima de 44px; os atalhos inferiores medem 44px por 44px. O menu de perfil é um painel elevado alinhado à direita.
+A navegação administrativa usa uma cápsula branca flutuante, horizontal e centralizada abaixo do cabeçalho da marca e do perfil. A cápsula tem raio de 32px, preenchimento de 8px, largura ajustada ao conteúdo com limite de `calc(100% - 32px)` e margem vertical de 12px. Os itens preservam seus nomes, usam texto cinza (`#5b5c63`) e intervalo de 12px; o item ativo recebe fundo rosa claro (`primary-soft`) e texto vermelho escuro, sem sombra. Até 650px, o intervalo passa para 8px e os itens se alinham ao início com rolagem horizontal. Os atalhos usam ícones com fundo rosa no estado ativo. Até 650px, os botões da navegação, ícones, perfil e ações em texto têm altura mínima de 44px; os atalhos inferiores medem 44px por 44px. O menu de perfil é um painel elevado alinhado à direita.
 
 ### Patient rating
 

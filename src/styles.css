@@ -506,15 +506,19 @@ textarea.input {
 .top-navigation {
   display: flex;
   align-items: center;
-  background: var(--pink);
-  padding: 10px 27px;
+  background: #fff;
+  border-radius: 32px;
+  padding: 8px;
   gap: 12px;
-  width: 100%;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 12px auto;
   justify-content: center;
   min-width: 0;
 }
 .top-navigation button {
   background: none;
+  color: #5b5c63;
   border: 0;
   font-size: 11px;
   padding: 9px 13px;
@@ -523,9 +527,8 @@ textarea.input {
   min-height: 34px;
 }
 .top-navigation button.active {
-  background: white;
-  color: var(--red);
-  box-shadow: 0 2px 6px #34303b03;
+  background: var(--pink);
+  color: var(--red-dark);
 }
 .top-navigation button:hover {
   color: var(--red-dark);
@@ -1674,7 +1677,6 @@ textarea.input {
   .top-navigation {
     justify-content: flex-start;
     overflow-x: auto;
-    padding: 10px 16px;
     gap: 8px;
     scrollbar-width: none;
   }

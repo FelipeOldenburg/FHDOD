@@ -298,9 +298,9 @@
     {
       "name": "Navegação superior",
       "kind": "nav",
-      "description": "Faixa rosa claro de largura total, separada e abaixo do cabeçalho da marca e do perfil. Itens centralizados com intervalo de 12px (8px até 650px) e página ativa em cápsula branca.",
+      "description": "Cápsula branca flutuante, horizontal e centralizada abaixo do cabeçalho da marca e do perfil. Itens com nomes e intervalo de 12px (8px até 650px), com página ativa em rosa claro e texto vermelho escuro.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Principal\"><button class=\"ds-current\" type=\"button\" aria-current=\"page\">Dashboard</button><button type=\"button\">Pesquisas</button><button type=\"button\">Resultados</button></nav>",
-      "css": ".ds-nav{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-width:0;padding:10px 27px;border-radius:0;background:var(--pink,#faebef);font-family:Inter,Arial,sans-serif}.ds-nav button{min-height:34px;border:0;border-radius:99px;background:none;padding:9px 13px;font:11px Inter,Arial,sans-serif;color:#26272b;cursor:pointer;white-space:nowrap}.ds-nav .ds-current{background:#fff;color:var(--red,#d92742);box-shadow:0 2px 6px #34303b03}.ds-nav button:hover{color:var(--red-dark,#b91e36)}.ds-nav button:focus-visible{outline:3px solid #ac2346;outline-offset:4px}@media(max-width:650px){.ds-nav{justify-content:flex-start;overflow-x:auto;padding:10px 16px;gap:8px;scrollbar-width:none}.ds-nav button{min-height:44px;padding:8px 13px}}"
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:center;gap:12px;width:max-content;max-width:calc(100% - 32px);min-width:0;margin:12px auto;padding:8px;border-radius:32px;background:#fff;font-family:Inter,Arial,sans-serif}.ds-nav button{min-height:34px;border:0;border-radius:99px;background:none;padding:9px 13px;font:11px Inter,Arial,sans-serif;color:#5b5c63;cursor:pointer;white-space:nowrap}.ds-nav .ds-current{background:var(--pink,#faebef);color:var(--red-dark,#b91e36)}.ds-nav button:hover{color:var(--red-dark,#b91e36)}.ds-nav button:focus-visible{outline:3px solid #ac2346;outline-offset:4px}@media(max-width:650px){.ds-nav{justify-content:flex-start;overflow-x:auto;gap:8px;scrollbar-width:none}.ds-nav button{min-height:44px;padding:8px 13px}}"
     },
     {
       "name": "Situação",
