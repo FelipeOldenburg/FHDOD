@@ -19,21 +19,12 @@ export function Brand({ patient = false }: { patient?: boolean }) {
       <span className="brand-symbol" aria-hidden="true">
         <img src="/assets/fhdod-logo.png" alt="" width="450" height="150" />
       </span>
-      <span className="brand-word">
-        FHDOD
-        <span>
-          Fundação Hospitalar
-          <br />
-          Dr. Oswaldo Diesel
-        </span>
+      <span className="brand-word">FHDOD</span>
+      <span className="brand-institution">
+        Fundação Hospitalar
+        <br />
+        Dr. Oswaldo Diesel
       </span>
-      {patient && (
-        <span className="brand-institution">
-          Fundação Hospitalar
-          <br />
-          Dr. Oswaldo Diesel
-        </span>
-      )}
     </a>
   );
 }

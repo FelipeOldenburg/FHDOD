@@ -95,6 +95,8 @@ Este documento registra o visual já implementado a partir do Figma fornecido pe
 
 A marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs autorados por aproximação visual. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; os SVGs originais são necessários para conferir os detalhes dessas ilustrações.
 
+A marca padrão usa símbolo de 44px, sigla de 28px e nome institucional de 9px à direita, separado por uma linha vertical. Até 1250px, a sigla passa para 26px; até 650px, símbolo e sigla passam para 36px e 24px, e o cabeçalho administrativo oculta o nome institucional. A variante do paciente preserva seus tamanhos e breakpoints próprios, sem separador.
+
 **Key Characteristics:**
 
 - Cartões brancos, cantos arredondados e separação por fundos.
@@ -165,7 +167,7 @@ Campos administrativos usam fundo cinza claro, altura mínima de 42px e borda tr
 
 ### Navigation
 
-A navegação administrativa usa uma cápsula cinza com item ativo branco e texto vermelho. Os atalhos usam ícones com fundo rosa no estado ativo. Até 650px, os botões da navegação, ícones, perfil e ações em texto têm altura mínima de 44px; os atalhos inferiores medem 44px por 44px. O menu de perfil é um painel elevado alinhado à direita.
+A navegação administrativa usa uma cápsula cinza de largura ajustada ao conteúdo, centralizada no cabeçalho, com intervalo de 4px entre os itens, item ativo branco e texto vermelho. Até 1000px, ocupa uma linha própria e mantém os itens agrupados; até 650px, permite rolagem horizontal. Os atalhos usam ícones com fundo rosa no estado ativo. Até 650px, os botões da navegação, ícones, perfil e ações em texto têm altura mínima de 44px; os atalhos inferiores medem 44px por 44px. O menu de perfil é um painel elevado alinhado à direita.
 
 ### Patient rating
 
