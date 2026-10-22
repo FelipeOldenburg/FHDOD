@@ -40,6 +40,16 @@ Abra [http://127.0.0.1:3001](http://127.0.0.1:3001); a API serve os arquivos de 
 - Respostas enviadas e comentários originais imutáveis; Ouvidoria com situação, notas internas e histórico próprios.
 - Indicadores sobre os dados da instalação, filtros, registro de auditoria e exportação XLSX gerada no navegador conforme perfil e filtros.
 
+## Acesso dos setores
+
+Cada setor tem **um único administrador**, com e-mail e senha próprios e acesso apenas àquele setor. Super Admin e Admin de Setor entram pela mesma tela de login; a conta autenticada define as permissões.
+
+Na tela **Setores**, o Super Admin cadastra o setor e o e-mail do administrador. A API cria setor e conta juntos; se houver erro, nenhum dos dois é salvo. A senha temporária aparece uma única vez e deve ser trocada no primeiro login. Setores existentes sem conta ficam pendentes de configuração; nenhum e-mail ou senha é preenchido automaticamente.
+
+Desativar a conta ou o setor bloqueia o login e as sessões existentes. Redefinir a senha também invalida as sessões anteriores. A tela **Usuários** permite administrar os demais perfis e editar acessos; o perfil e o setor de um administrador válido permanecem fixos. Contas antigas com vários setores ou vínculos duplicados podem ser corrigidas ali sem excluir contas ou alterar respostas.
+
+O link e o QR Code do questionário continuam públicos, separados do acesso administrativo e sem exigir login do paciente.
+
 ## Configuração e verificações
 
 As variáveis são lidas do ambiente do processo; o servidor não carrega arquivos `.env` automaticamente.

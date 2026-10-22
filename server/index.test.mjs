@@ -66,11 +66,34 @@ test("preserva respostas e versões, exige troca de senha e isola dados por seto
     ).status,
     403,
   );
-  const a = (
-    await api("/sectors", "POST", { name: "Setor A", slug: "a" }, admin.cookie)
-  ).body.sector;
+  const user = await api(
+    "/sectors",
+    "POST",
+    {
+      name: "Setor A",
+      slug: "a",
+      admin: {
+        email: "a@example.test",
+        temporaryPassword: "Senha-temporaria-2026",
+      },
+    },
+    admin.cookie,
+  );
+  const a = user.body.sector;
   const b = (
-    await api("/sectors", "POST", { name: "Setor B", slug: "b" }, admin.cookie)
+    await api(
+      "/sectors",
+      "POST",
+      {
+        name: "Setor B",
+        slug: "b",
+        admin: {
+          email: "b@example.test",
+          temporaryPassword: "Senha-temporaria-2026",
+        },
+      },
+      admin.cookie,
+    )
   ).body.sector;
   const survey = (
     await api(
@@ -108,18 +131,6 @@ test("preserva respostas e versões, exige troca de senha e isola dados por seto
     200,
   );
   assert.equal(survey.questions.filter((q) => q.type === "nps").length, 1);
-  const user = await api(
-    "/users",
-    "POST",
-    {
-      name: "Setor A",
-      email: "a@example.test",
-      role: "sector_admin",
-      sectorIds: [a.id],
-      temporaryPassword: "Senha-temporaria-2026",
-    },
-    admin.cookie,
-  );
   assert.equal(user.status, 201);
   const login = await api("/auth/login", "POST", {
     email: "a@example.test",
@@ -471,6 +482,21 @@ test("preserva respostas e versões, exige troca de senha e isola dados por seto
         `/users/${user.body.user.id}`,
         "PUT",
         { sectorIds: [b.id] },
+        admin.cookie,
+      )
+    ).status,
+    400,
+  );
+  assert.equal(
+    (await api("/auth/me", "GET", undefined, sectorCookie)).status,
+    200,
+  );
+  assert.equal(
+    (
+      await api(
+        `/users/${user.body.user.id}`,
+        "PUT",
+        { active: false },
         admin.cookie,
       )
     ).status,

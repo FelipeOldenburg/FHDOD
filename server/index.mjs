@@ -209,6 +209,39 @@ export function createApplication({
       row.id,
     ).map((s) => s.sector_id),
   });
+  const sectorAdmins = (sectorId) =>
+    all(
+      "SELECT u.* FROM users u JOIN user_sectors us ON us.user_id=u.id WHERE us.sector_id=? AND u.role='sector_admin'",
+      sectorId,
+    );
+  function fixedSectorAdmin(row) {
+    if (row.role !== "sector_admin") return false;
+    const sectorIds = userView(row).sectorIds;
+    return sectorIds.length === 1 && sectorAdmins(sectorIds[0]).length === 1;
+  }
+  function sectorAccount(row) {
+    const user = userView(row);
+    if (user.role !== "sector_admin") return user;
+    if (!fixedSectorAdmin(row))
+      fail(
+        409,
+        "O acesso deste setor precisa ser corrigido pelo Admin Supremo em Usuários: mantenha um administrador por setor.",
+      );
+    if (
+      !get("SELECT id FROM sectors WHERE id=? AND active=1", user.sectorIds[0])
+    )
+      fail(
+        401,
+        "O acesso deste setor está desativado. Contate o Admin Supremo.",
+      );
+    return user;
+  }
+  function revokeSectorSessions(sectorId) {
+    run(
+      "DELETE FROM sessions WHERE user_id IN (SELECT us.user_id FROM user_sectors us JOIN users u ON u.id=us.user_id WHERE us.sector_id=? AND u.role='sector_admin')",
+      sectorId,
+    );
+  }
   const surveyView = (row) => ({
     id: row.id,
     sectorId: row.sector_id,
@@ -444,7 +477,7 @@ export function createApplication({
       hash(token),
     );
     if (!row) fail(401, "Sua sessão expirou. Entre novamente.");
-    return userView(row);
+    return sectorAccount(row);
   }
   function session(req, res, userId) {
     const token = randomBytes(32).toString("hex");
@@ -553,8 +586,9 @@ export function createApplication({
           user?.password_hash || `${"0".repeat(32)}:${"0".repeat(128)}`,
         );
         if (!valid || !user) fail(401, "E-mail ou senha incorretos.");
+        const account = sectorAccount(user);
         session(req, res, user.id);
-        return send({ user: userView(user) });
+        return send({ user: account });
       }
       if (path === "/api/auth/logout" && method === "POST") {
         const token = (req.headers.cookie || "")
@@ -830,6 +864,51 @@ export function createApplication({
                 ? (before?.active ?? 1)
                 : Number(body.active === true);
             const id = before?.id || uid();
+            const admins = before ? sectorAdmins(id) : [];
+            const legacyAdmin =
+              admins.length > 1 || (admins[0] && !fixedSectorAdmin(admins[0]));
+            if (legacyAdmin && body.admin !== undefined)
+              fail(
+                409,
+                "Corrija o administrador deste setor em Usuários antes de editar seu acesso.",
+              );
+            const previousAdmin = legacyAdmin ? undefined : admins[0];
+            if (
+              body.admin !== undefined &&
+              (!body.admin ||
+                typeof body.admin !== "object" ||
+                Array.isArray(body.admin))
+            )
+              fail(400, "Informe os dados do administrador do setor.");
+            if (!before && !body.admin)
+              fail(
+                400,
+                "Defina o e-mail e a senha temporária do administrador deste setor.",
+              );
+            const adminEmail = body.admin
+              ? validEmail(body.admin.email ?? previousAdmin?.email)
+              : previousAdmin?.email;
+            if (
+              adminEmail &&
+              get(
+                "SELECT id FROM users WHERE email=? AND id<>?",
+                adminEmail,
+                previousAdmin?.id || "",
+              )
+            )
+              fail(409, "Já existe um usuário com este e-mail.");
+            const temporaryPassword = body.admin?.temporaryPassword;
+            const encoded =
+              temporaryPassword !== undefined
+                ? passwordHash(temporaryPassword)
+                : previousAdmin?.password_hash;
+            if (body.admin && !encoded)
+              fail(
+                400,
+                "Defina uma senha temporária com no mínimo 12 caracteres.",
+              );
+            const adminId =
+              previousAdmin?.id || (body.admin ? uid() : undefined);
             transaction(() => {
               if (before)
                 run(
@@ -850,6 +929,45 @@ export function createApplication({
                   active,
                   now(),
                 );
+              if (previousAdmin)
+                run(
+                  "UPDATE users SET name=?,email=?,password_hash=?,must_change_password=? WHERE id=?",
+                  name,
+                  adminEmail,
+                  encoded,
+                  temporaryPassword !== undefined
+                    ? 1
+                    : previousAdmin.must_change_password,
+                  adminId,
+                );
+              else if (body.admin) {
+                run(
+                  "INSERT INTO users(id,name,email,password_hash,role,created_at) VALUES(?,?,?,?,?,?)",
+                  adminId,
+                  name,
+                  adminEmail,
+                  encoded,
+                  "sector_admin",
+                  now(),
+                );
+                run("INSERT INTO user_sectors VALUES(?,?)", adminId, id);
+              }
+              if (adminId && temporaryPassword !== undefined)
+                run("DELETE FROM sessions WHERE user_id=?", adminId);
+              if (!active) revokeSectorSessions(id);
+              if (body.admin)
+                audit(
+                  user,
+                  previousAdmin ? "updated" : "created",
+                  "user",
+                  adminId,
+                  {
+                    role: "sector_admin",
+                    sectorIds: [id],
+                    passwordReset:
+                      !!previousAdmin && temporaryPassword !== undefined,
+                  },
+                );
               audit(user, before ? "updated" : "created", "sector", id, {
                 name,
                 slug,
@@ -859,13 +977,25 @@ export function createApplication({
             return send(
               {
                 sector: sectorView(get("SELECT * FROM sectors WHERE id=?", id)),
+                ...(adminId
+                  ? {
+                      user: userView(
+                        get("SELECT * FROM users WHERE id=?", adminId),
+                      ),
+                    }
+                  : {}),
               },
               before ? 200 : 201,
             );
           }
           if (method === "DELETE" && sectorMatch[1]) {
-            run("UPDATE sectors SET active=0 WHERE id=?", sectorMatch[1]);
-            audit(user, "deactivated", "sector", sectorMatch[1]);
+            if (!get("SELECT id FROM sectors WHERE id=?", sectorMatch[1]))
+              fail(404, "Setor não encontrado.");
+            transaction(() => {
+              run("UPDATE sectors SET active=0 WHERE id=?", sectorMatch[1]);
+              revokeSectorSessions(sectorMatch[1]);
+              audit(user, "deactivated", "sector", sectorMatch[1]);
+            });
             return send({ deactivated: true });
           }
         }
@@ -908,6 +1038,33 @@ export function createApplication({
               fail(400, "Selecione setores válidos.");
             if (role !== "superadmin" && !sectorIds.length)
               fail(400, "Selecione ao menos um setor para este perfil.");
+            if (
+              before &&
+              fixedSectorAdmin(before) &&
+              (role !== "sector_admin" ||
+                sectorIds.length !== 1 ||
+                sectorIds[0] !== previousSectorIds[0])
+            )
+              fail(
+                400,
+                "O perfil e o setor deste administrador são fixos. Edite seu e-mail, senha ou situação de acesso.",
+              );
+            if (role === "sector_admin") {
+              if (sectorIds.length !== 1)
+                fail(
+                  400,
+                  "O administrador deve ter acesso a exatamente um setor.",
+                );
+              if (
+                sectorAdmins(sectorIds[0]).some(
+                  (admin) => admin.id !== before?.id,
+                )
+              )
+                fail(
+                  409,
+                  "Este setor já possui um administrador. Edite o acesso existente.",
+                );
+            }
             const active =
               body.active === undefined
                 ? (before?.active ?? 1)

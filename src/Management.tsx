@@ -117,18 +117,92 @@ function SaveButton({
   );
 }
 
-export function Sectors({ data, onRefresh, notify }: CommonProps) {
+type TemporaryCredential = { name: string; email: string; password: string };
+function generateTemporaryPassword() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(18)), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
+function CredentialModal({
+  credential,
+  onClose,
+  notify,
+}: {
+  credential: TemporaryCredential;
+  onClose: () => void;
+  notify: (message: string) => void;
+}) {
+  return (
+    <Modal title="Senha temporária criada" onClose={onClose}>
+      <div className="credential-result">
+        <KeyRound size={30} />
+        <p>
+          Compartilhe este acesso com <strong>{credential.name}</strong> por um
+          canal seguro. A senha será exibida apenas agora e deverá ser trocada
+          no primeiro login.
+        </p>
+        <dl>
+          <dt>Endereço de login</dt>
+          <dd>{window.location.origin}</dd>
+          <dt>E-mail</dt>
+          <dd>{credential.email}</dd>
+          <dt>Senha temporária</dt>
+          <dd>
+            <code>{credential.password}</code>
+          </dd>
+        </dl>
+        <button
+          className="button secondary"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(credential.password);
+              notify("Senha copiada.");
+            } catch {
+              notify("Não foi possível copiar. Selecione a senha exibida.");
+            }
+          }}
+        >
+          <Copy size={15} />
+          Copiar senha
+        </button>
+        <button className="button" onClick={onClose}>
+          Concluir
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
   const [selectedId, setSelectedId] = useState(data.sectors[0]?.id ?? "");
   const [editing, setEditing] = useState<Sector | "new" | null>(null);
   const [qr, setQr] = useState("");
   const [qrError, setQrError] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [credential, setCredential] = useState<TemporaryCredential | null>(
+    null,
+  );
+  const adminsFor = (id: string) =>
+    data.users.filter(
+      (user) => user.role === "sector_admin" && user.sectorIds.includes(id),
+    );
+  const editingAdmins =
+    editing && editing !== "new" ? adminsFor(editing.id) : [];
+  const legacyAccess =
+    editingAdmins.length > 1 ||
+    editingAdmins.some((user) => user.sectorIds.length !== 1);
+  const editingAdmin = legacyAccess ? undefined : editingAdmins[0];
   const selected =
     data.sectors.find((s) => s.id === selectedId) ?? data.sectors[0];
   const link = selected
     ? `${window.location.origin}/avaliar/${selected.slug}`
     : "";
+  const selectedAdmins = selected ? adminsFor(selected.id) : [];
+  const selectedAdmin =
+    selectedAdmins.length === 1 && selectedAdmins[0].sectorIds.length === 1
+      ? selectedAdmins[0]
+      : undefined;
   useEffect(() => {
     let active = true;
     setQr("");
@@ -155,7 +229,11 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
     setBusy(true);
     setError("");
     try {
-      const result = await api<{ sector: Sector }>(
+      const password =
+        !legacyAccess && (!editingAdmin || form.get("resetPassword") === "on")
+          ? generateTemporaryPassword()
+          : undefined;
+      const result = await api<{ sector: Sector; user?: User }>(
         `/api/sectors${editing && editing !== "new" ? `/${editing.id}` : ""}`,
         {
           method: editing === "new" ? "POST" : "PUT",
@@ -164,13 +242,27 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
             slug: form.get("slug"),
             description: form.get("description"),
             active: form.get("active") === "on",
+            ...(!legacyAccess
+              ? {
+                  admin: {
+                    email: form.get("adminEmail"),
+                    ...(password ? { temporaryPassword: password } : {}),
+                  },
+                }
+              : {}),
           },
         },
       );
       setSelectedId(result.sector.id);
-      await onRefresh();
       setEditing(null);
-      notify("Setor salvo com sucesso.");
+      if (password && result.user)
+        setCredential({
+          name: result.sector.name,
+          email: result.user.email,
+          password,
+        });
+      notify("Setor e acesso administrativo salvos.");
+      await onRefresh().catch((err) => notify(errorMessage(err)));
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -200,7 +292,11 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
     <>
       <PageTitle
         title="Setores"
-        description="Configure os locais de atendimento e seus acessos à pesquisa."
+        description={
+          data.permissions.canManageSectors
+            ? "Cada setor tem um administrador com login próprio e acesso restrito."
+            : "Consulte seu setor e o link da pesquisa para os pacientes."
+        }
         action={
           data.permissions.canManageSectors && (
             <button
@@ -217,79 +313,162 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
         }
       />
       <div className="management-split sectors-layout">
-        <Card
-          title="Setores do hospital"
-          subtitle="Cada setor possui um link e um QR Code próprios."
-        >
-          {data.sectors.length ? (
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Setor</th>
-                    <th>Pesquisa vinculada</th>
-                    <th>Situação</th>
-                    {data.permissions.canManageSectors && <th>Ações</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.sectors.map((sector) => {
-                    const survey = data.surveys.find(
-                      (s) => s.sectorId === sector.id && s.active,
-                    );
-                    return (
-                      <tr
-                        key={sector.id}
-                        className={
-                          selected?.id === sector.id ? "selected-row" : ""
-                        }
-                      >
-                        <td>
-                          <button
-                            className="table-choice"
-                            onClick={() => setSelectedId(sector.id)}
-                            aria-pressed={selected?.id === sector.id}
-                          >
-                            {sector.name}
-                          </button>
-                        </td>
-                        <td>{survey?.title ?? "Sem pesquisa ativa"}</td>
-                        <td>
-                          <StatusBadge
-                            tone={sector.active ? "green" : "neutral"}
-                          >
-                            {sector.active ? "Ativo" : "Inativo"}
-                          </StatusBadge>
-                        </td>
-                        {data.permissions.canManageSectors && (
+        <div className="sector-management-stack">
+          <Card
+            title="Setores do hospital"
+            subtitle="Login administrativo e pesquisa para pacientes pertencem ao setor."
+          >
+            {data.sectors.length ? (
+              <div className="table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Setor</th>
+                      <th>Pesquisa vinculada</th>
+                      <th>Situação</th>
+                      {data.permissions.canManageUsers && (
+                        <th>Login do setor</th>
+                      )}
+                      {data.permissions.canManageSectors && <th>Ações</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.sectors.map((sector) => {
+                      const admins = adminsFor(sector.id);
+                      const admin =
+                        admins.length === 1 && admins[0].sectorIds.length === 1
+                          ? admins[0]
+                          : undefined;
+                      const survey = data.surveys.find(
+                        (s) => s.sectorId === sector.id && s.active,
+                      );
+                      return (
+                        <tr
+                          key={sector.id}
+                          className={
+                            selected?.id === sector.id ? "selected-row" : ""
+                          }
+                        >
                           <td>
                             <button
-                              className="text-action"
-                              onClick={() => {
-                                setError("");
-                                setEditing(sector);
-                              }}
+                              className="table-choice"
+                              onClick={() => setSelectedId(sector.id)}
+                              aria-pressed={selected?.id === sector.id}
                             >
-                              Editar
+                              {sector.name}
                             </button>
                           </td>
-                        )}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <EmptyState
-              title="Cadastre o primeiro setor"
-              description="Depois, crie a pesquisa que os pacientes vão responder."
-            />
+                          <td>{survey?.title ?? "Sem pesquisa ativa"}</td>
+                          <td>
+                            <StatusBadge
+                              tone={sector.active ? "green" : "neutral"}
+                            >
+                              {sector.active ? "Ativo" : "Inativo"}
+                            </StatusBadge>
+                          </td>
+                          {data.permissions.canManageUsers && (
+                            <td>
+                              {admin?.email ??
+                                (admins.length
+                                  ? "Corrigir acesso em Usuários"
+                                  : "Acesso não configurado")}
+                            </td>
+                          )}
+                          {data.permissions.canManageSectors && (
+                            <td>
+                              <button
+                                className="text-action"
+                                onClick={() => {
+                                  setError("");
+                                  setEditing(sector);
+                                }}
+                              >
+                                Editar setor e acesso
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <EmptyState
+                title="Cadastre o primeiro setor"
+                description="Depois, crie a pesquisa que os pacientes vão responder."
+              />
+            )}
+          </Card>
+          {selected && data.permissions.canManageSectors && (
+            <Card
+              title={`Administração de ${selected.name}`}
+              subtitle="Um único login, com acesso somente a este setor."
+            >
+              {selectedAdmin ? (
+                <>
+                  <p className="small">
+                    E-mail de login: <strong>{selectedAdmin.email}</strong>
+                  </p>
+                  <p className="muted small">
+                    {!selected.active
+                      ? "Setor inativo: o login está bloqueado."
+                      : selectedAdmin.active === false
+                        ? "Login desativado. Altere a situação em Usuários."
+                        : selectedAdmin.mustChangePassword
+                          ? "Aguardando a troca da senha temporária no primeiro acesso."
+                          : "Login configurado."}
+                  </p>
+                  <button
+                    className="text-action"
+                    onClick={() => {
+                      setError("");
+                      setEditing(selected);
+                    }}
+                  >
+                    Editar login ou gerar nova senha
+                  </button>
+                </>
+              ) : selectedAdmins.length ? (
+                <>
+                  <p className="muted small">
+                    Há vínculos antigos que precisam ser corrigidos para manter
+                    um administrador exclusivo deste setor.
+                  </p>
+                  <button
+                    className="text-action"
+                    onClick={() => onNavigate("/usuarios")}
+                  >
+                    Corrigir em Usuários
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="muted small">
+                    Este setor ainda não tem seu login administrativo.
+                  </p>
+                  <button
+                    className="text-action"
+                    onClick={() => {
+                      setError("");
+                      setEditing(selected);
+                    }}
+                  >
+                    Configurar acesso do setor
+                  </button>
+                </>
+              )}
+              <p className="muted small">
+                Endereço de login: {window.location.origin}. O administrador do
+                setor pode configurar suas perguntas, consultar suas respostas e
+                trocar a própria senha.
+              </p>
+            </Card>
           )}
-        </Card>
+        </div>
         <Card
-          title={selected?.name ?? "Link da pesquisa"}
-          subtitle="Acesso exclusivo do setor"
+          title="Pesquisa para pacientes"
+          subtitle={selected?.name ?? "Selecione um setor"}
         >
           {selected ? (
             <div className="sector-link">
@@ -328,8 +507,8 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
                 Abrir pesquisa <ArrowUpRight size={14} />
               </a>
               <p className="muted small">
-                O setor é identificado automaticamente pelo link. A pesquisa
-                precisa estar ativa para receber respostas.
+                Os pacientes respondem sem login. O setor é identificado pelo
+                link e a pesquisa precisa estar ativa para receber respostas.
               </p>
             </div>
           ) : (
@@ -395,6 +574,41 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
               />
               Setor ativo
             </label>
+            <h3>Acesso do administrador do setor</h3>
+            {legacyAccess ? (
+              <p className="muted small">
+                Corrija os vínculos antigos na tela Usuários antes de alterar
+                este acesso. Os dados do setor podem ser salvos normalmente.
+              </p>
+            ) : (
+              <>
+                <Field
+                  label="E-mail de login do setor"
+                  hint="Um único administrador, com acesso restrito a este setor."
+                >
+                  <input
+                    className="input"
+                    name="adminEmail"
+                    type="email"
+                    required
+                    maxLength={254}
+                    autoComplete="off"
+                    defaultValue={editingAdmin?.email ?? ""}
+                  />
+                </Field>
+                {editingAdmin && (
+                  <label className="check-label">
+                    <input name="resetPassword" type="checkbox" />
+                    Gerar nova senha temporária
+                  </label>
+                )}
+                <p className="muted small">
+                  {editingAdmin
+                    ? "A senha atual será mantida, a menos que você solicite uma nova senha temporária."
+                    : "Uma senha temporária será gerada ao salvar e deverá ser trocada no primeiro login."}
+                </p>
+              </>
+            )}
             <div className="modal-actions">
               <button
                 type="button"
@@ -409,25 +623,40 @@ export function Sectors({ data, onRefresh, notify }: CommonProps) {
           </form>
         </Modal>
       )}
+      {credential && (
+        <CredentialModal
+          credential={credential}
+          onClose={() => setCredential(null)}
+          notify={notify}
+        />
+      )}
     </>
   );
 }
 
 export function Users({ data, onRefresh, notify }: CommonProps) {
   const [editing, setEditing] = useState<User | "new" | null>(null);
-  const [role, setRole] = useState<Role>("sector_admin");
+  const [role, setRole] = useState<Role>("viewer");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [credential, setCredential] = useState<{
-    name: string;
-    email: string;
-    password: string;
-  } | null>(null);
+  const [credential, setCredential] = useState<TemporaryCredential | null>(
+    null,
+  );
   const [resetPassword, setResetPassword] = useState(false);
+  const fixedSectorAccess =
+    editing !== null &&
+    editing !== "new" &&
+    editing.role === "sector_admin" &&
+    editing.sectorIds.length === 1 &&
+    data.users.filter(
+      (user) =>
+        user.role === "sector_admin" &&
+        user.sectorIds.includes(editing.sectorIds[0]),
+    ).length === 1;
   function open(user: User | "new") {
     setError("");
-    setRole(user === "new" ? "sector_admin" : user.role);
+    setRole(user === "new" ? "viewer" : user.role);
     setSelectedSectors(user === "new" ? [] : user.sectorIds);
     setResetPassword(false);
     setEditing(user);
@@ -438,15 +667,16 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
     setError("");
     const form = new FormData(event.currentTarget);
     const shouldCreatePassword = editing === "new" || resetPassword;
-    const bytes = crypto.getRandomValues(new Uint8Array(18));
-    const password = Array.from(bytes, (byte) =>
-      byte.toString(16).padStart(2, "0"),
-    ).join("");
+    const password = shouldCreatePassword ? generateTemporaryPassword() : "";
     const name = String(form.get("name"));
     const email = String(form.get("email"));
     try {
       if (role !== "superadmin" && !selectedSectors.length)
         throw new Error("Selecione ao menos um setor para este usuário.");
+      if (role === "sector_admin" && selectedSectors.length !== 1)
+        throw new Error(
+          "O administrador deve estar vinculado a um único setor.",
+        );
       await api(
         `/api/users${editing && editing !== "new" ? `/${editing.id}` : ""}`,
         {
@@ -464,10 +694,10 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
           },
         },
       );
-      await onRefresh();
       setEditing(null);
       if (shouldCreatePassword) setCredential({ name, email, password });
       notify("Usuário salvo com sucesso.");
+      await onRefresh().catch((err) => notify(errorMessage(err)));
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -564,7 +794,8 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
           </table>
         </div>
         <p className="muted small management-footnote">
-          Super Admin · Admin de Setor · Gestão · Ouvidoria · Visualizador
+          Cada setor possui um único administrador. Crie ou configure esse login
+          na tela Setores. Os demais perfis podem ser cadastrados aqui.
         </p>
       </Card>
       {editing && (
@@ -598,29 +829,53 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
                 className="input"
                 value={role}
                 onChange={(e) => setRole(e.target.value as Role)}
-                disabled={editing !== "new" && editing.id === data.user.id}
+                disabled={
+                  fixedSectorAccess ||
+                  (editing !== "new" && editing.id === data.user.id)
+                }
               >
-                {Object.entries(roleNames).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
+                {Object.entries(roleNames)
+                  .filter(
+                    ([value]) =>
+                      value !== "sector_admin" ||
+                      (editing !== "new" && editing.role === "sector_admin"),
+                  )
+                  .map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
               </select>
             </Field>
             {role !== "superadmin" && (
               <fieldset className="sector-permissions">
-                <legend>Setores autorizados</legend>
+                <legend>
+                  {role === "sector_admin"
+                    ? "Setor do administrador"
+                    : "Setores autorizados"}
+                </legend>
                 {data.sectors.length ? (
                   data.sectors.map((sector) => (
                     <label className="check-label" key={sector.id}>
                       <input
-                        type="checkbox"
-                        checked={selectedSectors.includes(sector.id)}
+                        type={role === "sector_admin" ? "radio" : "checkbox"}
+                        name={
+                          role === "sector_admin" ? "adminSector" : undefined
+                        }
+                        disabled={fixedSectorAccess}
+                        checked={
+                          role === "sector_admin"
+                            ? selectedSectors.length === 1 &&
+                              selectedSectors[0] === sector.id
+                            : selectedSectors.includes(sector.id)
+                        }
                         onChange={(e) =>
                           setSelectedSectors((current) =>
-                            e.target.checked
-                              ? [...current, sector.id]
-                              : current.filter((id) => id !== sector.id),
+                            role === "sector_admin"
+                              ? [sector.id]
+                              : e.target.checked
+                                ? [...current, sector.id]
+                                : current.filter((id) => id !== sector.id),
                           )
                         }
                       />
@@ -635,6 +890,20 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
                 )}
               </fieldset>
             )}
+            {fixedSectorAccess && (
+              <p className="muted small">
+                O perfil e o setor deste administrador são fixos. Você pode
+                corrigir os dados de acesso ou gerar outra senha temporária.
+              </p>
+            )}
+            {editing !== "new" &&
+              editing.role === "sector_admin" &&
+              !fixedSectorAccess && (
+                <p className="error-banner">
+                  Corrija esta conta antiga para um único setor sem outro
+                  administrador, ou atribua outro perfil.
+                </p>
+              )}
             <label className="check-label">
               <input
                 name="active"
@@ -673,43 +942,11 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
         </Modal>
       )}
       {credential && (
-        <Modal
-          title="Senha temporária criada"
+        <CredentialModal
+          credential={credential}
           onClose={() => setCredential(null)}
-        >
-          <div className="credential-result">
-            <KeyRound size={30} />
-            <p>
-              Compartilhe esta senha com <strong>{credential.name}</strong> por
-              um canal seguro. Ela será exibida apenas agora.
-            </p>
-            <dl>
-              <dt>E-mail</dt>
-              <dd>{credential.email}</dd>
-              <dt>Senha temporária</dt>
-              <dd>
-                <code>{credential.password}</code>
-              </dd>
-            </dl>
-            <button
-              className="button secondary"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(credential.password);
-                  notify("Senha copiada.");
-                } catch {
-                  notify("Não foi possível copiar. Selecione a senha exibida.");
-                }
-              }}
-            >
-              <Copy size={15} />
-              Copiar senha
-            </button>
-            <button className="button" onClick={() => setCredential(null)}>
-              Concluir
-            </button>
-          </div>
-        </Modal>
+          notify={notify}
+        />
       )}
     </>
   );

@@ -6,6 +6,12 @@
 .sectors-layout {
   grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
 }
+.sector-management-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
 .ombudsman-layout {
   grid-template-columns: minmax(0, 1.6fr) minmax(310px, 1fr);
 }
