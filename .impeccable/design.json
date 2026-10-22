@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T04:02:07.671Z",
+  "title": "Design System: FHDOD",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Vermelho FHDOD",
+        "tonalRamp": [
+          "oklch(15% 0.2096 19.84)",
+          "oklch(25% 0.2096 19.84)",
+          "oklch(35% 0.2096 19.84)",
+          "oklch(45% 0.2096 19.84)",
+          "oklch(55% 0.2096 19.84)",
+          "oklch(65% 0.2096 19.84)",
+          "oklch(80% 0.2096 19.84)",
+          "oklch(95% 0.2096 19.84)"
+        ]
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "Vermelho de hover",
+        "tonalRamp": [
+          "oklch(15% 0.1872 19.94)",
+          "oklch(25% 0.1872 19.94)",
+          "oklch(35% 0.1872 19.94)",
+          "oklch(45% 0.1872 19.94)",
+          "oklch(55% 0.1872 19.94)",
+          "oklch(65% 0.1872 19.94)",
+          "oklch(80% 0.1872 19.94)",
+          "oklch(95% 0.1872 19.94)"
+        ]
+      },
+      "primary-soft": {
+        "role": "primary",
+        "displayName": "Rosa de seleção",
+        "tonalRamp": [
+          "oklch(15% 0.0170 359.29)",
+          "oklch(25% 0.0170 359.29)",
+          "oklch(35% 0.0170 359.29)",
+          "oklch(45% 0.0170 359.29)",
+          "oklch(55% 0.0170 359.29)",
+          "oklch(65% 0.0170 359.29)",
+          "oklch(80% 0.0170 359.29)",
+          "oklch(95% 0.0170 359.29)"
+        ]
+      },
+      "patient-primary": {
+        "role": "primary",
+        "displayName": "Vermelho do paciente",
+        "tonalRamp": [
+          "oklch(15% 0.2257 23.11)",
+          "oklch(25% 0.2257 23.11)",
+          "oklch(35% 0.2257 23.11)",
+          "oklch(45% 0.2257 23.11)",
+          "oklch(55% 0.2257 23.11)",
+          "oklch(65% 0.2257 23.11)",
+          "oklch(80% 0.2257 23.11)",
+          "oklch(95% 0.2257 23.11)"
+        ]
+      },
+      "patient-primary-hover": {
+        "role": "primary",
+        "displayName": "Hover do paciente",
+        "tonalRamp": [
+          "oklch(15% 0.2048 22.19)",
+          "oklch(25% 0.2048 22.19)",
+          "oklch(35% 0.2048 22.19)",
+          "oklch(45% 0.2048 22.19)",
+          "oklch(55% 0.2048 22.19)",
+          "oklch(65% 0.2048 22.19)",
+          "oklch(80% 0.2048 22.19)",
+          "oklch(95% 0.2048 22.19)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Branco",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.00)",
+          "oklch(25% 0.0000 0.00)",
+          "oklch(35% 0.0000 0.00)",
+          "oklch(45% 0.0000 0.00)",
+          "oklch(55% 0.0000 0.00)",
+          "oklch(65% 0.0000 0.00)",
+          "oklch(80% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Cinza de superfície",
+        "tonalRamp": [
+          "oklch(15% 0.0013 286.38)",
+          "oklch(25% 0.0013 286.38)",
+          "oklch(35% 0.0013 286.38)",
+          "oklch(45% 0.0013 286.38)",
+          "oklch(55% 0.0013 286.38)",
+          "oklch(65% 0.0013 286.38)",
+          "oklch(80% 0.0013 286.38)",
+          "oklch(95% 0.0013 286.38)"
+        ]
+      },
+      "exterior": {
+        "role": "neutral",
+        "displayName": "Cinza exterior",
+        "tonalRamp": [
+          "oklch(15% 0.0042 271.37)",
+          "oklch(25% 0.0042 271.37)",
+          "oklch(35% 0.0042 271.37)",
+          "oklch(45% 0.0042 271.37)",
+          "oklch(55% 0.0042 271.37)",
+          "oklch(65% 0.0042 271.37)",
+          "oklch(80% 0.0042 271.37)",
+          "oklch(95% 0.0042 271.37)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "tonalRamp": [
+          "oklch(15% 0.0075 274.68)",
+          "oklch(25% 0.0075 274.68)",
+          "oklch(35% 0.0075 274.68)",
+          "oklch(45% 0.0075 274.68)",
+          "oklch(55% 0.0075 274.68)",
+          "oklch(65% 0.0075 274.68)",
+          "oklch(80% 0.0075 274.68)",
+          "oklch(95% 0.0075 274.68)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Cinza atenuado",
+        "tonalRamp": [
+          "oklch(15% 0.0143 275.90)",
+          "oklch(25% 0.0143 275.90)",
+          "oklch(35% 0.0143 275.90)",
+          "oklch(45% 0.0143 275.90)",
+          "oklch(55% 0.0143 275.90)",
+          "oklch(65% 0.0143 275.90)",
+          "oklch(80% 0.0143 275.90)",
+          "oklch(95% 0.0143 275.90)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Linha",
+        "tonalRamp": [
+          "oklch(15% 0.0040 286.32)",
+          "oklch(25% 0.0040 286.32)",
+          "oklch(35% 0.0040 286.32)",
+          "oklch(45% 0.0040 286.32)",
+          "oklch(55% 0.0040 286.32)",
+          "oklch(65% 0.0040 286.32)",
+          "oklch(80% 0.0040 286.32)",
+          "oklch(95% 0.0040 286.32)"
+        ]
+      },
+      "positive": {
+        "role": "secondary",
+        "displayName": "Verde positivo",
+        "tonalRamp": [
+          "oklch(15% 0.0811 172.91)",
+          "oklch(25% 0.0811 172.91)",
+          "oklch(35% 0.0811 172.91)",
+          "oklch(45% 0.0811 172.91)",
+          "oklch(55% 0.0811 172.91)",
+          "oklch(65% 0.0811 172.91)",
+          "oklch(80% 0.0811 172.91)",
+          "oklch(95% 0.0811 172.91)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Título administrativo",
+        "purpose": "Título de página no painel."
+      },
+      "title": {
+        "displayName": "Título de cartão",
+        "purpose": "Cabeçalho dos cartões administrativos."
+      },
+      "field": {
+        "displayName": "Campo",
+        "purpose": "Texto dos campos administrativos."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Ações e rótulos administrativos."
+      },
+      "patient-question": {
+        "displayName": "Pergunta do paciente",
+        "purpose": "Pergunta única no formulário público."
+      }
+    },
+    "shadows": [
+      {
+        "name": "profile-menu",
+        "value": "0 12px 40px #28202d20",
+        "purpose": "Menu de perfil sobre o painel."
+      },
+      {
+        "name": "modal",
+        "value": "0 20px 100px #28243320",
+        "purpose": "Diálogo sobre o fundo escurecido."
+      },
+      {
+        "name": "toast",
+        "value": "0 8px 25px #2a373326",
+        "purpose": "Aviso temporário."
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "0 -3px 20px #29232c08",
+        "purpose": "Atalhos fixos na base do celular."
+      }
+    ],
+    "motion": [
+      {
+        "name": "admin-controls",
+        "value": "background 0.18s, transform 0.18s",
+        "purpose": "Hover e pressão dos botões administrativos."
+      },
+      {
+        "name": "patient-controls",
+        "value": "background 0.15s, border-color 0.15s",
+        "purpose": "Resposta de cor das alternativas públicas."
+      },
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Propriedade --ease declarada no CSS; não substitui os tempos específicos dos controles."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Duração de transições e animações quando prefers-reduced-motion é reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "patient-mobile",
+        "value": "640px"
+      },
+      {
+        "name": "admin-mobile",
+        "value": "650px"
+      },
+      {
+        "name": "reports-stack",
+        "value": "720px"
+      },
+      {
+        "name": "tablet",
+        "value": "1000px"
+      },
+      {
+        "name": "management-stack",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ação principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação administrativa em cápsula.",
+      "html": "<button class=\"ds-primary\" type=\"button\">Salvar alterações</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;min-height:38px;padding:10px 19px;background:var(--red,#d92742);color:#fff;font:500 12px/1.4 Inter,Arial,sans-serif;cursor:pointer;transition:background .18s,transform .18s}.ds-primary:hover:not(:disabled){background:var(--red-dark,#b91e36)}.ds-primary:active:not(:disabled){transform:translateY(1px)}.ds-primary:disabled{opacity:.5;cursor:not-allowed}.ds-primary:focus-visible{outline:3px solid #ac2346;outline-offset:4px}"
+    },
+    {
+      "name": "Ação secundária",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação de apoio em rosa.",
+      "html": "<button class=\"ds-secondary\" type=\"button\">Adicionar pergunta</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;min-height:38px;padding:10px 19px;background:var(--pink,#faebef);color:#b52540;font:500 12px/1.4 Inter,Arial,sans-serif;cursor:pointer;transition:background .18s,transform .18s}.ds-secondary:hover:not(:disabled){background:#f6dce3}.ds-secondary:active:not(:disabled){transform:translateY(1px)}.ds-secondary:focus-visible{outline:3px solid #ac2346;outline-offset:4px}.ds-secondary:disabled{opacity:.5;cursor:not-allowed}"
+    },
+    {
+      "name": "Ação do paciente",
+      "kind": "button",
+      "refersTo": "button-patient",
+      "description": "Controle principal ampliado do formulário público.",
+      "html": "<button class=\"ds-patient\" type=\"button\"><span>Começar pesquisa</span><svg viewBox=\"0 0 24 24\" width=\"28\" height=\"28\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></button>",
+      "css": ".ds-patient{display:inline-flex;align-items:center;justify-content:space-between;gap:48px;border:0;border-radius:11px;min-height:72px;min-width:260px;padding:18px 28px;background:#e51e36;color:#fff;font:500 24px Inter,Arial,sans-serif;cursor:pointer;transition:background .15s ease}.ds-patient:hover:not(:disabled){background:#c91831}.ds-patient:focus-visible{outline:3px solid #c8203d;outline-offset:4px}.ds-patient:disabled{opacity:.65;cursor:wait}@media(max-width:640px){.ds-patient{min-height:62px;min-width:0;width:100%;padding:16px 20px;font-size:20px;gap:20px}}"
+    },
+    {
+      "name": "Campo administrativo",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo cinza com borda e halo no foco.",
+      "html": "<label class=\"ds-field\"><span>Nome do setor</span><input class=\"ds-input\" placeholder=\"Informe o nome\" /></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:9px;color:#64646c;font:12px Inter,Arial,sans-serif}.ds-field>span{font-weight:500}.ds-input{min-width:0;width:100%;min-height:42px;border:1px solid transparent;border-radius:10px;padding:11px 14px;background:#f6f6f7;color:#303037;font:13px Inter,Arial,sans-serif;caret-color:var(--red,#d92742);transition:border-color .2s}.ds-input:hover{border-color:#dbd8dc}.ds-input:focus{outline:0;border-color:var(--red,#d92742);box-shadow:0 0 0 3px #d9274210}.ds-input::placeholder{color:var(--muted,#686a73)}.ds-input:disabled{color:#65616a;opacity:.8}@media(max-width:650px){.ds-input{min-height:44px}}"
+    },
+    {
+      "name": "Navegação superior",
+      "kind": "nav",
+      "description": "Cápsula cinza com a página ativa em branco.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Principal\"><button class=\"ds-current\" type=\"button\" aria-current=\"page\">Dashboard</button><button type=\"button\">Pesquisas</button><button type=\"button\">Resultados</button></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-around;gap:2px;padding:4px;border-radius:999px;background:var(--surface,#f5f5f6);font-family:Inter,Arial,sans-serif}.ds-nav button{min-height:34px;border:0;border-radius:99px;background:none;padding:9px 13px;font:11px Inter,Arial,sans-serif;color:#26272b;cursor:pointer;white-space:nowrap}.ds-nav .ds-current{background:#fff;color:var(--red,#d92742);box-shadow:0 2px 6px #34303b03}.ds-nav button:hover{color:var(--red,#d92742)}.ds-nav button:focus-visible{outline:3px solid #ac2346;outline-offset:4px}@media(max-width:650px){.ds-nav{justify-content:flex-start;overflow-x:auto}.ds-nav button{min-height:44px;padding:8px 13px}}"
+    },
+    {
+      "name": "Situação",
+      "kind": "chip",
+      "description": "Rótulo de situação com apoio de cor.",
+      "html": "<span class=\"ds-status\">Resolvida</span>",
+      "css": ".ds-status{display:inline-flex;align-items:center;white-space:nowrap;padding:5px 10px;border-radius:99px;background:#e8f4ef;color:#2b7863;font:10px Inter,Arial,sans-serif}"
+    },
+    {
+      "name": "Cartão",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Superfície branca básica do painel.",
+      "html": "<section class=\"ds-card\"><h2>Respostas por setor</h2><p>Dados do período selecionado</p></section>",
+      "css": ".ds-card{min-width:0;padding:22px;border-radius:var(--radius,20px);background:#fff;color:#26272b;font-family:Inter,Arial,sans-serif}.ds-card h2{margin:0;font-size:16px;font-weight:600;line-height:1.5;letter-spacing:-.3px}.ds-card p{margin:2px 0 0;font-size:11px;line-height:1.6;color:var(--muted,#686a73)}"
+    },
+    {
+      "name": "Avaliação do paciente",
+      "kind": "custom",
+      "description": "Cinco rostos e rótulos; SVGs autorados na implementação.",
+      "html": "<div class=\"ds-faces\" role=\"group\" aria-label=\"Avaliação de 1 a 5\"><button class=\"ds-face\" type=\"button\" aria-pressed=\"false\" aria-label=\"1 — Muito ruim\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><circle cx=\"50\" cy=\"50\" r=\"49\" fill=\"#c7a4ed\"/><path d=\"M26 40 Q34 52 42 40 M58 40 Q66 52 74 40\" fill=\"none\" stroke=\"#503e67\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"M32 77 Q50 40 68 77 Z\" fill=\"#503e67\"/></svg><span>Muito ruim</span></button><button class=\"ds-face\" type=\"button\" aria-pressed=\"false\" aria-label=\"2 — Ruim\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><circle cx=\"50\" cy=\"50\" r=\"49\" fill=\"#afd0f7\"/><g fill=\"#284e77\"><circle cx=\"35\" cy=\"41\" r=\"5\"/><circle cx=\"65\" cy=\"41\" r=\"5\"/></g><path d=\"M30 72 Q50 45 70 72\" fill=\"none\" stroke=\"#284e77\" stroke-width=\"5\" stroke-linecap=\"round\"/></svg><span>Ruim</span></button><button class=\"ds-face\" type=\"button\" aria-pressed=\"false\" aria-label=\"3 — Regular\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><circle cx=\"50\" cy=\"50\" r=\"49\" fill=\"#cacbc9\"/><g fill=\"#40413f\"><circle cx=\"35\" cy=\"41\" r=\"5\"/><circle cx=\"65\" cy=\"41\" r=\"5\"/></g><path d=\"M33 68 H67\" stroke=\"#40413f\" stroke-width=\"5\" stroke-linecap=\"round\"/></svg><span>Regular</span></button><button class=\"ds-face\" type=\"button\" aria-pressed=\"true\" aria-label=\"4 — Bom\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><circle cx=\"50\" cy=\"50\" r=\"49\" fill=\"#ffdc8b\"/><g fill=\"#634915\"><circle cx=\"35\" cy=\"41\" r=\"5\"/><circle cx=\"65\" cy=\"41\" r=\"5\"/></g><path d=\"M29 63 Q50 88 71 63\" fill=\"none\" stroke=\"#634915\" stroke-width=\"5\" stroke-linecap=\"round\"/></svg><span>Bom</span></button><button class=\"ds-face\" type=\"button\" aria-pressed=\"false\" aria-label=\"5 — Muito bom\"><svg viewBox=\"0 0 100 100\" aria-hidden=\"true\"><circle cx=\"50\" cy=\"50\" r=\"49\" fill=\"#bddfae\"/><path d=\"M25 42 Q34 29 43 42 M57 42 Q66 29 75 42\" fill=\"none\" stroke=\"#385e2c\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"M29 61 H71 Q70 87 50 87 Q30 87 29 61\" fill=\"#385e2c\"/></svg><span>Muito bom</span></button></div>",
+      "css": ".ds-faces{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;font-family:Inter,Arial,sans-serif}.ds-face{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:208px;padding:24px 10px;border:1px solid #ececef;border-radius:12px;background:#fff;color:#26272b;font:17px Inter,Arial,sans-serif;cursor:pointer;transition:background .18s,border-color .18s}.ds-face svg{width:112px;height:112px;flex-shrink:0}.ds-face:hover:not(:disabled),.ds-face[aria-pressed=true]{background:#fff7f9;border-color:var(--red,#d92742)}.ds-face:focus-visible{outline:3px solid #c8203d;outline-offset:4px}.ds-face:disabled{opacity:.5;cursor:not-allowed}@media(max-width:640px){.ds-faces{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ds-face{min-height:128px;padding:16px 6px;font-size:12px;gap:12px}.ds-face svg{width:62px;height:62px}.ds-face:nth-child(4){grid-column:1;margin-left:50%;margin-right:-50%}.ds-face:nth-child(5){grid-column:2;margin-left:50%;margin-right:-50%}}@media(prefers-reduced-motion:reduce){.ds-face{transition-duration:.01ms}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Referência hospitalar FHDOD",
+    "overview": "Este documento registra o visual já implementado a partir do Figma fornecido pelo usuário. O painel reúne cartões brancos sobre uma base cinza, ações vermelhas e navegação em cápsulas. A pesquisa do paciente amplia texto e controles sobre uma página branca, com uma pergunta por tela.\n\nA marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs autorados por aproximação visual. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; os SVGs originais são necessários para conferir os detalhes dessas ilustrações.",
+    "keyCharacteristics": [
+      "Cartões brancos, cantos arredondados e separação por fundos.",
+      "Vermelho nas ações e estados selecionados, com texto e ícones de apoio.",
+      "Densidade administrativa e controles maiores no fluxo do paciente."
+    ],
+    "rules": [],
+    "dos": [
+      "Do usar os tokens do frontmatter ao estender os componentes existentes.",
+      "Do preservar foco visível, navegação por teclado e rótulos nas avaliações e situações.",
+      "Do manter os controles maiores e a pergunta única no fluxo do paciente.",
+      "Do respeitar a redução de movimento solicitada pelo sistema."
+    ],
+    "donts": [
+      "Don't usar apenas a cor para comunicar seleção, situação ou avaliação.",
+      "Don't reduzir os controles públicos à escala compacta do painel.",
+      "Don't apresentar os rostos autorados como assets originais exportados do Figma."
+    ]
+  }
+}

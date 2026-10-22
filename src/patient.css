@@ -1,0 +1,857 @@
+.patient-app {
+  min-height: 100dvh;
+  overflow: clip;
+  background: #fff;
+  color: #222326;
+}
+.patient-app h1 {
+  outline: none;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.patient-demo-banner {
+  background: #fcebef;
+  color: #992139;
+  padding: 7px 20px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.patient-header {
+  min-height: 132px;
+  margin: 0 auto;
+  padding: 32px 0;
+  width: calc(100% - 144px);
+  max-width: 1320px;
+  border-bottom: 1px solid #dedee1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.patient-sector {
+  color: #68696d;
+  font-size: 15px;
+  text-align: right;
+}
+.patient-sector > span {
+  padding: 0 8px;
+}
+.patient-hero {
+  position: relative;
+  min-height: calc(100dvh - 174px);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 90px max(72px, calc((100% - 1180px) / 2));
+  display: flex;
+  align-items: center;
+  isolation: isolate;
+}
+.patient-hero-copy {
+  max-width: 540px;
+  position: relative;
+  z-index: 1;
+}
+.patient-rule {
+  display: block;
+  height: 3px;
+  width: 62px;
+  background: #d92944;
+  margin: 0 0 38px;
+}
+.patient-hero h1 {
+  font-size: clamp(42px, 4.6vw, 64px);
+  line-height: 1.13;
+  font-weight: 750;
+  margin: 0 0 38px;
+}
+.patient-hero p {
+  color: #747579;
+  line-height: 1.45;
+  font-size: 22px;
+  max-width: 490px;
+  margin: 0 0 34px;
+}
+.patient-hero-copy > small {
+  color: #6e6f73;
+  display: block;
+  margin-top: 20px;
+  font-size: 13px;
+}
+.patient-watermark {
+  position: absolute;
+  z-index: -1;
+  display: block;
+  overflow: hidden;
+  width: 520px;
+  height: 520px;
+  top: 50%;
+  right: -85px;
+  transform: translateY(-50%);
+  opacity: 0.2;
+  pointer-events: none;
+}
+.patient-watermark > img {
+  display: block;
+  width: 300%;
+  height: 100%;
+  max-width: none;
+  object-fit: fill;
+}
+.patient-primary {
+  min-height: 72px;
+  min-width: 260px;
+  padding: 18px 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  border: 0;
+  border-radius: 11px;
+  background: #e51e36;
+  color: #fff;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.patient-hero .patient-primary {
+  width: min(450px, 100%);
+}
+.patient-primary svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.patient-primary:hover:not(:disabled) {
+  background: #c91831;
+}
+.patient-primary:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.patient-app button:focus-visible,
+.patient-app input:focus-visible,
+.patient-app select:focus-visible,
+.patient-app textarea:focus-visible {
+  outline: 3px solid #c8203d;
+  outline-offset: 4px;
+}
+.patient-footer {
+  padding: 12px 24px 18px;
+  font-size: 12px;
+  text-align: center;
+  color: #707175;
+}
+.patient-footer span {
+  margin: 0 8px;
+}
+.patient-status {
+  min-height: 60vh;
+  padding: 60px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+.patient-status h1 {
+  margin: 0;
+  font-size: 34px;
+}
+.patient-status p {
+  color: #6d6e72;
+  margin: 0;
+}
+.patient-error {
+  position: relative;
+  z-index: 2;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: #fff0f1;
+  color: #a91c31;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 0;
+  font-size: 15px;
+}
+.patient-error button {
+  padding: 8px 12px;
+  min-height: 44px;
+  border: 1px solid currentColor;
+  background: #fff;
+  color: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.patient-context {
+  max-width: 900px;
+  padding: 62px 40px 44px;
+  margin: 0 auto;
+}
+.patient-context h1 {
+  font-size: 42px;
+  line-height: 1.15;
+  margin: 0 0 18px;
+}
+.patient-context > p {
+  color: #68696e;
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 680px;
+  margin: 0 0 34px;
+}
+.patient-context fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.patient-context legend {
+  margin-bottom: 14px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.patient-date-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.patient-date-options button,
+.patient-choice-options button,
+.patient-nps-options button {
+  border: 1px solid #dddde1;
+  border-radius: 12px;
+  background: #fff;
+  min-height: 68px;
+  color: #36373a;
+  font: inherit;
+  font-size: 19px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.patient-date-options button:hover,
+.patient-choice-options button:hover,
+.patient-nps-options button:hover {
+  background: #fff4f5;
+  border-color: #dc5068;
+}
+.patient-date-options button.selected,
+.patient-choice-options button.selected,
+.patient-nps-options button.selected {
+  border-color: #d82643;
+  background: #fcebef;
+  color: #b91f39;
+}
+.patient-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  max-width: 470px;
+  margin: 24px 0;
+  font-size: 17px;
+  color: #3c3d41;
+}
+.patient-field input,
+.patient-field select {
+  min-height: 56px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d6d7db;
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  color: #303136;
+}
+.patient-field small {
+  color: #68696d;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.patient-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 32px;
+}
+.patient-back,
+.patient-skip {
+  border: 0;
+  padding: 12px 0;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: none;
+  font: inherit;
+  font-size: 18px;
+  cursor: pointer;
+  color: #c92340;
+}
+.patient-back svg,
+.patient-skip svg {
+  width: 24px;
+  height: 24px;
+}
+.patient-skip {
+  color: #696a70;
+  font-size: 16px;
+}
+.patient-skip:hover {
+  color: #b51d36;
+}
+.patient-back:hover {
+  color: #97172c;
+}
+.patient-back:disabled,
+.patient-skip:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.patient-question {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 42px 56px 44px;
+  min-height: calc(100dvh - 174px);
+  display: flex;
+  flex-direction: column;
+}
+.patient-progress {
+  height: 4px;
+  width: 180px;
+  margin: 0 auto 30px;
+  background: #f2ecee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.patient-progress span {
+  height: 100%;
+  display: block;
+  border-radius: 8px;
+  background: #df6076;
+}
+.patient-question h1 {
+  max-width: 940px;
+  margin: 4px auto 24px;
+  text-align: center;
+  font-size: clamp(29px, 3.2vw, 42px);
+  font-weight: 700;
+  line-height: 1.3;
+}
+.patient-question-hint {
+  margin: 0 auto 18px;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
+  color: #686970;
+}
+.patient-answer-area {
+  width: 100%;
+  margin: auto;
+  padding: 22px 0;
+}
+.patient-answer-area .rating-faces {
+  gap: 14px;
+}
+.patient-answer-area .rating-face {
+  padding: 24px 10px;
+  min-height: 208px;
+  font-size: 17px;
+  gap: 18px;
+}
+.patient-answer-area .rating-face img,
+.patient-answer-area .rating-face svg {
+  width: 112px;
+  height: 112px;
+}
+.patient-nps {
+  max-width: 1100px;
+  margin: 24px auto;
+}
+.patient-nps-options {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 10px;
+}
+.patient-nps-options button {
+  min-height: 78px;
+  font-size: 24px;
+  font-weight: 600;
+}
+.patient-nps-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #686970;
+  font-size: 15px;
+  margin-top: 16px;
+}
+.patient-choice-options {
+  max-width: 760px;
+  margin: 22px auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.patient-choice-options button {
+  min-height: 90px;
+  padding: 18px 24px;
+}
+.patient-choice-options button:disabled,
+.patient-nps-options button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.patient-save-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #686970;
+  min-height: 28px;
+  margin: 4px 0 22px;
+}
+.patient-question-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: auto;
+}
+.patient-text-answer {
+  max-width: 850px;
+  margin: 8px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+.patient-text-answer textarea {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  padding: 20px;
+  border: 1px solid #d7d8dd;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 18px;
+  color: #303136;
+}
+.patient-text-answer small {
+  font-size: 13px;
+  color: #686970;
+}
+.patient-text-answer .patient-primary {
+  min-height: 56px;
+  font-size: 18px;
+  min-width: 220px;
+}
+.patient-comment {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 56px 72px 44px;
+  position: relative;
+  isolation: isolate;
+}
+.patient-comment .patient-watermark {
+  top: 310px;
+  right: -90px;
+}
+.patient-comment .patient-rule {
+  margin-bottom: 30px;
+}
+.patient-comment h1 {
+  font-size: clamp(34px, 3.8vw, 49px);
+  line-height: 1.12;
+  margin: 0 0 20px;
+  max-width: 650px;
+}
+.patient-comment > p {
+  font-size: 20px;
+  line-height: 1.5;
+  color: #707175;
+  max-width: 570px;
+  margin: 0 0 26px;
+}
+.patient-comment form {
+  position: relative;
+}
+.patient-comment-input {
+  background: #fff;
+  border: 1px solid #d7d7dc;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.patient-comment-input textarea {
+  display: block;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  min-height: 110px;
+  padding: 18px;
+  font: inherit;
+  font-size: 17px;
+  resize: vertical;
+  color: #303136;
+}
+.patient-comment-input small {
+  display: block;
+  text-align: right;
+  padding: 0 20px 10px;
+  font-size: 12px;
+  color: #6b6c70;
+}
+.patient-comment-input:focus-within {
+  outline: 3px solid #c8203d;
+  outline-offset: 3px;
+}
+.patient-comment-input textarea:focus-visible {
+  outline: none;
+}
+.patient-comment-kind {
+  margin: 20px 0;
+}
+.patient-comment-kind select {
+  min-height: 48px;
+}
+.patient-contact-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 10px;
+  min-height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.patient-contact-toggle input {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: #d82643;
+}
+.patient-anonymous {
+  display: block;
+  max-width: 670px;
+  color: #66676c;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.patient-phone {
+  margin: 18px 0;
+}
+.patient-comment .patient-actions {
+  margin-top: 28px;
+}
+.patient-thanks p > svg {
+  vertical-align: -0.15em;
+  color: #33846c;
+}
+.patient-app input,
+.patient-app textarea {
+  caret-color: #d82643;
+}
+.patient-app ::selection {
+  color: #8c1930;
+  background: #f9c9d2;
+}
+
+@media (min-width: 1600px) {
+  .patient-hero {
+    padding-inline: 105px;
+  }
+  .patient-watermark {
+    right: -10px;
+  }
+}
+@media (max-width: 1000px) {
+  .patient-header {
+    width: calc(100% - 64px);
+    min-height: 108px;
+    padding: 24px 0;
+  }
+  .patient-hero {
+    padding: 70px 48px;
+    min-height: calc(100dvh - 150px);
+  }
+  .patient-hero-copy {
+    max-width: 480px;
+  }
+  .patient-hero p {
+    font-size: 20px;
+    max-width: 400px;
+  }
+  .patient-watermark {
+    width: 450px;
+    height: 450px;
+    right: -190px;
+  }
+  .patient-question {
+    padding-inline: 32px;
+  }
+  .patient-answer-area .rating-face {
+    min-height: 170px;
+    font-size: 15px;
+  }
+  .patient-answer-area .rating-face img,
+  .patient-answer-area .rating-face svg {
+    width: 80px;
+    height: 80px;
+  }
+  .patient-comment {
+    padding-inline: 48px;
+  }
+  .patient-nps-options {
+    gap: 6px;
+  }
+  .patient-nps-options button {
+    min-height: 64px;
+    font-size: 20px;
+  }
+}
+@media (max-width: 640px) {
+  .patient-header {
+    width: calc(100% - 40px);
+    padding: 20px 0 16px;
+    min-height: 104px;
+    align-items: flex-start;
+    gap: 14px;
+    flex-direction: column;
+  }
+  .patient-sector {
+    font-size: 13px;
+    text-align: left;
+  }
+  .patient-sector > span {
+    padding: 0 4px;
+  }
+  .patient-hero {
+    min-height: calc(100dvh - 165px);
+    padding: 48px 24px 58px;
+    align-items: flex-start;
+  }
+  .patient-hero h1 {
+    font-size: 42px;
+    margin-bottom: 26px;
+  }
+  .patient-rule {
+    margin-bottom: 30px;
+    width: 46px;
+  }
+  .patient-hero p {
+    font-size: 18px;
+    max-width: 100%;
+    margin-bottom: 32px;
+  }
+  .patient-watermark {
+    width: 350px;
+    height: 350px;
+    opacity: 0.09;
+    right: -175px;
+    top: 55%;
+  }
+  .patient-primary {
+    min-height: 62px;
+    min-width: 0;
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 20px;
+    gap: 20px;
+  }
+  .patient-primary svg {
+    width: 24px;
+    height: 24px;
+  }
+  .patient-hero-copy {
+    width: 100%;
+  }
+  .patient-hero-copy > small {
+    font-size: 12px;
+  }
+  .patient-footer {
+    font-size: 10px;
+    padding: 10px 20px 18px;
+    line-height: 1.6;
+  }
+  .patient-footer span {
+    margin: 0 3px;
+  }
+  .patient-context {
+    padding: 36px 24px;
+  }
+  .patient-context h1 {
+    font-size: 32px;
+  }
+  .patient-context > p {
+    font-size: 16px;
+    margin-bottom: 26px;
+  }
+  .patient-context legend {
+    font-size: 18px;
+  }
+  .patient-date-options {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .patient-date-options button {
+    min-height: 58px;
+    font-size: 17px;
+  }
+  .patient-field {
+    font-size: 16px;
+    max-width: none;
+  }
+  .patient-actions {
+    gap: 16px;
+  }
+  .patient-actions .patient-primary {
+    width: auto;
+    min-width: 155px;
+    font-size: 18px;
+  }
+  .patient-back,
+  .patient-skip {
+    font-size: 15px;
+    gap: 8px;
+  }
+  .patient-question {
+    padding: 28px 20px 30px;
+    min-height: calc(100dvh - 165px);
+  }
+  .patient-progress {
+    margin-bottom: 24px;
+    width: 130px;
+  }
+  .patient-question h1 {
+    font-size: 28px;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+  .patient-question-hint {
+    font-size: 14px;
+  }
+  .patient-answer-area {
+    padding: 20px 0;
+  }
+  .patient-answer-area .rating-faces {
+    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .patient-answer-area .rating-face {
+    min-height: 128px;
+    padding: 16px 6px;
+    font-size: 12px;
+    gap: 12px;
+  }
+  .patient-answer-area .rating-face img,
+  .patient-answer-area .rating-face svg {
+    width: 62px;
+    height: 62px;
+  }
+  .patient-answer-area .rating-face:nth-child(4) {
+    grid-column: 1;
+    margin-left: 50%;
+    margin-right: -50%;
+  }
+  .patient-answer-area .rating-face:nth-child(5) {
+    grid-column: 2;
+    margin-left: 50%;
+    margin-right: -50%;
+  }
+  .patient-nps-options {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .patient-nps-options button {
+    min-height: 55px;
+    font-size: 20px;
+    border-radius: 9px;
+  }
+  .patient-nps-labels {
+    font-size: 12px;
+  }
+  .patient-choice-options {
+    gap: 12px;
+  }
+  .patient-choice-options button {
+    min-height: 75px;
+    padding: 16px 12px;
+    font-size: 18px;
+  }
+  .patient-save-state {
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .patient-text-answer textarea {
+    font-size: 16px;
+    padding: 16px;
+  }
+  .patient-text-answer .patient-primary {
+    width: auto;
+    min-width: 160px;
+  }
+  .patient-question-actions {
+    gap: 12px;
+  }
+  .patient-skip {
+    font-size: 13px;
+  }
+  .patient-comment {
+    padding: 36px 24px;
+  }
+  .patient-comment .patient-rule {
+    margin-bottom: 26px;
+  }
+  .patient-comment h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+  .patient-comment > p {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  .patient-comment-input textarea {
+    min-height: 140px;
+    font-size: 16px;
+  }
+  .patient-comment .patient-watermark {
+    top: 300px;
+    right: -180px;
+  }
+  .patient-contact-toggle {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .patient-anonymous {
+    font-size: 12px;
+  }
+  .patient-error {
+    padding: 14px;
+    font-size: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .patient-thanks h1 {
+    font-size: 38px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .patient-app *,
+  .patient-app *::before,
+  .patient-app *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
