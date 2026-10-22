@@ -112,9 +112,6 @@ function Authentication({
           </div>
         </div>
         <Card className="auth-card">
-          <div className="auth-icon">
-            <KeyRound size={24} />
-          </div>
           <h2>
             {needsSetup ? "Configure o primeiro acesso" : "Bem-vindo de volta"}
           </h2>

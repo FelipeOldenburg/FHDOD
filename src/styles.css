@@ -491,11 +491,12 @@ textarea.input {
   margin-left: 4px;
 }
 .app-shell {
-  max-width: 1600px;
-  margin: 28px auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0;
   background: var(--surface);
-  border-radius: 24px;
-  min-height: calc(100vh - 56px);
   padding: 0 0 10px;
 }
 .topbar {
@@ -504,7 +505,6 @@ textarea.input {
   gap: 18px;
   padding: 18px 27px;
   background: #fff;
-  border-radius: 24px;
   min-height: 80px;
 }
 .top-navigation {
@@ -608,6 +608,7 @@ textarea.input {
 }
 .app-body {
   display: grid;
+  flex: 1;
   grid-template-columns: 52px minmax(0, 1fr);
   gap: 20px;
   padding: 24px 36px 26px 22px;
@@ -1405,16 +1406,6 @@ textarea.input {
 .auth-card form {
   margin-top: 28px;
 }
-.auth-icon {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  background: var(--pink);
-  color: var(--red);
-  border-radius: 14px;
-  margin-bottom: 25px;
-}
 .auth-card .button {
   min-height: 44px;
   width: 100%;
@@ -1459,9 +1450,6 @@ textarea.input {
   background: #f7f6f7;
 }
 @media (min-width: 1680px) {
-  .app-shell {
-    margin: 38px auto;
-  }
   .app-body {
     padding-bottom: 32px;
   }
@@ -1476,9 +1464,6 @@ textarea.input {
   }
 }
 @media (min-width: 1001px) and (max-width: 1660px) {
-  .app-shell {
-    margin: 24px 30px;
-  }
   .topbar {
     padding: 17px 24px;
     gap: 14px;
@@ -1553,10 +1538,6 @@ textarea.input {
   }
 }
 @media (max-width: 1000px) {
-  .app-shell {
-    margin: 16px;
-    border-radius: 22px;
-  }
   .topbar {
     flex-wrap: wrap;
     padding: 16px 20px;
@@ -1681,13 +1662,7 @@ textarea.input {
   h1 {
     font-size: 23px;
   }
-  .app-shell {
-    margin: 0;
-    border-radius: 0;
-    min-height: 100vh;
-  }
   .topbar {
-    border-radius: 0 0 20px 20px;
     padding: 15px 16px;
     gap: 16px;
   }

@@ -45,7 +45,7 @@ rounded:
   patient-button: "11px"
   choice: "12px"
   card: "20px"
-  shell: "24px"
+  shell: "0px"
   pill: "999px"
 spacing:
   small: "8px"
@@ -91,7 +91,7 @@ components:
 
 **Creative North Star: "Referência hospitalar FHDOD"**
 
-Este documento registra o visual já implementado a partir do Figma fornecido pelo usuário. O painel reúne cartões brancos sobre uma base cinza, ações vermelhas e navegação em cápsulas. A pesquisa do paciente amplia texto e controles sobre uma página branca, com uma pergunta por tela.
+Este documento registra o visual já implementado a partir do Figma fornecido pelo usuário e dos ajustes solicitados. O painel ocupa toda a tela, sem moldura exterior ou cantos arredondados no contorno e no cabeçalho. Reúne cartões brancos sobre uma base cinza, ações vermelhas e navegação em cápsulas. O login mantém a marca sem o ícone decorativo de chave. A pesquisa do paciente amplia texto e controles sobre uma página branca, com uma pergunta por tela.
 
 A marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs autorados por aproximação visual. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; os SVGs originais são necessários para conferir os detalhes dessas ilustrações.
 
@@ -114,7 +114,7 @@ Os valores do frontmatter são normativos e refletem `src/styles.css` e `src/pat
 ### Neutral
 
 - **Branco:** cartões, cabeçalho e página do paciente.
-- **Cinza de superfície:** área interna do painel; o cinza exterior enquadra o aplicativo no desktop.
+- **Cinza de superfície:** fundo do painel em toda a tela.
 - **Tinta:** texto principal; o cinza atenuado identifica descrições, rótulos auxiliares, cabeçalhos de tabela, apoio da marca, rodapé, placeholders e o denominador da satisfação.
 - **Linha:** divisórias de tabelas e bordas de opções.
 
@@ -129,9 +129,9 @@ A instalação carrega os pesos 400, 500, 600 e 700. Títulos administrativos us
 
 ## Layout
 
-O painel tem largura máxima de 1600px, cabeçalho horizontal e uma coluna lateral de 52px para atalhos. O conteúdo usa grades com intervalos de 14–20px. Cartões básicos recebem `spacing.card`; em larguras menores o CSS reduz o preenchimento.
+O painel ocupa 100% da largura e no mínimo toda a altura visível, sem largura máxima, margens externas ou centralização do contorno. O cabeçalho é horizontal e a coluna lateral de atalhos mede 52px. O corpo cresce para manter o rodapé na base quando há pouco conteúdo. O conteúdo usa grades com intervalos de 14–20px. Cartões básicos recebem `spacing.card`; em larguras menores o CSS reduz o preenchimento.
 
-Até 1000px, o dashboard passa a duas colunas, resultados e editor ficam em uma coluna. Até 650px, o painel ocupa a largura da tela, a navegação superior permite rolagem horizontal e os atalhos ficam na base. Tabelas mantêm rolagem horizontal. Gestão empilha suas colunas em 1100px e relatórios em 720px.
+Até 1000px, o dashboard passa a duas colunas, resultados e editor ficam em uma coluna. Até 650px, a navegação superior permite rolagem horizontal e os atalhos ficam na base. Tabelas mantêm rolagem horizontal. Gestão empilha suas colunas em 1100px e relatórios em 720px.
 
 A pesquisa usa cabeçalho e área de perguntas com largura máxima de 1320px. Em 640px, as avaliações ficam em três colunas e o NPS em seis; a numeração de 0 a 10 permanece completa. O botão público tem altura mínima de 72px no desktop e 62px no celular. Voltar e pular preservam áreas de interação próprias.
 
@@ -143,7 +143,7 @@ Botões administrativos mudam cor em 0.18s e deslocam 1px ao pressionar. Control
 
 ## Shapes
 
-Use `rounded.card` nos cartões comuns e `rounded.pill` nas ações administrativas e navegação. Campos usam `rounded.field`; alternativas e avaliações usam `rounded.choice`. O botão principal do paciente usa `rounded.patient-button`. O contorno do aplicativo usa `rounded.shell` no desktop e desaparece no celular.
+Use `rounded.card` nos cartões comuns e `rounded.pill` nas ações administrativas e navegação. Campos usam `rounded.field`; alternativas e avaliações usam `rounded.choice`. O botão principal do paciente usa `rounded.patient-button`. O contorno do aplicativo e o cabeçalho usam `rounded.shell`, sem arredondamento em qualquer largura.
 
 ## Components
 

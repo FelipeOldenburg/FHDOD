@@ -327,7 +327,7 @@
   ],
   "narrative": {
     "northStar": "Referência hospitalar FHDOD",
-    "overview": "Este documento registra o visual já implementado a partir do Figma fornecido pelo usuário. O painel reúne cartões brancos sobre uma base cinza, ações vermelhas e navegação em cápsulas. A pesquisa do paciente amplia texto e controles sobre uma página branca, com uma pergunta por tela.\n\nA marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs autorados por aproximação visual. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; os SVGs originais são necessários para conferir os detalhes dessas ilustrações.",
+    "overview": "Este documento registra o visual já implementado a partir do Figma fornecido pelo usuário e dos ajustes solicitados. O painel ocupa toda a tela, sem moldura exterior ou cantos arredondados no contorno e no cabeçalho. Reúne cartões brancos sobre uma base cinza, ações vermelhas e navegação em cápsulas. O login mantém a marca sem o ícone decorativo de chave. A pesquisa do paciente amplia texto e controles sobre uma página branca, com uma pergunta por tela.\n\nA marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs autorados por aproximação visual. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; os SVGs originais são necessários para conferir os detalhes dessas ilustrações.",
     "keyCharacteristics": [
       "Cartões brancos, cantos arredondados e separação por fundos.",
       "Vermelho nas ações e estados selecionados, com texto e ícones de apoio.",
