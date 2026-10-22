@@ -509,10 +509,10 @@ textarea.input {
 .top-navigation {
   display: flex;
   align-items: center;
-  background: var(--surface);
+  background: var(--pink);
   border-radius: 999px;
   padding: 4px;
-  gap: 4px;
+  gap: 12px;
   grid-column: 1 / -1;
   justify-self: center;
   width: max-content;
@@ -535,7 +535,7 @@ textarea.input {
   box-shadow: 0 2px 6px #34303b03;
 }
 .top-navigation button:hover {
-  color: var(--red);
+  color: var(--red-dark);
 }
 .header-tools {
   display: flex;
@@ -1681,7 +1681,7 @@ textarea.input {
   .top-navigation {
     justify-content: flex-start;
     overflow-x: auto;
-    gap: 1px;
+    gap: 8px;
     scrollbar-width: none;
   }
   .top-navigation button {

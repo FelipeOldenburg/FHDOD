@@ -298,9 +298,9 @@
     {
       "name": "Navegação superior",
       "kind": "nav",
-      "description": "Cápsula cinza centralizada na segunda linha do cabeçalho, com itens agrupados e a página ativa em branco.",
+      "description": "Cápsula rosa claro centralizada na segunda linha do cabeçalho, com intervalo de 12px entre os itens (8px até 650px) e a página ativa em branco.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Principal\"><button class=\"ds-current\" type=\"button\" aria-current=\"page\">Dashboard</button><button type=\"button\">Pesquisas</button><button type=\"button\">Resultados</button></nav>",
-      "css": ".ds-nav{display:flex;align-items:center;justify-content:flex-start;gap:4px;grid-column:1/-1;justify-self:center;width:max-content;max-width:100%;min-width:0;padding:4px;border-radius:999px;background:var(--surface,#f5f5f6);font-family:Inter,Arial,sans-serif}.ds-nav button{min-height:34px;border:0;border-radius:99px;background:none;padding:9px 13px;font:11px Inter,Arial,sans-serif;color:#26272b;cursor:pointer;white-space:nowrap}.ds-nav .ds-current{background:#fff;color:var(--red,#d92742);box-shadow:0 2px 6px #34303b03}.ds-nav button:hover{color:var(--red,#d92742)}.ds-nav button:focus-visible{outline:3px solid #ac2346;outline-offset:4px}@media(max-width:650px){.ds-nav{overflow-x:auto;gap:1px}.ds-nav button{min-height:44px;padding:8px 13px}}"
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:flex-start;gap:12px;grid-column:1/-1;justify-self:center;width:max-content;max-width:100%;min-width:0;padding:4px;border-radius:999px;background:var(--pink,#faebef);font-family:Inter,Arial,sans-serif}.ds-nav button{min-height:34px;border:0;border-radius:99px;background:none;padding:9px 13px;font:11px Inter,Arial,sans-serif;color:#26272b;cursor:pointer;white-space:nowrap}.ds-nav .ds-current{background:#fff;color:var(--red,#d92742);box-shadow:0 2px 6px #34303b03}.ds-nav button:hover{color:var(--red-dark,#b91e36)}.ds-nav button:focus-visible{outline:3px solid #ac2346;outline-offset:4px}@media(max-width:650px){.ds-nav{overflow-x:auto;gap:8px}.ds-nav button{min-height:44px;padding:8px 13px}}"
     },
     {
       "name": "Situação",
