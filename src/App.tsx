@@ -521,19 +521,19 @@ function AdminApp() {
               )}
             </div>
           </div>
-          <nav className="top-navigation" aria-label="Navegação principal">
-            {visibleLinks.map((link) => (
-              <button
-                key={link.path}
-                onClick={() => navigate(link.path)}
-                className={activePath === link.path ? "active" : ""}
-                aria-current={activePath === link.path ? "page" : undefined}
-              >
-                {link.name}
-              </button>
-            ))}
-          </nav>
         </header>
+        <nav className="top-navigation" aria-label="Navegação principal">
+          {visibleLinks.map((link) => (
+            <button
+              key={link.path}
+              onClick={() => navigate(link.path)}
+              className={activePath === link.path ? "active" : ""}
+              aria-current={activePath === link.path ? "page" : undefined}
+            >
+              {link.name}
+            </button>
+          ))}
+        </nav>
         {data.demo && (
           <div className="demo-banner">
             <ShieldCheck size={14} />

@@ -495,29 +495,22 @@ textarea.input {
   padding: 0 0 10px;
 }
 .topbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px 18px;
+  gap: 18px;
   padding: 18px 27px;
   background: #fff;
   min-height: 80px;
-}
-.topbar > .brand {
-  justify-self: start;
 }
 .top-navigation {
   display: flex;
   align-items: center;
   background: var(--pink);
-  border-radius: 999px;
-  padding: 4px;
+  padding: 10px 27px;
   gap: 12px;
-  grid-column: 1 / -1;
-  justify-self: center;
-  width: max-content;
-  max-width: 100%;
-  justify-content: flex-start;
+  width: 100%;
+  justify-content: center;
   min-width: 0;
 }
 .top-navigation button {
@@ -1681,6 +1674,7 @@ textarea.input {
   .top-navigation {
     justify-content: flex-start;
     overflow-x: auto;
+    padding: 10px 16px;
     gap: 8px;
     scrollbar-width: none;
   }
