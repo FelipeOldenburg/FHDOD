@@ -495,12 +495,16 @@ textarea.input {
   padding: 0 0 10px;
 }
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
+  gap: 12px 18px;
   padding: 18px 27px;
   background: #fff;
   min-height: 80px;
+}
+.topbar > .brand {
+  justify-self: start;
 }
 .top-navigation {
   display: flex;
@@ -509,8 +513,10 @@ textarea.input {
   border-radius: 999px;
   padding: 4px;
   gap: 4px;
-  flex: 0 1 auto;
-  margin-inline: auto;
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: max-content;
+  max-width: 100%;
   justify-content: flex-start;
   min-width: 0;
 }
@@ -1529,19 +1535,8 @@ textarea.input {
 }
 @media (max-width: 1000px) {
   .topbar {
-    flex-wrap: wrap;
     padding: 16px 20px;
     gap: 15px;
-  }
-  .topbar > .brand {
-    margin-right: auto;
-  }
-  .header-tools {
-    order: 0;
-  }
-  .top-navigation {
-    order: 1;
-    flex-basis: 100%;
   }
   .profile-name {
     display: flex;
@@ -1688,8 +1683,6 @@ textarea.input {
     overflow-x: auto;
     gap: 1px;
     scrollbar-width: none;
-    flex-basis: calc(100% + 8px);
-    margin: 0 -4px;
   }
   .top-navigation button {
     font-size: 11px;

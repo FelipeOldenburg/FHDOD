@@ -474,18 +474,6 @@ function AdminApp() {
       <div className="app-shell">
         <header className="topbar">
           <Brand />
-          <nav className="top-navigation" aria-label="Navegação principal">
-            {visibleLinks.map((link) => (
-              <button
-                key={link.path}
-                onClick={() => navigate(link.path)}
-                className={activePath === link.path ? "active" : ""}
-                aria-current={activePath === link.path ? "page" : undefined}
-              >
-                {link.name}
-              </button>
-            ))}
-          </nav>
           <div className="header-tools">
             <button
               className="icon-button"
@@ -533,6 +521,18 @@ function AdminApp() {
               )}
             </div>
           </div>
+          <nav className="top-navigation" aria-label="Navegação principal">
+            {visibleLinks.map((link) => (
+              <button
+                key={link.path}
+                onClick={() => navigate(link.path)}
+                className={activePath === link.path ? "active" : ""}
+                aria-current={activePath === link.path ? "page" : undefined}
+              >
+                {link.name}
+              </button>
+            ))}
+          </nav>
         </header>
         {data.demo && (
           <div className="demo-banner">
