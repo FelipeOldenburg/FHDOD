@@ -51,13 +51,11 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   const [failedAnswer, setFailedAnswer] = useState<Value | undefined>();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const requestInFlight = useRef(false);
-  const isKiosk =
-    new URLSearchParams(window.location.search).get("quiosque") === "1";
   const currentQuestion = questions[questionIndex];
   const npsQuestion = questions.find((item) => item.type === "nps");
   const nps = npsQuestion ? values[npsQuestion.id] : undefined;
   const commentLimit = context?.settings?.commentLimit ?? 1000;
-  const autoResetSeconds = context?.settings?.autoResetSeconds ?? 15;
+  const autoResetSeconds = context?.settings?.autoResetSeconds ?? 10;
   const isLowNps =
     typeof nps === "number" &&
     nps <= (context?.settings?.lowScoreThreshold ?? 6);
@@ -104,10 +102,10 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   }, [stage, questionIndex]);
 
   useEffect(() => {
-    if (stage !== "thanks" || !isKiosk) return;
+    if (stage !== "thanks") return;
     const timeout = window.setTimeout(reset, autoResetSeconds * 1000);
     return () => window.clearTimeout(timeout);
-  }, [stage, isKiosk, autoResetSeconds]);
+  }, [stage, autoResetSeconds]);
 
   function reset() {
     setSession(null);
@@ -720,12 +718,10 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               Finalizar
               <ArrowRight aria-hidden="true" />
             </button>
-            {isKiosk && (
-              <small>
-                Esta tela volta ao início automaticamente em {autoResetSeconds}{" "}
-                segundos.
-              </small>
-            )}
+            <small>
+              Esta tela volta ao início automaticamente em {autoResetSeconds}{" "}
+              segundos.
+            </small>
           </div>
         </main>
       ) : (

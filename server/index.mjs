@@ -37,7 +37,7 @@ const defaultSettings = {
   hospitalName: "Fundação Hospitalar Dr. Oswaldo Diesel",
   commentLimit: 1000,
   lowScoreThreshold: 6,
-  autoResetSeconds: 15,
+  autoResetSeconds: 10,
 };
 const hash = (value) => createHash("sha256").update(value).digest("hex");
 const uid = () => randomUUID();

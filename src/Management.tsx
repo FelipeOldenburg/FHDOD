@@ -1602,7 +1602,7 @@ function AuditHistory({ sectors }: { sectors: Sector[] }) {
     for (const [key, label] of [
       ["commentLimit", "Limite de comentário"],
       ["lowScoreThreshold", "Nota máxima de atenção"],
-      ["autoResetSeconds", "Reinício do tablet (segundos)"],
+      ["autoResetSeconds", "Retorno ao início da pesquisa (segundos)"],
     ])
       if (typeof values[key] === "number")
         result.push({ label, value: String(values[key]) });
@@ -1712,7 +1712,7 @@ export function SettingsPanel({ data, onRefresh, notify }: CommonProps) {
       hospitalName: "Fundação Hospitalar Dr. Oswaldo Diesel",
       commentLimit: 1000,
       lowScoreThreshold: 6,
-      autoResetSeconds: 15,
+      autoResetSeconds: 10,
     },
   );
   const [error, setError] = useState("");
@@ -1838,8 +1838,8 @@ export function SettingsPanel({ data, onRefresh, notify }: CommonProps) {
                 />
               </Field>
               <Field
-                label="Reinício do tablet após o envio (segundos)"
-                hint="Aplicado apenas ao modo quiosque, depois da confirmação do envio."
+                label="Retorno ao início da pesquisa (segundos)"
+                hint="Após a confirmação do envio, em qualquer dispositivo. Padrão: 10 segundos."
               >
                 <input
                   className="input"

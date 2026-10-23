@@ -37,6 +37,7 @@ Abra [http://127.0.0.1:3001](http://127.0.0.1:3001); a API serve os arquivos de 
 - Autenticação com cinco perfis: Super Admin, Admin de Setor, Gestão, Ouvidoria e Visualizador; permissões e isolamento de setores aplicados na API.
 - Setores, formulários, perguntas com versões e uma URL pública por setor, com QR Code. O paciente responde sem login, uma pergunta por tela.
 - Salvamento parcial, horário de cada resposta e data de atendimento separada. Apenas o NPS de 0 a 10 é obrigatório.
+- Após confirmar o envio, a tela de agradecimento retorna ao início em 10 segundos por padrão, em qualquer dispositivo. O Super Admin pode ajustar esse tempo em Configurações; o botão “Finalizar” permite voltar antes.
 - Respostas enviadas e comentários originais imutáveis; Ouvidoria com situação, notas internas e histórico próprios.
 - Indicadores sobre os dados da instalação, filtros, registro de auditoria e exportação XLSX gerada no navegador conforme perfil e filtros.
 
