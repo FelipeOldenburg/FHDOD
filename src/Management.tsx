@@ -1,4 +1,5 @@
 import {
+  startTransition,
   useEffect,
   useId,
   useState,
@@ -973,11 +974,15 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
         `/api/manifestations${filterQuery(filters)}`,
         { signal },
       );
-      setRecords(result.manifestations);
+      startTransition(() => {
+        setRecords(result.manifestations);
+        setLoading(false);
+      });
     } catch (err) {
-      if (!signal?.aborted) setError(errorMessage(err));
-    } finally {
-      if (!signal?.aborted) setLoading(false);
+      if (!signal?.aborted) {
+        setError(errorMessage(err));
+        setLoading(false);
+      }
     }
   }
   useEffect(() => {

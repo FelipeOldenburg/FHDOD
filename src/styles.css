@@ -653,6 +653,47 @@ textarea.input {
 .route-content:focus {
   outline: none;
 }
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(admin-content) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(admin-content) {
+  animation: admin-content-out 150ms ease-out both;
+}
+::view-transition-new(admin-content) {
+  animation: admin-content-in 320ms var(--ease) both;
+}
+@keyframes admin-content-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes admin-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes admin-content-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 .global-filters {
   display: flex;
   align-items: flex-end;
@@ -2020,6 +2061,17 @@ textarea.input {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  ::view-transition-old(admin-content) {
+    animation: admin-content-out 90ms linear both !important;
+  }
+  ::view-transition-new(admin-content) {
+    animation: admin-content-fade-in 140ms linear both !important;
+  }
   *,
   *::before,
   *::after {

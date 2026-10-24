@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   ArrowDown,
@@ -208,8 +208,10 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
         signal: controller.signal,
       })
         .then((result) => {
-          setStats(result);
-          setError("");
+          startTransition(() => {
+            setStats(result);
+            setError("");
+          });
         })
         .catch((e) => {
           if (!controller.signal.aborted) setError(e.message);
@@ -916,8 +918,10 @@ export function Results(props: AdminProps) {
         : Promise.resolve({ responses: [] }),
     ])
       .then(([d, r]) => {
-        setStats(d);
-        setResponses(r.responses);
+        startTransition(() => {
+          setStats(d);
+          setResponses(r.responses);
+        });
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);

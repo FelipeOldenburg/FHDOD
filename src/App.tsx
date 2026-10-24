@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useState,
+  ViewTransition,
+} from "react";
 import type { FormEvent } from "react";
 import {
   ArrowDownToLine,
@@ -27,7 +33,6 @@ import {
   Field,
   Loading,
   PageTitle,
-  usePageTransition,
 } from "./components";
 import { Dashboard, QuestionEditor, Results, Surveys } from "./AdminPages";
 import {
@@ -300,7 +305,6 @@ function AdminApp() {
   const [loading, setLoading] = useState(true);
   const [fatalError, setFatalError] = useState("");
   const [route, setRoute] = useState(window.location.pathname);
-  const contentRef = usePageTransition(data ? route : "auth");
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [toast, setToast] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -363,6 +367,10 @@ function AdminApp() {
   }, [dirty]);
   const navigate = useCallback(
     (path: string) => {
+      if (path === window.location.pathname) {
+        setMenu(false);
+        return;
+      }
       if (
         dirty &&
         !window.confirm(
@@ -372,7 +380,7 @@ function AdminApp() {
         return;
       setDirty(false);
       setMenu(false);
-      setRoute(path);
+      startTransition(() => setRoute(path));
       window.history.pushState({}, "", path);
       window.scrollTo({ top: 0 });
     },
@@ -385,7 +393,7 @@ function AdminApp() {
         return;
       }
       setDirty(false);
-      setRoute(window.location.pathname);
+      startTransition(() => setRoute(window.location.pathname));
     };
     window.addEventListener("popstate", pop);
     return () => window.removeEventListener("popstate", pop);
@@ -615,121 +623,123 @@ function AdminApp() {
               </button>
             </div>
           </aside>
-          <main ref={contentRef} id="conteudo" className="route-content" tabIndex={-1}>
-            {showFilters && (
-              <div className="global-filters">
-                <label>
-                  <span>Setor</span>
-                  <select
-                    className="input"
-                    aria-label="Setor dos indicadores"
-                    value={filters.sectorId}
-                    onChange={(e) =>
-                      setFilters({ ...filters, sectorId: e.target.value })
-                    }
-                  >
-                    <option value="">
-                      {user.role === "superadmin"
-                        ? "Todos os setores"
-                        : "Setores autorizados"}
-                    </option>
-                    {data.sectors.map((sector) => (
-                      <option key={sector.id} value={sector.id}>
-                        {sector.name}
+          <ViewTransition name="admin-content">
+            <main id="conteudo" className="route-content" tabIndex={-1}>
+              {showFilters && (
+                <div className="global-filters">
+                  <label>
+                    <span>Setor</span>
+                    <select
+                      className="input"
+                      aria-label="Setor dos indicadores"
+                      value={filters.sectorId}
+                      onChange={(e) =>
+                        setFilters({ ...filters, sectorId: e.target.value })
+                      }
+                    >
+                      <option value="">
+                        {user.role === "superadmin"
+                          ? "Todos os setores"
+                          : "Setores autorizados"}
                       </option>
-                    ))}
-                  </select>
-                </label>
-                <fieldset className="date-range">
-                  <legend>Período das respostas</legend>
-                  <input
-                    className="input"
-                    type="date"
-                    aria-label="Data inicial"
-                    value={filters.from}
-                    max={filters.to || undefined}
-                    onChange={(e) =>
-                      setFilters({ ...filters, from: e.target.value })
-                    }
-                  />
-                  <span>até</span>
-                  <input
-                    className="input"
-                    type="date"
-                    aria-label="Data final"
-                    value={filters.to}
-                    min={filters.from || undefined}
-                    onChange={(e) =>
-                      setFilters({ ...filters, to: e.target.value })
-                    }
-                  />
-                </fieldset>
-                <button
-                  className="text-button"
-                  onClick={() => setFilters(initialFilters())}
-                >
-                  Este mês
-                </button>
-              </div>
-            )}
-            {route === "/" ? (
-              <>
-                <PageTitle
-                  title="Visão geral"
-                  description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
-                  action={
-                    <>
-                      <button
-                        className="button secondary"
-                        onClick={() => navigate("/relatorios")}
-                      >
-                        <ArrowDownToLine size={15} />
-                        Exportar Excel
-                      </button>
-                      {data.permissions.canEditSurveys && (
+                      {data.sectors.map((sector) => (
+                        <option key={sector.id} value={sector.id}>
+                          {sector.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <fieldset className="date-range">
+                    <legend>Período das respostas</legend>
+                    <input
+                      className="input"
+                      type="date"
+                      aria-label="Data inicial"
+                      value={filters.from}
+                      max={filters.to || undefined}
+                      onChange={(e) =>
+                        setFilters({ ...filters, from: e.target.value })
+                      }
+                    />
+                    <span>até</span>
+                    <input
+                      className="input"
+                      type="date"
+                      aria-label="Data final"
+                      value={filters.to}
+                      min={filters.from || undefined}
+                      onChange={(e) =>
+                        setFilters({ ...filters, to: e.target.value })
+                      }
+                    />
+                  </fieldset>
+                  <button
+                    className="text-button"
+                    onClick={() => setFilters(initialFilters())}
+                  >
+                    Este mês
+                  </button>
+                </div>
+              )}
+              {route === "/" ? (
+                <>
+                  <PageTitle
+                    title="Visão geral"
+                    description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
+                    action={
+                      <>
                         <button
-                          className="button"
-                          onClick={() => navigate("/pesquisas")}
+                          className="button secondary"
+                          onClick={() => navigate("/relatorios")}
                         >
-                          <Plus size={15} />
-                          Nova pesquisa
+                          <ArrowDownToLine size={15} />
+                          Exportar Excel
                         </button>
-                      )}
-                    </>
-                  }
+                        {data.permissions.canEditSurveys && (
+                          <button
+                            className="button"
+                            onClick={() => navigate("/pesquisas")}
+                          >
+                            <Plus size={15} />
+                            Nova pesquisa
+                          </button>
+                        )}
+                      </>
+                    }
+                  />
+                  <Dashboard {...props} />
+                </>
+              ) : route === "/pesquisas" ? (
+                <Surveys {...props} />
+              ) : route.startsWith("/pesquisas/") ? (
+                <QuestionEditor
+                  key={route}
+                  {...props}
+                  surveyId={route.split("/")[2]}
+                  onDirtyChange={setDirty}
                 />
-                <Dashboard {...props} />
-              </>
-            ) : route === "/pesquisas" ? (
-              <Surveys {...props} />
-            ) : route.startsWith("/pesquisas/") ? (
-              <QuestionEditor
-                key={route}
-                {...props}
-                surveyId={route.split("/")[2]}
-                onDirtyChange={setDirty}
-              />
-            ) : route === "/setores" ? (
-              <Sectors {...props} />
-            ) : route === "/resultados" ? (
-              <Results {...props} />
-            ) : route === "/ouvidoria" ? (
-              <Ombudsman {...props} />
-            ) : route === "/usuarios" ? (
-              <Users {...props} />
-            ) : route === "/relatorios" ? (
-              <Reports {...props} />
-            ) : route === "/configuracoes" ? (
-              <SettingsPanel {...props} />
-            ) : (
-              <Card title="Página não encontrada">
-                <p>Escolha uma das áreas no menu para continuar.</p>
-                <button className="button" onClick={() => navigate("/")}>
-                  Voltar à visão geral
-                </button>
-              </Card>
-            )}
-          </main>
+              ) : route === "/setores" ? (
+                <Sectors {...props} />
+              ) : route === "/resultados" ? (
+                <Results {...props} />
+              ) : route === "/ouvidoria" ? (
+                <Ombudsman {...props} />
+              ) : route === "/usuarios" ? (
+                <Users {...props} />
+              ) : route === "/relatorios" ? (
+                <Reports {...props} />
+              ) : route === "/configuracoes" ? (
+                <SettingsPanel {...props} />
+              ) : (
+                <Card title="Página não encontrada">
+                  <p>Escolha uma das áreas no menu para continuar.</p>
+                  <button className="button" onClick={() => navigate("/")}>
+                    Voltar à visão geral
+                  </button>
+                </Card>
+              )}
+            </main>
+          </ViewTransition>
         </div>
         <footer className="app-footer">
           <span>FHDOD · Experiência do paciente</span>
