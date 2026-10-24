@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowLeft, ArrowRight, Check, LoaderCircle } from "lucide-react";
 import { api } from "./api";
-import { Brand, RatingFaces } from "./components";
+import { Brand, RatingFaces, usePageTransition } from "./components";
 import type { Question, Sector, Survey } from "./types";
 import "./patient.css";
 
@@ -49,6 +49,9 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [failedAnswer, setFailedAnswer] = useState<Value | undefined>();
+  const contentRef = usePageTransition(
+    `${loading ? "loading" : stage}:${questionIndex}`,
+  );
   const headingRef = useRef<HTMLHeadingElement>(null);
   const requestInFlight = useRef(false);
   const currentQuestion = questions[questionIndex];
@@ -307,12 +310,12 @@ export default function PatientSurvey({ slug }: { slug: string }) {
       </header>
 
       {loading ? (
-        <main className="patient-status" aria-live="polite">
+        <main ref={contentRef} className="patient-status" aria-live="polite">
           <LoaderCircle className="spinner" size={28} />
           <p>Carregando pesquisa…</p>
         </main>
       ) : !context ? (
-        <main className="patient-status">
+        <main ref={contentRef} className="patient-status">
           <h1 ref={headingRef} tabIndex={-1}>
             Pesquisa indisponível
           </h1>
@@ -323,7 +326,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           </button>
         </main>
       ) : stage === "welcome" ? (
-        <main className="patient-hero">
+        <main ref={contentRef} className="patient-hero">
           <span className="patient-watermark" aria-hidden="true">
             <img src="/assets/fhdod-logo.png" alt="" />
           </span>
@@ -350,7 +353,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           </div>
         </main>
       ) : stage === "context" ? (
-        <main className="patient-context">
+        <main ref={contentRef} className="patient-context">
           <h1 ref={headingRef} tabIndex={-1}>
             Sobre seu atendimento
           </h1>
@@ -427,7 +430,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           </form>
         </main>
       ) : stage === "question" && currentQuestion ? (
-        <main className="patient-question">
+        <main ref={contentRef} className="patient-question">
           <div
             className="patient-progress"
             role="progressbar"
@@ -578,7 +581,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           </div>
         </main>
       ) : stage === "comment" ? (
-        <main className="patient-comment">
+        <main ref={contentRef} className="patient-comment">
           <span className="patient-watermark" aria-hidden="true">
             <img src="/assets/fhdod-logo.png" alt="" />
           </span>
@@ -696,7 +699,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           </form>
         </main>
       ) : stage === "thanks" ? (
-        <main className="patient-hero patient-thanks">
+        <main ref={contentRef} className="patient-hero patient-thanks">
           <span className="patient-watermark" aria-hidden="true">
             <img src="/assets/fhdod-logo.png" alt="" />
           </span>
@@ -725,7 +728,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           </div>
         </main>
       ) : (
-        <main className="patient-status">
+        <main ref={contentRef} className="patient-status">
           <h1>Pesquisa sem perguntas</h1>
           <p>
             Procure a equipe do hospital para verificar a pesquisa deste setor.

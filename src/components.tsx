@@ -4,10 +4,29 @@ import {
   isValidElement,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
 } from "react";
 import type { ReactNode } from "react";
 import { Inbox, X, LoaderCircle } from "lucide-react";
+
+export function usePageTransition(view: string) {
+  const ref = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return;
+    const animation = element.animate(
+      [
+        { opacity: 0.35, transform: "translateY(6px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 260, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+    );
+    return () => animation.cancel();
+  }, [view]);
+  return ref;
+}
 
 export function Brand({ patient = false }: { patient?: boolean }) {
   return (
@@ -39,8 +58,8 @@ export function RatingFaces({
   onChange: (value: number) => void;
   disabled?: boolean;
 }) {
-  const colors = ["#c7a4ed", "#afd0f7", "#cacbc9", "#ffdc8b", "#bddfae"];
-  const inks = ["#503e67", "#284e77", "#40413f", "#634915", "#385e2c"];
+  const colors = ["#b77bea", "#f39732", "#ae845b", "#f6c51b", "#91ad51"];
+  const inks = ["#641d8f", "#8b3914", "#512d20", "#88430c", "#344d19"];
   return (
     <div className="rating-faces" role="group" aria-label="Avaliação de 1 a 5">
       {faceLabels.map((label, index) => (
@@ -57,54 +76,58 @@ export function RatingFaces({
             <circle cx="50" cy="50" r="49" fill={colors[index]} />
             {index === 0 ? (
               <path
-                d="M26 40 Q34 52 42 40 M58 40 Q66 52 74 40"
+                d="M30 39 Q36 48 43 39 M57 39 Q64 48 70 39"
                 fill="none"
                 stroke={inks[index]}
-                strokeWidth="5"
+                strokeWidth="7"
                 strokeLinecap="round"
               />
             ) : index === 4 ? (
               <path
-                d="M25 42 Q34 29 43 42 M57 42 Q66 29 75 42"
+                d="M30 42 Q36 32 43 42 M57 42 Q64 32 70 42"
                 fill="none"
                 stroke={inks[index]}
-                strokeWidth="5"
+                strokeWidth="7"
                 strokeLinecap="round"
               />
             ) : (
               <g fill={inks[index]}>
-                <circle cx="35" cy="41" r="5" />
-                <circle cx="65" cy="41" r="5" />
+                <circle cx="36" cy="41" r="6" />
+                <circle cx="64" cy="41" r="6" />
               </g>
             )}
             {index === 0 ? (
-              <path d="M32 77 Q50 40 68 77 Z" fill={inks[index]} />
+              <path
+                d="M33 62 Q50 46 67 62 Q73 70 64 70 H36 Q27 70 33 62 Z"
+                fill={inks[index]}
+              />
             ) : index === 1 ? (
               <path
-                d="M30 72 Q50 45 70 72"
+                d="M35 63 Q50 49 65 63"
                 fill="none"
                 stroke={inks[index]}
-                strokeWidth="5"
+                strokeWidth="8"
                 strokeLinecap="round"
               />
             ) : index === 2 ? (
               <path
-                d="M33 68 H67"
+                d="M35 60 Q50 75 65 60"
+                fill="none"
                 stroke={inks[index]}
-                strokeWidth="5"
+                strokeWidth="8"
                 strokeLinecap="round"
               />
             ) : index === 3 ? (
               <path
-                d="M29 63 Q50 88 71 63"
+                d="M35 59 Q50 75 65 59"
                 fill="none"
                 stroke={inks[index]}
-                strokeWidth="5"
+                strokeWidth="8"
                 strokeLinecap="round"
               />
             ) : (
               <path
-                d="M29 61 H71 Q70 87 50 87 Q30 87 29 61"
+                d="M35 55 H65 Q72 55 67 63 Q61 72 50 72 Q39 72 33 63 Q28 55 35 55 Z"
                 fill={inks[index]}
               />
             )}

@@ -8,8 +8,8 @@
   color: #26272b;
   background: #e4e5e8;
   font-synthesis: none;
-  --red: #d92742;
-  --red-dark: #b91e36;
+  --red: #bd203b;
+  --red-dark: #9f1b32;
   --pink: #faebef;
   --surface: #f5f5f6;
   --muted: #686a73;
@@ -251,7 +251,7 @@ img {
 .input:focus {
   outline: 0;
   border-color: var(--red);
-  box-shadow: 0 0 0 3px #d9274210;
+  box-shadow: 0 0 0 3px #bd203b10;
 }
 .input::placeholder {
   color: var(--muted);
@@ -1186,6 +1186,14 @@ textarea.input {
   width: 42px;
   height: 42px;
   flex-shrink: 0;
+  transition: transform 0.2s var(--ease);
+}
+.rating-face:hover:not(:disabled) svg,
+.rating-face.selected svg {
+  transform: scale(1.06);
+}
+.rating-face:active:not(:disabled) svg {
+  transform: scale(0.97);
 }
 .question-preview .rating-face {
   border: 0;

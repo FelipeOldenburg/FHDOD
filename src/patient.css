@@ -56,7 +56,7 @@
   display: block;
   height: 3px;
   width: 62px;
-  background: #d92944;
+  background: var(--red);
   margin: 0 0 38px;
 }
 .patient-hero h1 {
@@ -108,7 +108,7 @@
   gap: 48px;
   border: 0;
   border-radius: 11px;
-  background: #e51e36;
+  background: var(--red);
   color: #fff;
   font: inherit;
   font-size: 24px;
@@ -125,7 +125,7 @@
   flex-shrink: 0;
 }
 .patient-primary:hover:not(:disabled) {
-  background: #c91831;
+  background: var(--red-dark);
 }
 .patient-primary:disabled {
   opacity: 0.65;
@@ -135,7 +135,7 @@
 .patient-app input:focus-visible,
 .patient-app select:focus-visible,
 .patient-app textarea:focus-visible {
-  outline: 3px solid #c8203d;
+  outline: 3px solid var(--red-dark);
   outline-offset: 4px;
 }
 .patient-footer {
@@ -246,9 +246,9 @@
 .patient-date-options button.selected,
 .patient-choice-options button.selected,
 .patient-nps-options button.selected {
-  border-color: #d82643;
+  border-color: var(--red);
   background: #fcebef;
-  color: #b91f39;
+  color: var(--red-dark);
 }
 .patient-field {
   display: flex;
@@ -338,7 +338,7 @@
   height: 100%;
   display: block;
   border-radius: 8px;
-  background: #df6076;
+  background: var(--red);
 }
 .patient-question h1 {
   max-width: 940px;
@@ -512,7 +512,7 @@
   color: #6b6c70;
 }
 .patient-comment-input:focus-within {
-  outline: 3px solid #c8203d;
+  outline: 3px solid var(--red-dark);
   outline-offset: 3px;
 }
 .patient-comment-input textarea:focus-visible {
@@ -537,7 +537,7 @@
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  accent-color: #d82643;
+  accent-color: var(--red);
 }
 .patient-anonymous {
   display: block;
@@ -558,7 +558,7 @@
 }
 .patient-app input,
 .patient-app textarea {
-  caret-color: #d82643;
+  caret-color: var(--red);
 }
 .patient-app ::selection {
   color: #8c1930;

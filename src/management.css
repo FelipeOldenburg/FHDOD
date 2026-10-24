@@ -58,7 +58,7 @@
   line-height: 1.4;
 }
 .table-choice:hover {
-  color: var(--red, #d92742);
+  color: var(--red);
 }
 .selected-row {
   background: #fff9fa;
@@ -165,7 +165,7 @@
   min-height: 28px;
 }
 .check-label input {
-  accent-color: #d92742;
+  accent-color: var(--red);
   width: 17px;
   height: 17px;
   flex-shrink: 0;
@@ -189,7 +189,7 @@
   line-height: 1.7;
 }
 .credential-result > svg {
-  color: #d92742;
+  color: var(--red);
 }
 .credential-result p {
   margin: 0;
@@ -363,7 +363,7 @@
   padding: 34px 0;
 }
 .account-overview > svg {
-  color: #d92742;
+  color: var(--red);
 }
 .account-overview h3 {
   margin-top: 20px;

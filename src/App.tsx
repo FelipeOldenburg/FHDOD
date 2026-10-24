@@ -21,7 +21,14 @@ import {
   UsersRound,
 } from "lucide-react";
 import { api, ApiError } from "./api";
-import { Brand, Card, Field, Loading, PageTitle } from "./components";
+import {
+  Brand,
+  Card,
+  Field,
+  Loading,
+  PageTitle,
+  usePageTransition,
+} from "./components";
 import { Dashboard, QuestionEditor, Results, Surveys } from "./AdminPages";
 import {
   Ombudsman,
@@ -293,6 +300,7 @@ function AdminApp() {
   const [loading, setLoading] = useState(true);
   const [fatalError, setFatalError] = useState("");
   const [route, setRoute] = useState(window.location.pathname);
+  const contentRef = usePageTransition(data ? route : "auth");
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [toast, setToast] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -607,7 +615,7 @@ function AdminApp() {
               </button>
             </div>
           </aside>
-          <main id="conteudo" className="route-content" tabIndex={-1}>
+          <main ref={contentRef} id="conteudo" className="route-content" tabIndex={-1}>
             {showFilters && (
               <div className="global-filters">
                 <label>

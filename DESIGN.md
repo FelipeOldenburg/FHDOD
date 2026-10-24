@@ -2,11 +2,11 @@
 name: FHDOD
 description: Sistema visual implementado para o painel e a pesquisa de experiência do paciente.
 colors:
-  primary: "#d92742"
-  primary-dark: "#b91e36"
+  primary: "#bd203b"
+  primary-dark: "#9f1b32"
   primary-soft: "#faebef"
-  patient-primary: "#e51e36"
-  patient-primary-hover: "#c91831"
+  patient-primary: "#bd203b"
+  patient-primary-hover: "#9f1b32"
   paper: "#ffffff"
   surface: "#f5f5f6"
   exterior: "#e4e5e8"
@@ -93,7 +93,7 @@ components:
 
 Este documento registra o visual já implementado a partir do Figma fornecido pelo usuário e dos ajustes solicitados. O painel ocupa toda a tela, sem moldura exterior ou cantos arredondados no contorno e no cabeçalho. Reúne cartões brancos sobre uma base cinza, ações vermelhas e navegação em cápsulas. O login mantém a marca sem o ícone decorativo de chave. A pesquisa do paciente amplia texto e controles sobre uma página branca, com uma pergunta por tela.
 
-A marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs autorados por aproximação visual. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; os SVGs originais são necessários para conferir os detalhes dessas ilustrações.
+A marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs geométricos autorados por aproximação da referência JPG enviada pelo usuário. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; as carinhas atuais seguem a referência JPG e não são assets originais do Figma.
 
 A marca padrão usa símbolo de 44px, sigla de 28px e nome institucional de 9px à direita, separado por uma linha vertical. Até 1250px, a sigla passa para 26px; até 650px, símbolo e sigla passam para 36px e 24px, e o cabeçalho administrativo oculta o nome institucional. A variante do paciente preserva seus tamanhos e breakpoints próprios, sem separador.
 
@@ -109,9 +109,9 @@ Os valores do frontmatter são normativos e refletem `src/styles.css` e `src/pat
 
 ### Primary
 
-- **Vermelho FHDOD:** ações administrativas e destaque do NPS; a variante escura indica hover.
+- **Vermelho FHDOD:** `--red` usa `#bd203b` nas ações administrativas e no destaque do NPS; `--red-dark` usa `#9f1b32` no hover.
 - **Rosa de seleção:** ações secundárias, avatares e itens selecionados.
-- **Vermelho do paciente:** botão principal do formulário público, com seu próprio hover.
+- **Vermelho do paciente:** botão principal e hover do formulário público compartilham os mesmos valores de `--red` e `--red-dark`.
 
 ### Neutral
 
@@ -143,6 +143,8 @@ Cartões comuns usam a diferença entre branco e cinza para separar áreas. Menu
 
 Botões administrativos mudam cor em 0.18s e deslocam 1px ao pressionar. Controles públicos mudam cor em 0.15s. `prefers-reduced-motion` reduz as transições e animações.
 
+Os conteúdos das páginas administrativas e das etapas e perguntas públicas entram em 260ms, com opacidade de 0.35 a 1 e deslocamento vertical de 6px a 0, usando `cubic-bezier(.16, 1, .3, 1)`. Uma nova tela cancela a animação anterior. Com `prefers-reduced-motion`, o conteúdo aparece diretamente, sem essa entrada animada.
+
 ## Shapes
 
 Use `rounded.card` nos cartões comuns e `rounded.pill` nas ações administrativas e navegação. Campos usam `rounded.field`; alternativas e avaliações usam `rounded.choice`. O botão principal do paciente usa `rounded.patient-button`. O contorno do aplicativo e o cabeçalho usam `rounded.shell`, sem arredondamento em qualquer largura.
@@ -171,7 +173,7 @@ A navegação administrativa usa uma cápsula branca flutuante, horizontal e cen
 
 ### Patient rating
 
-As cinco avaliações combinam rosto e rótulo. Cada opção pública tem altura mínima de 208px no desktop; seleção e hover acrescentam borda vermelha e fundo rosa claro. O NPS usa botões numerados, com seleção indicada por borda, fundo e estado acessível.
+As cinco avaliações combinam rosto e rótulo: Muito ruim em roxo (`#b77bea`), Ruim em laranja (`#f39732`), Regular em castanho (`#ae845b`), Bom em amarelo (`#f6c51b`) e Muito bom em verde (`#91ad51`). Olhos e bocas usam traços escuros tonais, com expressões aproximadas da referência JPG: olhos fechados e boca triste aberta, expressão triste, sorriso suave, sorriso e olhos alegres com boca aberta. Cada opção pública tem altura mínima de 208px no desktop; seleção e hover acrescentam borda vermelha e fundo rosa claro. O NPS usa botões numerados, com seleção indicada por borda, fundo e estado acessível.
 
 ## Do's and Don'ts
 
