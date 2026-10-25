@@ -37,10 +37,8 @@ O **FHDOD** organiza a escuta dos pacientes em uma pesquisa digital por setor. A
 | Questionário sem login, uma pergunta por tela e avaliações com carinhas. | Um administrador próprio, perguntas do setor e acesso às suas respostas. | Indicadores, filtros e acompanhamento dos setores conforme as permissões. |
 
 <p align="center">
-  <picture>
-    <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/pulse-care.svg">
-    <img src="docs/assets/pulse-care.gif" alt="Pulso ilustrativo que remete à escuta e ao cuidado hospitalar." width="820">
-  </picture><br>
+  <strong>Cada resposta ajuda a cuidar.</strong><br>
+  <img src="docs/assets/care-heartbeat.gif" alt="Traçado vermelho de um batimento cardíaco animado, sobre fundo transparente." width="320"><br>
   <sub>Animação ilustrativa de apresentação · <a href="docs/assets/pulse-care.svg">Versão estática</a></sub>
 </p>
 
@@ -258,7 +256,9 @@ A marca em `public/assets/fhdod-logo.png` veio do **[site oficial da FHDOD](http
 
 As carinhas da interface são SVGs recriados por aproximação da referência de avaliação enviada durante o desenvolvimento. As capas, os símbolos e os GIFs deste README são gráficos de apresentação, sem representar dados clínicos ou resultados reais. As duas capturas da aplicação usam dados fictícios.
 
-As imagens ficam no próprio repositório. O pulso tem uma versão estática para leitura com menos movimento; os GIFs são breves e não repetem indefinidamente.
+O GIF de pulso é o arquivo **Gigaton Sticker by Pearl Jam.gif**, fornecido para este README e preservado sem alterações.
+
+As imagens ficam no próprio repositório. A animação do pulso se repete e tem uma versão estática para leitura com menos movimento; a animação de avaliações é breve e não se repete.
 
 </details>
 
