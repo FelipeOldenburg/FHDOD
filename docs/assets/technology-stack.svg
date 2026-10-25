@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="88" viewBox="0 0 1000 88" role="img" aria-labelledby="title desc">
+  <title id="title">Tecnologias do FHDOD</title>
+  <desc id="desc">React 19, TypeScript 7, Node.js 24 ou superior, SQLite e Vite 8.</desc>
+  <g font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="23" font-weight="600" text-anchor="middle">
+    <rect x="24" y="16" width="162" height="56" rx="14" fill="#e6f6fb"/>
+    <text x="105" y="52" fill="#155b72">React 19</text>
+    <rect x="198" y="16" width="205" height="56" rx="14" fill="#e7f0fb"/>
+    <text x="300.5" y="52" fill="#22518a">TypeScript 7</text>
+    <rect x="415" y="16" width="193" height="56" rx="14" fill="#edf5eb"/>
+    <text x="511.5" y="52" fill="#345b2c">Node.js 24+</text>
+    <rect x="620" y="16" width="160" height="56" rx="14" fill="#eef3f7"/>
+    <text x="700" y="52" fill="#345068">SQLite</text>
+    <rect x="792" y="16" width="184" height="56" rx="14" fill="#f1eafb"/>
+    <text x="884" y="52" fill="#60408e">Vite 8</text>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="180" viewBox="0 0 1000 180" role="img" aria-labelledby="title desc">
+  <title id="title">Cada resposta ajuda a cuidar.</title>
+  <desc id="desc">Traçado hospitalar vermelho de eletrocardiograma sobre fundo claro. Versão estática da animação decorativa do projeto.</desc>
+  <rect width="1000" height="180" rx="16" fill="#f5f5f6"/>
+  <text x="40" y="55" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="26" font-weight="650" fill="#26272b">Cada resposta ajuda a cuidar.</text>
+  <path d="M40 121H160L182 107L202 121H269L293 139L322 78L352 155L378 107L399 121H529L551 107L572 121H639L663 139L692 78L722 155L748 107L769 121H960" fill="none" stroke="#bd203b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
