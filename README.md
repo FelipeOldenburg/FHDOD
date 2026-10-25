@@ -11,11 +11,11 @@
 </p>
 
 <p align="center">
-  <a href="#-o-projeto">O projeto</a> ·
-  <a href="#-conheça-as-telas">Telas</a> ·
-  <a href="#-comece-por-aqui">Instalação</a> ·
-  <a href="#-acessos-e-responsabilidades">Acessos</a> ·
-  <a href="#-documentação-e-próximos-passos">Documentação</a>
+  <a href="#o-projeto">O projeto</a> ·
+  <a href="#telas">Telas</a> ·
+  <a href="#instalacao">Instalação</a> ·
+  <a href="#acessos">Acessos</a> ·
+  <a href="#documentacao">Documentação</a>
 </p>
 
 <p align="center">
@@ -25,6 +25,8 @@
 <p align="center">
   <img src="docs/assets/technology-stack.svg" alt="React 19 · TypeScript 7 · Node.js 24 ou superior · SQLite · Vite 8" width="820">
 </p>
+
+<a name="o-projeto"></a>
 
 ## ❤️ O projeto
 
@@ -53,6 +55,8 @@ O **FHDOD** organiza a escuta dos pacientes em uma pesquisa digital por setor. A
 - **🔐 Acesso definido por função:** cinco perfis, permissões aplicadas na API e registro de auditoria.
 
 Após o envio confirmado, a tela de agradecimento retorna ao início em **10 segundos por padrão**. O Super Admin pode ajustar esse tempo; o botão **Finalizar** permite voltar antes.
+
+<a name="telas"></a>
 
 ## 🖥️ Conheça as telas
 
@@ -88,6 +92,8 @@ Controles maiores, rótulos legíveis e cinco expressões para avaliar o atendim
 | **3 · Recomendar** | Escolhe uma nota NPS de 0 a 10, a única resposta obrigatória. |
 | **4 · Compartilhar** | Pode deixar um comentário e solicitar retorno da ouvidoria. |
 | **5 · Acompanhar** | A equipe consulta os registros, os indicadores e as manifestações conforme seu acesso. |
+
+<a name="instalacao"></a>
 
 ## 🚀 Comece por aqui
 
@@ -141,6 +147,8 @@ Abra **[http://127.0.0.1:3001](http://127.0.0.1:3001)**. A API serve os arquivos
 Os servidores escutam somente no endereço local.
 
 </details>
+
+<a name="acessos"></a>
 
 ## 🔑 Acessos e responsabilidades
 
@@ -222,6 +230,8 @@ Os testes integrados cobrem os cinco perfis, isolamento de setores, troca e rede
 O override de `uuid` mantém a correção da dependência transitiva usada pelo ExcelJS sem reduzir sua versão.
 
 </details>
+
+<a name="documentacao"></a>
 
 ## 📚 Documentação e próximos passos
 
