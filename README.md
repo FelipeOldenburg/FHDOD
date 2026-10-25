@@ -73,7 +73,9 @@ Indicadores, avaliações e acompanhamento da experiência do paciente em uma vi
 Controles maiores, rótulos legíveis e cinco expressões para avaliar o atendimento. As demais perguntas podem ser puladas; apenas o NPS é obrigatório.
 
 <p align="center">
-  <img src="docs/assets/faces_reactions.gif" alt="Ilustração das cinco expressões de avaliação, do roxo ao verde." width="620"><br>
+  <picture>
+    <img src="docs/assets/faces_reactions.gif" alt="Ilustração das cinco expressões de avaliação, do roxo ao verde." width="620">
+  </picture><br>
   <sub>Cada avaliação faz parte da escuta. Ilustração de apresentação, sem dados de pacientes.</sub>
 </p>
 
@@ -254,7 +256,7 @@ As carinhas da interface são SVGs recriados por aproximação da referência de
 
 O GIF de pulso é o arquivo **Gigaton Sticker by Pearl Jam.gif**, fornecido para este README e preservado sem alterações.
 
-As imagens ficam no próprio repositório. A animação do pulso se repete e tem uma versão estática para leitura com menos movimento; a animação de avaliações é breve e não se repete.
+As imagens ficam no próprio repositório. A animação do pulso se repete e tem uma versão estática para leitura com menos movimento; a animação de avaliações é breve e se repete.
 
 </details>
 
