@@ -73,13 +73,7 @@ Indicadores, avaliações e acompanhamento da experiência do paciente em uma vi
 Controles maiores, rótulos legíveis e cinco expressões para avaliar o atendimento. As demais perguntas podem ser puladas; apenas o NPS é obrigatório.
 
 <p align="center">
-  <a href="docs/assets/questionario-paciente.jpg">
-    <img src="docs/assets/questionario-paciente.jpg" alt="Questionário no celular, com avaliações de Muito ruim a Muito bom e dados fictícios." width="260">
-  </a>
-</p>
-
-<p align="center">
-  <img src="docs/assets/feedback-care.gif" alt="Ilustração das cinco expressões de avaliação, do roxo ao verde." width="620"><br>
+  <img src="docs/assets/faces_reactions.gif" alt="Ilustração das cinco expressões de avaliação, do roxo ao verde." width="620"><br>
   <sub>Cada avaliação faz parte da escuta. Ilustração de apresentação, sem dados de pacientes.</sub>
 </p>
 
