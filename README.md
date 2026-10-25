@@ -38,9 +38,11 @@ O **FHDOD** organiza a escuta dos pacientes em uma pesquisa digital por setor. A
 
 <p align="center">
   <strong>Cada resposta ajuda a cuidar.</strong><br>
-  <img src="docs/assets/care-heartbeat.gif" alt="Traçado vermelho de um batimento cardíaco animado, sobre fundo transparente." width="320"><br>
-  <sub>Animação ilustrativa de apresentação · <a href="docs/assets/pulse-care.svg">Versão estática</a></sub>
+  <picture>
+    <img src="docs/assets/ezgif-765eb357ca937745.gif" alt="Traçado vermelho de um batimento cardíaco animado, sobre fundo transparente." width="320">
+  </picture><br>
 </p>
+
 
 ### O que já está funcionando
 
