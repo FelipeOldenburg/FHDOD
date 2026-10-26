@@ -2103,3 +2103,200 @@ textarea.input {
     min-height: 44px;
   }
 }
+
+/* Mobile admin: compact, touch-first composition inspired by the approved mockups.
+   Desktop layouts and patient survey styles are intentionally unchanged. */
+@media (max-width: 650px) {
+  .app-shell {
+    background: #f5f5f6;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .topbar {
+    background: #fff;
+    border-radius: 0 0 22px 22px;
+  }
+  .top-navigation {
+    max-width: calc(100% - 32px);
+    margin: 12px 16px 4px;
+    padding: 6px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 4px 16px #2b243008;
+  }
+  .top-navigation button {
+    min-height: 42px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .top-navigation button.active {
+    color: #fff;
+    background: var(--red);
+  }
+  .app-body {
+    padding: 18px 16px 110px;
+  }
+  .route-content {
+    gap: 14px;
+  }
+  .page-title {
+    gap: 12px;
+    padding: 0 3px;
+  }
+  .page-title h1 {
+    font-size: 25px;
+    letter-spacing: -0.8px;
+  }
+  .page-title p {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .page-actions {
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .page-actions .button {
+    min-height: 42px;
+  }
+  .global-filters,
+  .filter-card {
+    border: 1px solid #ececef;
+    box-shadow: 0 6px 20px #29232c06;
+    border-radius: 18px;
+  }
+  .global-filters select,
+  .global-filters input,
+  .filter-card input,
+  .filter-card select {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "satisfaction satisfaction"
+      "responses nps"
+      "pending pending"
+      "evolution evolution"
+      "sectors sectors"
+      "recent recent";
+    gap: 12px;
+  }
+  .dashboard-grid > .card {
+    min-width: 0;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 7px 22px #29232c08;
+  }
+  .dashboard-grid .card-heading {
+    margin-bottom: 12px;
+  }
+  .dashboard-grid .card-heading h2 {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .satisfaction-card {
+    background: linear-gradient(135deg, #bd203b, #9f1b32);
+    color: #fff;
+    min-height: 190px;
+  }
+  .satisfaction-card .card-heading h2,
+  .satisfaction-card .card-heading p,
+  .satisfaction-card .metric-note,
+  .satisfaction-value > span {
+    color: #fff;
+  }
+  .satisfaction-card .card-heading p,
+  .satisfaction-card .metric-note {
+    opacity: .82;
+  }
+  .satisfaction-value {
+    margin-top: 15px;
+    gap: 10px;
+  }
+  .satisfaction-value > strong {
+    font-size: 54px;
+    line-height: 1.05;
+    letter-spacing: -2px;
+  }
+  .satisfaction-value .status-badge {
+    background: #ffffff24;
+    color: #fff;
+    margin-left: 0;
+  }
+  .responses-card {
+    background: #fff2e9;
+  }
+  .nps-card {
+    background: #f0eefa;
+  }
+  .nps-value {
+    min-height: 92px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .nps-value strong {
+    font-size: 39px;
+  }
+  .pending-card {
+    background: #faebef;
+  }
+  .pending-card .metric-action {
+    justify-content: space-between;
+  }
+  .pending-card .metric-action > span {
+    flex-basis: auto;
+  }
+  .evolution-card,
+  .recent-card,
+  .sectors-card {
+    background: #fff;
+  }
+  .evolution-chart {
+    height: 190px;
+    gap: 11px;
+  }
+  .chart-bar {
+    border-radius: 9px 9px 5px 5px;
+  }
+  .side-rail {
+    position: fixed;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    left: 16px;
+    right: 16px;
+    padding: 8px 12px;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 10px 35px #29232c20;
+    z-index: 30;
+    justify-content: space-between;
+  }
+  .rail-group {
+    gap: 5px;
+  }
+  .rail-group button {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+  .rail-group button.active {
+    color: #fff;
+    background: var(--red);
+  }
+  .app-footer {
+    padding-bottom: 95px;
+  }
+  .management-split .card,
+  .route-content > .card {
+    border-radius: 20px;
+  }
+  .button,
+  .icon-button {
+    touch-action: manipulation;
+  }
+}
+@media (max-width: 380px) {
+  .dashboard-grid > .card { padding: 14px; }
+  .satisfaction-value > strong { font-size: 46px; }
+  .top-navigation { margin-inline: 12px; max-width: calc(100% - 24px); }
+}
