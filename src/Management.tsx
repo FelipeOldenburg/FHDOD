@@ -26,6 +26,7 @@ import {
   StatusBadge,
   PageTitle,
   Field,
+  PasswordField,
 } from "./components";
 import type {
   Bootstrap,
@@ -1890,39 +1891,31 @@ export function SettingsPanel({ data, onRefresh, notify }: CommonProps) {
         >
           <form className="management-form" onSubmit={changePassword}>
             <FormError value={passwordError} />
-            <Field label="Senha atual">
-              <input
-                id={`${passwordId}-current`}
-                className="input"
-                type="password"
-                name="currentPassword"
-                autoComplete="current-password"
-                required
-                maxLength={128}
-              />
-            </Field>
-            <Field label="Nova senha" hint="Use entre 12 e 128 caracteres.">
-              <input
-                className="input"
-                type="password"
-                name="newPassword"
-                autoComplete="new-password"
-                required
-                minLength={12}
-                maxLength={128}
-              />
-            </Field>
-            <Field label="Confirme a nova senha">
-              <input
-                className="input"
-                type="password"
-                name="confirmPassword"
-                autoComplete="new-password"
-                required
-                minLength={12}
-                maxLength={128}
-              />
-            </Field>
+            <PasswordField
+              id={`${passwordId}-current`}
+              label="Senha atual"
+              name="currentPassword"
+              autoComplete="current-password"
+              required
+              maxLength={128}
+            />
+            <PasswordField
+              label="Nova senha"
+              hint="Use entre 12 e 128 caracteres."
+              name="newPassword"
+              autoComplete="new-password"
+              required
+              minLength={12}
+              maxLength={128}
+            />
+            <PasswordField
+              label="Confirme a nova senha"
+              name="confirmPassword"
+              autoComplete="new-password"
+              required
+              minLength={12}
+              maxLength={128}
+            />
             <p className="muted small">
               Após a alteração, suas sessões serão encerradas e será necessário
               entrar novamente.

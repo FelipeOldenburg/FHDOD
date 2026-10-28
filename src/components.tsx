@@ -6,9 +6,10 @@ import {
   useId,
   useLayoutEffect,
   useRef,
+  useState,
 } from "react";
-import type { ReactNode } from "react";
-import { Inbox, X, LoaderCircle } from "lucide-react";
+import type { InputHTMLAttributes, ReactNode } from "react";
+import { Eye, EyeOff, Inbox, X, LoaderCircle } from "lucide-react";
 
 export function usePageTransition(view: string) {
   const ref = useRef<HTMLElement>(null);
@@ -164,20 +165,38 @@ export function Card({
 export function PageTitle({
   title,
   description,
+  mobileTitle,
+  mobileDescription,
   action,
 }: {
   title: string;
   description: string;
+  mobileTitle?: string;
+  mobileDescription?: string;
   action?: ReactNode;
 }) {
   return (
-    <div className="page-title">
-      <div>
-        <h1>{title}</h1>
-        <p>{description}</p>
+    <header className={`page-title${action ? " has-action" : ""}`}>
+      <div className="page-title-copy">
+        <h1>
+          <span className={mobileTitle ? "desktop-page-title" : undefined}>
+            {title}
+          </span>
+          {mobileTitle && <span className="mobile-page-title">{mobileTitle}</span>}
+        </h1>
+        <p>
+          <span
+            className={mobileDescription ? "desktop-page-title" : undefined}
+          >
+            {description}
+          </span>
+          {mobileDescription && (
+            <span className="mobile-page-title">{mobileDescription}</span>
+          )}
+        </p>
       </div>
       {action && <div className="page-actions">{action}</div>}
-    </div>
+    </header>
   );
 }
 export function EmptyState({
@@ -233,6 +252,45 @@ export function Field({
           : child,
       )}
       {hint && <small id={`${controlId}-hint`}>{hint}</small>}
+    </div>
+  );
+}
+
+export function PasswordField({
+  label,
+  hint,
+  className = "input",
+  ...inputProps
+}: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+  label: string;
+  hint?: string;
+}) {
+  const generatedId = useId();
+  const [visible, setVisible] = useState(false);
+  const inputId = inputProps.id || generatedId;
+  const hintId = hint ? `${inputId}-hint` : undefined;
+  return (
+    <div className="field">
+      <label htmlFor={inputId}>{label}</label>
+      <div className="password-control">
+        <input
+          {...inputProps}
+          id={inputId}
+          type={visible ? "text" : "password"}
+          className={className}
+          aria-describedby={hintId || inputProps["aria-describedby"]}
+        />
+        <button
+          type="button"
+          className="password-visibility"
+          onClick={() => setVisible((current) => !current)}
+          aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+          aria-pressed={visible}
+        >
+          {visible ? <EyeOff size={19} /> : <Eye size={19} />}
+        </button>
+      </div>
+      {hint && <small id={hintId}>{hint}</small>}
     </div>
   );
 }
