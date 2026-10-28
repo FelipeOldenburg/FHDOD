@@ -442,6 +442,13 @@
     padding: 16px 12px;
     min-height: 96px;
   }
+  .management-stats .card-heading {
+    margin-bottom: 10px;
+  }
+  .management-stats .card-heading h2 {
+    font-size: 13px;
+    line-height: 1.35;
+  }
   .management-stats strong {
     font-size: 26px;
   }
