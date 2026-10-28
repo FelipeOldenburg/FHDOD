@@ -17,6 +17,7 @@ import {
   FileBarChart2,
   Grid2X2,
   Hospital,
+  House,
   KeyRound,
   LogOut,
   MessageCircle,
@@ -24,6 +25,7 @@ import {
   RotateCw,
   Settings,
   ShieldCheck,
+  UserRound,
   UsersRound,
 } from "lucide-react";
 import { api, ApiError } from "./api";
@@ -33,6 +35,7 @@ import {
   Field,
   Loading,
   PageTitle,
+  PasswordField,
 } from "./components";
 import { Dashboard, QuestionEditor, Results, Surveys } from "./AdminPages";
 import {
@@ -78,6 +81,7 @@ function Authentication({
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
@@ -110,9 +114,7 @@ function Authentication({
             <img src="/assets/fhdod-logo.png" alt="" />
           </span>
           <h1>
-            Cuidar começa
-            <br />
-            por ouvir.
+            Cuidar começa <span className="auth-title-break">por ouvir.</span>
           </h1>
           <p>
             Acompanhe a experiência dos pacientes e transforme cada resposta em
@@ -160,47 +162,65 @@ function Authentication({
                 placeholder="seu.email@hospital.com.br"
               />
             </Field>
-            <Field
+            <PasswordField
               label={needsSetup ? "Senha temporária de instalação" : "Senha"}
-              hint={
-                needsSetup
-                  ? "De 12 a 128 caracteres. Você definirá sua senha pessoal na próxima etapa."
-                  : undefined
-              }
-            >
-              <input
-                className="input"
-                type="password"
-                name="password"
-                required
-                minLength={needsSetup ? 12 : 1}
-                maxLength={128}
-                autoComplete={needsSetup ? "new-password" : "current-password"}
-              />
-            </Field>
+              name="password"
+              required
+              minLength={needsSetup ? 12 : 1}
+              maxLength={128}
+              autoComplete={needsSetup ? "new-password" : "current-password"}
+            />
+            {!needsSetup && (
+              <div className="auth-recovery">
+                <button
+                  type="button"
+                  className="auth-forgot-button"
+                  aria-expanded={recoveryOpen}
+                  aria-controls="password-recovery-help"
+                  onClick={() => setRecoveryOpen((current) => !current)}
+                >
+                  Esqueceu a senha?
+                </button>
+                {recoveryOpen && (
+                  <div id="password-recovery-help" className="auth-recovery-help">
+                    <KeyRound size={18} aria-hidden="true" />
+                    <p>
+                      Peça ao Super Admin uma nova senha temporária. No próximo
+                      acesso, você criará uma senha pessoal.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             {error && (
               <p className="error-banner" role="alert">
                 {error}
               </p>
             )}
             <button className="button" disabled={busy}>
-              {busy
-                ? "Aguarde…"
-                : needsSetup
-                  ? "Configurar administrador"
-                  : "Entrar no painel"}
-              <ArrowRight size={17} />
+              <span className="auth-submit-content">
+                {busy
+                  ? "Aguarde…"
+                  : needsSetup
+                    ? "Configurar administrador"
+                    : "Entrar no painel"}
+                <ArrowRight size={17} />
+              </span>
             </button>
           </form>
-          {!needsSetup && (
-            <p className="auth-help">
-              Esqueceu a senha? Solicite uma senha temporária ao Super Admin.
-            </p>
-          )}
+          <div className="auth-mobile-trust">
+            <ShieldCheck size={17} />
+            <span>Acesso seguro e exclusivo à equipe do hospital</span>
+          </div>
         </Card>
       </main>
       <footer className="auth-footer">
-        Fundação Hospitalar Dr. Oswaldo Diesel · Experiência do paciente
+        <span className="auth-footer-full">
+          Fundação Hospitalar Dr. Oswaldo Diesel · Experiência do paciente
+        </span>
+        <span className="auth-footer-compact">
+          FHDOD · Experiência do paciente
+        </span>
       </footer>
     </div>
   );
@@ -247,38 +267,30 @@ function TemporaryPassword({
         subtitle="Sua senha é temporária. Altere-a para acessar o painel."
       >
         <form className="stack-form" onSubmit={submit}>
-          <Field label="Senha temporária">
-            <input
-              type="password"
-              className="input"
-              name="currentPassword"
-              autoComplete="current-password"
-              required
-              maxLength={128}
-            />
-          </Field>
-          <Field label="Nova senha" hint="Use de 12 a 128 caracteres.">
-            <input
-              type="password"
-              className="input"
-              name="newPassword"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              maxLength={128}
-            />
-          </Field>
-          <Field label="Confirme a nova senha">
-            <input
-              type="password"
-              className="input"
-              name="confirmation"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              maxLength={128}
-            />
-          </Field>
+          <PasswordField
+            label="Senha temporária"
+            name="currentPassword"
+            autoComplete="current-password"
+            required
+            maxLength={128}
+          />
+          <PasswordField
+            label="Nova senha"
+            hint="Use de 12 a 128 caracteres."
+            name="newPassword"
+            autoComplete="new-password"
+            required
+            minLength={12}
+            maxLength={128}
+          />
+          <PasswordField
+            label="Confirme a nova senha"
+            name="confirmation"
+            autoComplete="new-password"
+            required
+            minLength={12}
+            maxLength={128}
+          />
           {error && (
             <p className="error-banner" role="alert">
               {error}
@@ -482,6 +494,25 @@ function AdminApp() {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+  const firstName = user.name.split(" ").filter(Boolean)[0] || user.name;
+  const currentHour = Number(
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).format(new Date()),
+  );
+  const greeting =
+    currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
+  const mobileLinks = [
+    { path: "/", name: "Início", icon: House },
+    { path: "/resultados", name: "Resultados", icon: ChartNoAxesColumn },
+    { path: "/pesquisas", name: "Pesquisas", icon: ClipboardList },
+    data.permissions.canViewManifestations
+      ? { path: "/ouvidoria", name: "Ouvidoria", icon: MessageCircle }
+      : { path: "/setores", name: "Setores", icon: Hospital },
+    { path: "/configuracoes", name: "Perfil", icon: UserRound },
+  ];
   return (
     <>
       <a href="#conteudo" className="skip-link">
@@ -649,36 +680,42 @@ function AdminApp() {
                       ))}
                     </select>
                   </label>
-                  <fieldset className="date-range">
-                    <legend>Período das respostas</legend>
-                    <input
-                      className="input"
-                      type="date"
-                      aria-label="Data inicial"
-                      value={filters.from}
-                      max={filters.to || undefined}
-                      onChange={(e) =>
-                        setFilters({ ...filters, from: e.target.value })
-                      }
-                    />
-                    <span>até</span>
-                    <input
-                      className="input"
-                      type="date"
-                      aria-label="Data final"
-                      value={filters.to}
-                      min={filters.from || undefined}
-                      onChange={(e) =>
-                        setFilters({ ...filters, to: e.target.value })
-                      }
-                    />
-                  </fieldset>
-                  <button
-                    className="text-button"
-                    onClick={() => setFilters(initialFilters())}
-                  >
-                    Este mês
-                  </button>
+                  <div className="filter-period">
+                    <div className="filter-period-heading">
+                      <span>Período das respostas</span>
+                      <button
+                        type="button"
+                        className="text-button"
+                        onClick={() => setFilters(initialFilters())}
+                      >
+                        Este mês
+                      </button>
+                    </div>
+                    <fieldset className="date-range">
+                      <legend className="sr-only">Período das respostas</legend>
+                      <input
+                        className="input"
+                        type="date"
+                        aria-label="Data inicial"
+                        value={filters.from}
+                        max={filters.to || undefined}
+                        onChange={(e) =>
+                          setFilters({ ...filters, from: e.target.value })
+                        }
+                      />
+                      <span>até</span>
+                      <input
+                        className="input"
+                        type="date"
+                        aria-label="Data final"
+                        value={filters.to}
+                        min={filters.from || undefined}
+                        onChange={(e) =>
+                          setFilters({ ...filters, to: e.target.value })
+                        }
+                      />
+                    </fieldset>
+                  </div>
                 </div>
               )}
               {route === "/" ? (
@@ -686,10 +723,12 @@ function AdminApp() {
                   <PageTitle
                     title="Visão geral"
                     description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
+                    mobileTitle={`${greeting}, ${firstName}!`}
+                    mobileDescription="Resumo da experiência dos pacientes."
                     action={
                       <>
                         <button
-                          className="button secondary"
+                          className="button secondary dashboard-export-action"
                           onClick={() => navigate("/relatorios")}
                         >
                           <ArrowDownToLine size={15} />
@@ -697,7 +736,7 @@ function AdminApp() {
                         </button>
                         {data.permissions.canEditSurveys && (
                           <button
-                            className="button"
+                            className="button mobile-icon-action"
                             onClick={() => navigate("/pesquisas")}
                           >
                             <Plus size={15} />
@@ -741,6 +780,24 @@ function AdminApp() {
             </main>
           </ViewTransition>
         </div>
+        <nav className="mobile-navigation" aria-label="Navegação principal">
+          {mobileLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = activePath === link.path;
+            return (
+              <button
+                key={link.path}
+                className={isActive ? "active" : ""}
+                onClick={() => navigate(link.path)}
+                aria-label={link.name}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <Icon size={21} strokeWidth={1.8} />
+                <span>{link.name}</span>
+              </button>
+            );
+          })}
+        </nav>
         <footer className="app-footer">
           <span>FHDOD · Experiência do paciente</span>
           <span>
