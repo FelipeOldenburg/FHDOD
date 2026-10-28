@@ -51,20 +51,21 @@ const types: Record<QuestionType, string> = {
 };
 
 export function Evolution({ items }: { items: DashboardData["monthly"] }) {
-  const max = Math.max(1, ...items.map((item) => item.count));
+  const safeItems = Array.isArray(items) ? items : [];
+  const max = Math.max(1, ...safeItems.map((item) => item.count));
   return (
     <div
       className="evolution-chart"
       role="img"
-      aria-label={items
+      aria-label={safeItems
         .map((item) => `${item.label}: ${item.count} respostas`)
         .join(", ")}
     >
-      {items.map((item, index) => (
+      {safeItems.map((item, index) => (
         <div className="chart-column" key={item.month}>
           <div className="bar-track">
             <span
-              className={`chart-bar ${index === items.length - 1 ? "current" : ""}`}
+              className={`chart-bar ${index === safeItems.length - 1 ? "current" : ""}`}
               style={{
                 height: `${item.count ? Math.max(6, (item.count / max) * 100) : 0}%`,
               }}
@@ -76,7 +77,7 @@ export function Evolution({ items }: { items: DashboardData["monthly"] }) {
           <span>{item.label}</span>
         </div>
       ))}
-      {!items.some((item) => item.count) && (
+      {!safeItems.some((item) => item.count) && (
         <p className="chart-empty">As respostas aparecerão aqui.</p>
       )}
     </div>
@@ -89,7 +90,8 @@ export function ResponseTable({
   responses: ResponseRow[];
   onSelect?: (response: ResponseRow) => void;
 }) {
-  return responses.length ? (
+  const safeResponses = Array.isArray(responses) ? responses : [];
+  return safeResponses.length ? (
     <div className="table-wrap">
       <table className="data-table">
         <thead>
@@ -106,7 +108,7 @@ export function ResponseTable({
           </tr>
         </thead>
         <tbody>
-          {responses.map((response) => (
+          {safeResponses.map((response) => (
             <tr key={response.id}>
               <td>{response.sectorName}</td>
               <td>{formatDate(response.submittedAt || response.createdAt)}</td>
@@ -231,7 +233,11 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
       </div>
     );
   if (!stats) return <Loading />;
-  const largest = Math.max(1, ...stats.bySector.map((s) => s.count));
+  const bySector = Array.isArray(stats.bySector) ? stats.bySector : [];
+  const recent = Array.isArray(stats.recent) ? stats.recent : [];
+  const responseCount = stats.responseCount ?? 0;
+  const pendingCount = stats.pendingCount ?? 0;
+  const largest = Math.max(1, ...bySector.map((s) => s.count));
   return (
     <div className="dashboard-grid">
       <Card
@@ -251,8 +257,13 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
       </Card>
       <Card title="Respostas recebidas" className="responses-card">
         <div className="metric-line">
-          <strong>{formatNumber(stats.responseCount)}</strong>
+          <strong>{formatNumber(responseCount)}</strong>
         </div>
+        <small className="metric-caption">
+          {responseCount === 0
+            ? "Nenhuma resposta no período"
+            : "No período selecionado"}
+        </small>
       </Card>
       <Card
         title="Evolução das avaliações"
@@ -268,12 +279,16 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
         className="satisfaction-card"
       >
         <div className="satisfaction-value">
-          <strong>{formatNumber(stats.satisfaction, 1)}</strong>
-          <span>/ 5,0</span>
+          <strong className={stats.satisfaction == null ? "is-empty" : ""}>
+            {stats.satisfaction == null
+              ? "Sem dados"
+              : formatNumber(stats.satisfaction, 1)}
+          </strong>
+          {stats.satisfaction != null && <span>/ 5,0</span>}
         </div>
         <p className="metric-note">
           {stats.positivePercent == null
-            ? "As notas de 1 a 5 compõem este indicador."
+            ? "Ainda não há avaliações no período selecionado."
             : `${formatNumber(stats.positivePercent)}% de promotores no NPS`}
         </p>
       </Card>
@@ -283,26 +298,34 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
           onClick={() => onNavigate("/ouvidoria")}
           disabled={!data.permissions.canViewManifestations}
         >
-          <strong>{stats.pendingCount}</strong>
+          <strong>{pendingCount}</strong>
           <span>Em aberto</span>
           <ArrowUpRight size={17} />
         </button>
+      </Card>
+      <Card title="Setores avaliados" className="mobile-sector-card">
+        <strong>{bySector.length}</strong>
+        <small>
+          {bySector.length === 0
+            ? "Nenhum no período"
+            : "Com respostas no período"}
+        </small>
       </Card>
       <Card
         title="Últimas avaliações"
         subtitle="Respostas recentes no período"
         className="recent-card"
       >
-        <ResponseTable responses={stats.recent.slice(0, 4)} />
+        <ResponseTable responses={recent.slice(0, 4)} />
       </Card>
       <Card
         title="Respostas por setor"
         subtitle="Distribuição no período"
         className="by-sector-card"
       >
-        {stats.bySector.length ? (
+        {bySector.length ? (
           <div className="sector-bars">
-            {stats.bySector.map((sector, index) => (
+            {bySector.map((sector, index) => (
               <div key={sector.id}>
                 <div>
                   <span>{sector.name}</span>
@@ -319,9 +342,10 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
           </div>
         ) : (
           <EmptyState
-            title="Nenhum setor cadastrado"
+            title="Nenhuma resposta por setor"
+            description="Os dados aparecerão aqui após as primeiras avaliações do período."
             action={
-              data.permissions.canManageSectors && (
+              data.permissions.canManageSectors && data.sectors.length === 0 && (
                 <button
                   className="text-button"
                   onClick={() => onNavigate("/setores")}
@@ -385,7 +409,7 @@ export function Surveys({ data, onRefresh, notify, onNavigate }: AdminProps) {
         action={
           data.permissions.canEditSurveys && (
             <button
-              className="button"
+              className="button mobile-icon-action"
               onClick={() => setCreate(true)}
               disabled={!data.sectors.length}
             >
@@ -431,6 +455,7 @@ export function Surveys({ data, onRefresh, notify, onNavigate }: AdminProps) {
       <Card
         title="Pesquisas cadastradas"
         subtitle="Selecione uma pesquisa para editar suas perguntas, ordem e publicação."
+        className="surveys-list-card"
       >
         {surveys.length ? (
           <div className="table-wrap">
@@ -920,7 +945,7 @@ export function Results(props: AdminProps) {
       .then(([d, r]) => {
         startTransition(() => {
           setStats(d);
-          setResponses(r.responses);
+          setResponses(Array.isArray(r.responses) ? r.responses : []);
         });
       })
       .catch((e) => {
@@ -935,7 +960,41 @@ export function Results(props: AdminProps) {
       </p>
     );
   if (!stats) return <Loading />;
-  const total = stats.ratingDistribution.reduce((sum, d) => sum + d.count, 0);
+  const ratingDistribution = Array.isArray(stats.ratingDistribution)
+    ? stats.ratingDistribution
+    : [];
+  const total = ratingDistribution.reduce((sum, d) => sum + d.count, 0);
+  const responseCount = stats.responseCount ?? 0;
+  const criticalCount = stats.criticalCount ?? 0;
+  const resultStats = [
+    {
+      label: "Respostas",
+      value: formatNumber(responseCount),
+      description: "No período selecionado",
+      tone: "responses",
+    },
+    {
+      label: "Satisfação média",
+      value:
+        stats.satisfaction == null
+          ? "Sem dados"
+          : `${formatNumber(stats.satisfaction, 1)} / 5`,
+      description: "Média das notas de 1 a 5",
+      tone: "satisfaction",
+    },
+    {
+      label: "NPS",
+      value: stats.nps == null ? "Sem dados" : formatNumber(stats.nps),
+      description: "Promotores menos detratores",
+      tone: "nps",
+    },
+    {
+      label: "Avaliações críticas",
+      value: formatNumber(criticalCount),
+      description: `NPS de 0 a ${props.data.settings?.lowScoreThreshold ?? 6}`,
+      tone: "critical",
+    },
+  ];
   return (
     <>
       <PageTitle
@@ -943,7 +1002,7 @@ export function Results(props: AdminProps) {
         description="Analise as avaliações por setor e período."
         action={
           <button
-            className="button"
+            className="button desktop-page-action"
             onClick={() => props.onNavigate("/relatorios")}
           >
             Exportar relatório
@@ -951,18 +1010,18 @@ export function Results(props: AdminProps) {
         }
       />
       <div className="stats-row">
-        {[
-          ["Respostas", formatNumber(stats.responseCount)],
-          ["Satisfação média", `${formatNumber(stats.satisfaction, 1)} / 5`],
-          ["NPS", formatNumber(stats.nps)],
-          ["Avaliações críticas", formatNumber(stats.criticalCount)],
-        ].map(([label, value]) => (
-          <Card title={label} key={label}>
+        {resultStats.map(({ label, value, description, tone }) => (
+          <Card
+            title={label}
+            className={`result-stat result-stat-${tone}`}
+            key={label}
+          >
             <strong
-              className={`stat-value ${label === "NPS" ? "red-text" : ""}`}
+              className={`stat-value ${value === "Sem dados" ? "is-empty" : ""}`}
             >
               {value}
             </strong>
+            <small className="stat-description">{description}</small>
           </Card>
         ))}
       </div>
@@ -978,7 +1037,7 @@ export function Results(props: AdminProps) {
           subtitle="Escala de satisfação de 1 a 5"
         >
           <div className="distribution-bars">
-            {[...stats.ratingDistribution]
+            {[...ratingDistribution]
               .sort((a, b) => b.score - a.score)
               .map((d) => (
                 <div key={d.score}>
