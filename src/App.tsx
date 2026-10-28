@@ -17,6 +17,7 @@ import {
   FileBarChart2,
   Grid2X2,
   Hospital,
+  House,
   KeyRound,
   LogOut,
   MessageCircle,
@@ -24,6 +25,7 @@ import {
   RotateCw,
   Settings,
   ShieldCheck,
+  UserRound,
   UsersRound,
 } from "lucide-react";
 import { api, ApiError } from "./api";
@@ -492,6 +494,25 @@ function AdminApp() {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+  const firstName = user.name.split(" ").filter(Boolean)[0] || user.name;
+  const currentHour = Number(
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).format(new Date()),
+  );
+  const greeting =
+    currentHour < 12 ? "Bom dia" : currentHour < 18 ? "Boa tarde" : "Boa noite";
+  const mobileLinks = [
+    { path: "/", name: "Início", icon: House },
+    { path: "/resultados", name: "Resultados", icon: ChartNoAxesColumn },
+    { path: "/pesquisas", name: "Pesquisas", icon: ClipboardList },
+    data.permissions.canViewManifestations
+      ? { path: "/ouvidoria", name: "Ouvidoria", icon: MessageCircle }
+      : { path: "/setores", name: "Setores", icon: Hospital },
+    { path: "/configuracoes", name: "Perfil", icon: UserRound },
+  ];
   return (
     <>
       <a href="#conteudo" className="skip-link">
@@ -696,10 +717,12 @@ function AdminApp() {
                   <PageTitle
                     title="Visão geral"
                     description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
+                    mobileTitle={`${greeting}, ${firstName}!`}
+                    mobileDescription="Resumo da experiência dos pacientes."
                     action={
                       <>
                         <button
-                          className="button secondary"
+                          className="button secondary dashboard-export-action"
                           onClick={() => navigate("/relatorios")}
                         >
                           <ArrowDownToLine size={15} />
@@ -707,7 +730,7 @@ function AdminApp() {
                         </button>
                         {data.permissions.canEditSurveys && (
                           <button
-                            className="button"
+                            className="button mobile-icon-action"
                             onClick={() => navigate("/pesquisas")}
                           >
                             <Plus size={15} />
@@ -751,6 +774,24 @@ function AdminApp() {
             </main>
           </ViewTransition>
         </div>
+        <nav className="mobile-navigation" aria-label="Navegação principal">
+          {mobileLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = activePath === link.path;
+            return (
+              <button
+                key={link.path}
+                className={isActive ? "active" : ""}
+                onClick={() => navigate(link.path)}
+                aria-label={link.name}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <Icon size={21} strokeWidth={1.8} />
+                <span>{link.name}</span>
+              </button>
+            );
+          })}
+        </nav>
         <footer className="app-footer">
           <span>FHDOD · Experiência do paciente</span>
           <span>
