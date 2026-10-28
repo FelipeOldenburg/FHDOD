@@ -680,36 +680,42 @@ function AdminApp() {
                       ))}
                     </select>
                   </label>
-                  <fieldset className="date-range">
-                    <legend>Período das respostas</legend>
-                    <input
-                      className="input"
-                      type="date"
-                      aria-label="Data inicial"
-                      value={filters.from}
-                      max={filters.to || undefined}
-                      onChange={(e) =>
-                        setFilters({ ...filters, from: e.target.value })
-                      }
-                    />
-                    <span>até</span>
-                    <input
-                      className="input"
-                      type="date"
-                      aria-label="Data final"
-                      value={filters.to}
-                      min={filters.from || undefined}
-                      onChange={(e) =>
-                        setFilters({ ...filters, to: e.target.value })
-                      }
-                    />
-                  </fieldset>
-                  <button
-                    className="text-button"
-                    onClick={() => setFilters(initialFilters())}
-                  >
-                    Este mês
-                  </button>
+                  <div className="filter-period">
+                    <div className="filter-period-heading">
+                      <span>Período das respostas</span>
+                      <button
+                        type="button"
+                        className="text-button"
+                        onClick={() => setFilters(initialFilters())}
+                      >
+                        Este mês
+                      </button>
+                    </div>
+                    <fieldset className="date-range">
+                      <legend className="sr-only">Período das respostas</legend>
+                      <input
+                        className="input"
+                        type="date"
+                        aria-label="Data inicial"
+                        value={filters.from}
+                        max={filters.to || undefined}
+                        onChange={(e) =>
+                          setFilters({ ...filters, from: e.target.value })
+                        }
+                      />
+                      <span>até</span>
+                      <input
+                        className="input"
+                        type="date"
+                        aria-label="Data final"
+                        value={filters.to}
+                        min={filters.from || undefined}
+                        onChange={(e) =>
+                          setFilters({ ...filters, to: e.target.value })
+                        }
+                      />
+                    </fieldset>
+                  </div>
                 </div>
               )}
               {route === "/" ? (
