@@ -51,20 +51,21 @@ const types: Record<QuestionType, string> = {
 };
 
 export function Evolution({ items }: { items: DashboardData["monthly"] }) {
-  const max = Math.max(1, ...items.map((item) => item.count));
+  const safeItems = Array.isArray(items) ? items : [];
+  const max = Math.max(1, ...safeItems.map((item) => item.count));
   return (
     <div
       className="evolution-chart"
       role="img"
-      aria-label={items
+      aria-label={safeItems
         .map((item) => `${item.label}: ${item.count} respostas`)
         .join(", ")}
     >
-      {items.map((item, index) => (
+      {safeItems.map((item, index) => (
         <div className="chart-column" key={item.month}>
           <div className="bar-track">
             <span
-              className={`chart-bar ${index === items.length - 1 ? "current" : ""}`}
+              className={`chart-bar ${index === safeItems.length - 1 ? "current" : ""}`}
               style={{
                 height: `${item.count ? Math.max(6, (item.count / max) * 100) : 0}%`,
               }}
@@ -76,7 +77,7 @@ export function Evolution({ items }: { items: DashboardData["monthly"] }) {
           <span>{item.label}</span>
         </div>
       ))}
-      {!items.some((item) => item.count) && (
+      {!safeItems.some((item) => item.count) && (
         <p className="chart-empty">As respostas aparecerão aqui.</p>
       )}
     </div>
