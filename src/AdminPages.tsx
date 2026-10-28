@@ -409,7 +409,7 @@ export function Surveys({ data, onRefresh, notify, onNavigate }: AdminProps) {
         action={
           data.permissions.canEditSurveys && (
             <button
-              className="button"
+              className="button mobile-icon-action"
               onClick={() => setCreate(true)}
               disabled={!data.sectors.length}
             >
@@ -455,6 +455,7 @@ export function Surveys({ data, onRefresh, notify, onNavigate }: AdminProps) {
       <Card
         title="Pesquisas cadastradas"
         subtitle="Selecione uma pesquisa para editar suas perguntas, ordem e publicação."
+        className="surveys-list-card"
       >
         {surveys.length ? (
           <div className="table-wrap">
