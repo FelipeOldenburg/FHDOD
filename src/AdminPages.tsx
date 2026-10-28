@@ -90,7 +90,8 @@ export function ResponseTable({
   responses: ResponseRow[];
   onSelect?: (response: ResponseRow) => void;
 }) {
-  return responses.length ? (
+  const safeResponses = Array.isArray(responses) ? responses : [];
+  return safeResponses.length ? (
     <div className="table-wrap">
       <table className="data-table">
         <thead>
@@ -107,7 +108,7 @@ export function ResponseTable({
           </tr>
         </thead>
         <tbody>
-          {responses.map((response) => (
+          {safeResponses.map((response) => (
             <tr key={response.id}>
               <td>{response.sectorName}</td>
               <td>{formatDate(response.submittedAt || response.createdAt)}</td>
