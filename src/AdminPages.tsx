@@ -945,7 +945,7 @@ export function Results(props: AdminProps) {
       .then(([d, r]) => {
         startTransition(() => {
           setStats(d);
-          setResponses(r.responses);
+          setResponses(Array.isArray(r.responses) ? r.responses : []);
         });
       })
       .catch((e) => {
@@ -960,7 +960,41 @@ export function Results(props: AdminProps) {
       </p>
     );
   if (!stats) return <Loading />;
-  const total = stats.ratingDistribution.reduce((sum, d) => sum + d.count, 0);
+  const ratingDistribution = Array.isArray(stats.ratingDistribution)
+    ? stats.ratingDistribution
+    : [];
+  const total = ratingDistribution.reduce((sum, d) => sum + d.count, 0);
+  const responseCount = stats.responseCount ?? 0;
+  const criticalCount = stats.criticalCount ?? 0;
+  const resultStats = [
+    {
+      label: "Respostas",
+      value: formatNumber(responseCount),
+      description: "No período selecionado",
+      tone: "responses",
+    },
+    {
+      label: "Satisfação média",
+      value:
+        stats.satisfaction == null
+          ? "Sem dados"
+          : `${formatNumber(stats.satisfaction, 1)} / 5`,
+      description: "Média das notas de 1 a 5",
+      tone: "satisfaction",
+    },
+    {
+      label: "NPS",
+      value: stats.nps == null ? "Sem dados" : formatNumber(stats.nps),
+      description: "Promotores menos detratores",
+      tone: "nps",
+    },
+    {
+      label: "Avaliações críticas",
+      value: formatNumber(criticalCount),
+      description: `NPS de 0 a ${props.data.settings?.lowScoreThreshold ?? 6}`,
+      tone: "critical",
+    },
+  ];
   return (
     <>
       <PageTitle
@@ -968,7 +1002,7 @@ export function Results(props: AdminProps) {
         description="Analise as avaliações por setor e período."
         action={
           <button
-            className="button"
+            className="button desktop-page-action"
             onClick={() => props.onNavigate("/relatorios")}
           >
             Exportar relatório
@@ -976,18 +1010,18 @@ export function Results(props: AdminProps) {
         }
       />
       <div className="stats-row">
-        {[
-          ["Respostas", formatNumber(stats.responseCount)],
-          ["Satisfação média", `${formatNumber(stats.satisfaction, 1)} / 5`],
-          ["NPS", formatNumber(stats.nps)],
-          ["Avaliações críticas", formatNumber(stats.criticalCount)],
-        ].map(([label, value]) => (
-          <Card title={label} key={label}>
+        {resultStats.map(({ label, value, description, tone }) => (
+          <Card
+            title={label}
+            className={`result-stat result-stat-${tone}`}
+            key={label}
+          >
             <strong
-              className={`stat-value ${label === "NPS" ? "red-text" : ""}`}
+              className={`stat-value ${value === "Sem dados" ? "is-empty" : ""}`}
             >
               {value}
             </strong>
+            <small className="stat-description">{description}</small>
           </Card>
         ))}
       </div>
@@ -1003,7 +1037,7 @@ export function Results(props: AdminProps) {
           subtitle="Escala de satisfação de 1 a 5"
         >
           <div className="distribution-bars">
-            {[...stats.ratingDistribution]
+            {[...ratingDistribution]
               .sort((a, b) => b.score - a.score)
               .map((d) => (
                 <div key={d.score}>
