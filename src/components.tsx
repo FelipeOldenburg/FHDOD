@@ -164,20 +164,38 @@ export function Card({
 export function PageTitle({
   title,
   description,
+  mobileTitle,
+  mobileDescription,
   action,
 }: {
   title: string;
   description: string;
+  mobileTitle?: string;
+  mobileDescription?: string;
   action?: ReactNode;
 }) {
   return (
-    <div className="page-title">
-      <div>
-        <h1>{title}</h1>
-        <p>{description}</p>
+    <header className={`page-title${action ? " has-action" : ""}`}>
+      <div className="page-title-copy">
+        <h1>
+          <span className={mobileTitle ? "desktop-page-title" : undefined}>
+            {title}
+          </span>
+          {mobileTitle && <span className="mobile-page-title">{mobileTitle}</span>}
+        </h1>
+        <p>
+          <span
+            className={mobileDescription ? "desktop-page-title" : undefined}
+          >
+            {description}
+          </span>
+          {mobileDescription && (
+            <span className="mobile-page-title">{mobileDescription}</span>
+          )}
+        </p>
       </div>
       {action && <div className="page-actions">{action}</div>}
-    </div>
+    </header>
   );
 }
 export function EmptyState({
