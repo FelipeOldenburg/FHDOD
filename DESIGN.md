@@ -2,11 +2,11 @@
 name: FHDOD
 description: Sistema visual implementado para o painel e a pesquisa de experiência do paciente.
 colors:
-  primary: "#bd203b"
-  primary-dark: "#9f1b32"
+  primary: "#9b001b"
+  primary-dark: "#790015"
   primary-soft: "#faebef"
-  patient-primary: "#bd203b"
-  patient-primary-hover: "#9f1b32"
+  patient-primary: "#9b001b"
+  patient-primary-hover: "#790015"
   paper: "#ffffff"
   surface: "#f5f5f6"
   exterior: "#e4e5e8"
@@ -65,7 +65,7 @@ components:
     backgroundColor: "{colors.primary-dark}"
   button-secondary:
     backgroundColor: "{colors.primary-soft}"
-    textColor: "#b52540"
+    textColor: "#9b001b"
     rounded: "{rounded.pill}"
     padding: "10px 19px"
   button-patient:
@@ -95,7 +95,7 @@ Este documento registra o visual já implementado a partir do Figma fornecido pe
 
 A marca oficial é um PNG local; Inter também é local. Os rostos de avaliação são SVGs geométricos autorados por aproximação da referência JPG enviada pelo usuário. A inspeção do Figma ocorreu no navegador, sem exportação automática de assets; as carinhas atuais seguem a referência JPG e não são assets originais do Figma.
 
-A marca padrão usa símbolo de 44px, sigla de 28px e nome institucional de 9px à direita, separado por uma linha vertical. Até 1250px, a sigla passa para 26px; até 650px, símbolo e sigla passam para 36px e 24px, e o cabeçalho administrativo oculta o nome institucional. A variante do paciente preserva seus tamanhos e breakpoints próprios, sem separador.
+A marca padrão usa símbolo, sigla e nome institucional à direita, separado por uma linha vertical. Até 650px, o conjunto é reduzido como uma unidade, mas o nome institucional continua visível para preservar reconhecimento e contexto. A variante do paciente preserva seus tamanhos e breakpoints próprios, sem separador.
 
 **Key Characteristics:**
 
@@ -109,7 +109,7 @@ Os valores do frontmatter são normativos e refletem `src/styles.css` e `src/pat
 
 ### Primary
 
-- **Vermelho FHDOD:** `--red` usa `#bd203b` nas ações administrativas e no destaque do NPS; `--red-dark` usa `#9f1b32` no hover.
+- **Vermelho FHDOD:** `--red` usa `#9B001B`, um rubi escuro e saturado, nas ações administrativas e no destaque do NPS; `--red-dark` usa `#790015` no hover.
 - **Rosa de seleção:** ações secundárias, avatares e itens selecionados.
 - **Vermelho do paciente:** botão principal e hover do formulário público compartilham os mesmos valores de `--red` e `--red-dark`.
 
@@ -134,6 +134,16 @@ A instalação carrega os pesos 400, 500, 600 e 700. Títulos administrativos us
 O painel ocupa 100% da largura e no mínimo toda a altura visível, sem largura máxima, margens externas ou centralização do contorno. O cabeçalho é horizontal e a coluna lateral de atalhos mede 52px. O corpo cresce para manter o rodapé na base quando há pouco conteúdo. O conteúdo usa grades com intervalos de 14–20px. Cartões básicos recebem `spacing.card`; em larguras menores o CSS reduz o preenchimento.
 
 Até 1000px, o dashboard passa a duas colunas, resultados e editor ficam em uma coluna. Até 650px, a navegação superior permite rolagem horizontal e os atalhos ficam na base. Tabelas mantêm rolagem horizontal. Gestão empilha suas colunas em 1100px e relatórios em 720px.
+
+### Regras mobile fundamentadas nas referências do projeto
+
+- O breakpoint é decidido pelo conteúdo, não por um aparelho específico. Nenhuma rota pode gerar rolagem horizontal em 320–430px.
+- Cabeçalhos de rota são um único padrão reutilizável: margem lateral de 16px, título de 24px, descrição de 14px e ação opcional de 46–48px dentro da área segura.
+- Repetição, alinhamento e proximidade são obrigatórios entre telas equivalentes. Título, descrição, filtros e primeiro cartão começam sempre no mesmo eixo.
+- No mobile, rótulos ficam acima dos campos e permanecem visíveis depois do preenchimento. Campos usam texto de 16px e altura mínima de 48px para legibilidade, toque e prevenção de zoom involuntário no iOS.
+- Ações essenciais não dependem de hover e têm alvo mínimo de 44px. Controles nativos de data e seleção são preferidos quando atendem ao fluxo.
+- A interface reduz carga cognitiva: uma ação primária por contexto, informação secundária em contraste neutro e cor vermelha reservada para ação, seleção ou atenção real.
+- O sistema deve ser verificado em tarefas reais e em diferentes larguras; aprovação visual em uma única captura não substitui o teste responsivo.
 
 A pesquisa usa cabeçalho e área de perguntas com largura máxima de 1320px. Em 640px, as avaliações ficam em três colunas e o NPS em seis; a numeração de 0 a 10 permanece completa. O botão público tem altura mínima de 72px no desktop e 62px no celular. Voltar e pular preservam áreas de interação próprias.
 
