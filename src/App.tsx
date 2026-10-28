@@ -33,6 +33,7 @@ import {
   Field,
   Loading,
   PageTitle,
+  PasswordField,
 } from "./components";
 import { Dashboard, QuestionEditor, Results, Surveys } from "./AdminPages";
 import {
@@ -78,6 +79,7 @@ function Authentication({
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
@@ -110,9 +112,7 @@ function Authentication({
             <img src="/assets/fhdod-logo.png" alt="" />
           </span>
           <h1>
-            Cuidar começa
-            <br />
-            por ouvir.
+            Cuidar começa <span className="auth-title-break">por ouvir.</span>
           </h1>
           <p>
             Acompanhe a experiência dos pacientes e transforme cada resposta em
@@ -160,47 +160,65 @@ function Authentication({
                 placeholder="seu.email@hospital.com.br"
               />
             </Field>
-            <Field
+            <PasswordField
               label={needsSetup ? "Senha temporária de instalação" : "Senha"}
-              hint={
-                needsSetup
-                  ? "De 12 a 128 caracteres. Você definirá sua senha pessoal na próxima etapa."
-                  : undefined
-              }
-            >
-              <input
-                className="input"
-                type="password"
-                name="password"
-                required
-                minLength={needsSetup ? 12 : 1}
-                maxLength={128}
-                autoComplete={needsSetup ? "new-password" : "current-password"}
-              />
-            </Field>
+              name="password"
+              required
+              minLength={needsSetup ? 12 : 1}
+              maxLength={128}
+              autoComplete={needsSetup ? "new-password" : "current-password"}
+            />
+            {!needsSetup && (
+              <div className="auth-recovery">
+                <button
+                  type="button"
+                  className="auth-forgot-button"
+                  aria-expanded={recoveryOpen}
+                  aria-controls="password-recovery-help"
+                  onClick={() => setRecoveryOpen((current) => !current)}
+                >
+                  Esqueceu a senha?
+                </button>
+                {recoveryOpen && (
+                  <div id="password-recovery-help" className="auth-recovery-help">
+                    <KeyRound size={18} aria-hidden="true" />
+                    <p>
+                      Peça ao Super Admin uma nova senha temporária. No próximo
+                      acesso, você criará uma senha pessoal.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             {error && (
               <p className="error-banner" role="alert">
                 {error}
               </p>
             )}
             <button className="button" disabled={busy}>
-              {busy
-                ? "Aguarde…"
-                : needsSetup
-                  ? "Configurar administrador"
-                  : "Entrar no painel"}
-              <ArrowRight size={17} />
+              <span className="auth-submit-content">
+                {busy
+                  ? "Aguarde…"
+                  : needsSetup
+                    ? "Configurar administrador"
+                    : "Entrar no painel"}
+                <ArrowRight size={17} />
+              </span>
             </button>
           </form>
-          {!needsSetup && (
-            <p className="auth-help">
-              Esqueceu a senha? Solicite uma senha temporária ao Super Admin.
-            </p>
-          )}
+          <div className="auth-mobile-trust">
+            <ShieldCheck size={17} />
+            <span>Acesso seguro e exclusivo à equipe do hospital</span>
+          </div>
         </Card>
       </main>
       <footer className="auth-footer">
-        Fundação Hospitalar Dr. Oswaldo Diesel · Experiência do paciente
+        <span className="auth-footer-full">
+          Fundação Hospitalar Dr. Oswaldo Diesel · Experiência do paciente
+        </span>
+        <span className="auth-footer-compact">
+          FHDOD · Experiência do paciente
+        </span>
       </footer>
     </div>
   );
