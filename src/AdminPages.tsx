@@ -233,7 +233,11 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
       </div>
     );
   if (!stats) return <Loading />;
-  const largest = Math.max(1, ...stats.bySector.map((s) => s.count));
+  const bySector = Array.isArray(stats.bySector) ? stats.bySector : [];
+  const recent = Array.isArray(stats.recent) ? stats.recent : [];
+  const responseCount = stats.responseCount ?? 0;
+  const pendingCount = stats.pendingCount ?? 0;
+  const largest = Math.max(1, ...bySector.map((s) => s.count));
   return (
     <div className="dashboard-grid">
       <Card
@@ -253,8 +257,13 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
       </Card>
       <Card title="Respostas recebidas" className="responses-card">
         <div className="metric-line">
-          <strong>{formatNumber(stats.responseCount)}</strong>
+          <strong>{formatNumber(responseCount)}</strong>
         </div>
+        <small className="metric-caption">
+          {responseCount === 0
+            ? "Nenhuma resposta no período"
+            : "No período selecionado"}
+        </small>
       </Card>
       <Card
         title="Evolução das avaliações"
@@ -270,12 +279,16 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
         className="satisfaction-card"
       >
         <div className="satisfaction-value">
-          <strong>{formatNumber(stats.satisfaction, 1)}</strong>
-          <span>/ 5,0</span>
+          <strong className={stats.satisfaction == null ? "is-empty" : ""}>
+            {stats.satisfaction == null
+              ? "Sem dados"
+              : formatNumber(stats.satisfaction, 1)}
+          </strong>
+          {stats.satisfaction != null && <span>/ 5,0</span>}
         </div>
         <p className="metric-note">
           {stats.positivePercent == null
-            ? "As notas de 1 a 5 compõem este indicador."
+            ? "Ainda não há avaliações no período selecionado."
             : `${formatNumber(stats.positivePercent)}% de promotores no NPS`}
         </p>
       </Card>
@@ -285,26 +298,34 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
           onClick={() => onNavigate("/ouvidoria")}
           disabled={!data.permissions.canViewManifestations}
         >
-          <strong>{stats.pendingCount}</strong>
+          <strong>{pendingCount}</strong>
           <span>Em aberto</span>
           <ArrowUpRight size={17} />
         </button>
+      </Card>
+      <Card title="Setores avaliados" className="mobile-sector-card">
+        <strong>{bySector.length}</strong>
+        <small>
+          {bySector.length === 0
+            ? "Nenhum no período"
+            : "Com respostas no período"}
+        </small>
       </Card>
       <Card
         title="Últimas avaliações"
         subtitle="Respostas recentes no período"
         className="recent-card"
       >
-        <ResponseTable responses={stats.recent.slice(0, 4)} />
+        <ResponseTable responses={recent.slice(0, 4)} />
       </Card>
       <Card
         title="Respostas por setor"
         subtitle="Distribuição no período"
         className="by-sector-card"
       >
-        {stats.bySector.length ? (
+        {bySector.length ? (
           <div className="sector-bars">
-            {stats.bySector.map((sector, index) => (
+            {bySector.map((sector, index) => (
               <div key={sector.id}>
                 <div>
                   <span>{sector.name}</span>
@@ -321,9 +342,10 @@ export function Dashboard({ data, filters, onNavigate }: AdminProps) {
           </div>
         ) : (
           <EmptyState
-            title="Nenhum setor cadastrado"
+            title="Nenhuma resposta por setor"
+            description="Os dados aparecerão aqui após as primeiras avaliações do período."
             action={
-              data.permissions.canManageSectors && (
+              data.permissions.canManageSectors && data.sectors.length === 0 && (
                 <button
                   className="text-button"
                   onClick={() => onNavigate("/setores")}
