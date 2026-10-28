@@ -11,7 +11,7 @@
 }
 .patient-demo-banner {
   background: #fcebef;
-  color: #992139;
+  color: var(--red-dark);
   padding: 7px 20px;
   text-align: center;
   font-size: 12px;
@@ -171,7 +171,7 @@
   padding: 16px 20px;
   border-radius: 10px;
   background: #fff0f1;
-  color: #a91c31;
+  color: var(--red-dark);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -241,7 +241,7 @@
 .patient-choice-options button:hover,
 .patient-nps-options button:hover {
   background: #fff4f5;
-  border-color: #dc5068;
+  border-color: #ad3a4f;
 }
 .patient-date-options button.selected,
 .patient-choice-options button.selected,
@@ -296,7 +296,7 @@
   font: inherit;
   font-size: 18px;
   cursor: pointer;
-  color: #c92340;
+  color: var(--red);
 }
 .patient-back svg,
 .patient-skip svg {
@@ -308,10 +308,10 @@
   font-size: 16px;
 }
 .patient-skip:hover {
-  color: #b51d36;
+  color: var(--red);
 }
 .patient-back:hover {
-  color: #97172c;
+  color: var(--red-dark);
 }
 .patient-back:disabled,
 .patient-skip:disabled {
@@ -561,7 +561,7 @@
   caret-color: var(--red);
 }
 .patient-app ::selection {
-  color: #8c1930;
+  color: var(--red-dark);
   background: #f9c9d2;
 }
 
