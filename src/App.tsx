@@ -265,38 +265,30 @@ function TemporaryPassword({
         subtitle="Sua senha é temporária. Altere-a para acessar o painel."
       >
         <form className="stack-form" onSubmit={submit}>
-          <Field label="Senha temporária">
-            <input
-              type="password"
-              className="input"
-              name="currentPassword"
-              autoComplete="current-password"
-              required
-              maxLength={128}
-            />
-          </Field>
-          <Field label="Nova senha" hint="Use de 12 a 128 caracteres.">
-            <input
-              type="password"
-              className="input"
-              name="newPassword"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              maxLength={128}
-            />
-          </Field>
-          <Field label="Confirme a nova senha">
-            <input
-              type="password"
-              className="input"
-              name="confirmation"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              maxLength={128}
-            />
-          </Field>
+          <PasswordField
+            label="Senha temporária"
+            name="currentPassword"
+            autoComplete="current-password"
+            required
+            maxLength={128}
+          />
+          <PasswordField
+            label="Nova senha"
+            hint="Use de 12 a 128 caracteres."
+            name="newPassword"
+            autoComplete="new-password"
+            required
+            minLength={12}
+            maxLength={128}
+          />
+          <PasswordField
+            label="Confirme a nova senha"
+            name="confirmation"
+            autoComplete="new-password"
+            required
+            minLength={12}
+            maxLength={128}
+          />
           {error && (
             <p className="error-banner" role="alert">
               {error}
