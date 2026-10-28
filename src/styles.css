@@ -531,6 +531,13 @@ textarea.input {
   background: var(--surface);
   padding: 0 0 10px;
 }
+.mobile-page-title {
+  display: none;
+}
+.mobile-navigation,
+.mobile-sector-card {
+  display: none;
+}
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -758,6 +765,27 @@ textarea.input {
   padding: 7px 12px;
   border-radius: 99px;
 }
+.filter-period {
+  min-width: 0;
+}
+.filter-period-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.filter-period-heading > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.filter-period-heading > .text-button {
+  min-height: 0;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
 .date-range {
   display: flex;
   align-items: center;
@@ -777,10 +805,6 @@ textarea.input {
 }
 .date-range .input {
   width: 145px;
-}
-.global-filters > .text-button {
-  margin-bottom: 1px;
-  white-space: nowrap;
 }
 .app-footer {
   display: flex;
@@ -829,7 +853,7 @@ textarea.input {
   left: 20px;
   z-index: 1000;
   background: white;
-  color: #bd2440;
+  color: var(--red);
   padding: 14px;
   border-radius: 10px;
 }
@@ -931,6 +955,16 @@ textarea.input {
   font-weight: 600;
   letter-spacing: -1px;
 }
+.metric-caption,
+.stat-description {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.metric-caption {
+  margin-top: 7px;
+}
 .evolution-card {
   grid-area: evolution;
   position: relative;
@@ -944,7 +978,7 @@ textarea.input {
   border-radius: 99px;
   background: var(--pink);
   padding: 7px 13px;
-  color: #bc324a;
+  color: var(--red);
   font-size: 10px;
 }
 .evolution-chart {
@@ -1131,7 +1165,7 @@ textarea.input {
 }
 .filter-card > .input {
   max-width: 220px;
-  background: none;
+  background-color: transparent;
 }
 .editor-layout {
   display: grid;
