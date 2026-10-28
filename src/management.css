@@ -70,7 +70,7 @@
   background: none;
   border: 0;
   padding: 8px 0;
-  color: #b71b34;
+  color: var(--red);
   font: inherit;
   font-size: 12px;
   cursor: pointer;
@@ -279,7 +279,7 @@
 .manifestation-history summary {
   cursor: pointer;
   padding: 10px 0;
-  color: #b71b34;
+  color: var(--red);
 }
 .manifestation-history ol {
   list-style: none;
@@ -390,7 +390,7 @@
 }
 .audit-details summary {
   cursor: pointer;
-  color: #b71b34;
+  color: var(--red);
   min-height: 28px;
   display: list-item;
 }
