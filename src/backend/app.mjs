@@ -11,7 +11,7 @@ import { mkdirSync, existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, resolve, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const roles = [
   "superadmin",
   "sector_admin",

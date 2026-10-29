@@ -7,7 +7,7 @@ const env = {
   ...(process.argv.includes("--demo") ? { FHDOD_DEMO: "1" } : {}),
 };
 const children = [
-  spawn(process.execPath, ["--watch", "server/index.mjs"], {
+  spawn(process.execPath, ["--watch", "src/backend/app.mjs"], {
     cwd: root,
     env,
     stdio: "inherit",

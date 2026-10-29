@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowLeft, ArrowRight, Check, LoaderCircle } from "lucide-react";
-import { api } from "./api";
-import { Brand, RatingFaces, usePageTransition } from "./components";
-import type { Question, Sector, Survey } from "./types";
-import "./patient.css";
+import { api } from "../controllers/api";
+import { Brand, RatingFaces, usePageTransition } from "../components/components";
+import type { Question, Sector, Survey } from "../models/types";
+import "../styles/patient.css";
 
 type Value = string | number;
 type Stage = "welcome" | "context" | "question" | "comment" | "thanks";

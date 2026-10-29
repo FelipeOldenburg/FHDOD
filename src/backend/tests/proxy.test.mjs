@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer, loadConfigFromFile } from "vite";
-import { createApplication } from "./index.mjs";
+import { createApplication } from "../app.mjs";
 
 test("permite login da mesma origem pelo proxy e bloqueia origens externas", async (t) => {
   const app = createApplication({ databasePath: ":memory:" });
@@ -23,7 +23,7 @@ test("permite login da mesma origem pelo proxy e bloqueia origens externas", asy
 
   const { config } = await loadConfigFromFile(
     { command: "serve", mode: "test" },
-    fileURLToPath(new URL("../vite.config.ts", import.meta.url)),
+    fileURLToPath(new URL("../../../vite.config.ts", import.meta.url)),
   );
   const configuredProxy = config.server.proxy["/api"];
   const vite = await createServer({

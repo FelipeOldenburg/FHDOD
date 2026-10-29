@@ -18,7 +18,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { api, filterQuery } from "./api";
+import { api, filterQuery } from "../controllers/api";
 import {
   Card,
   EmptyState,
@@ -27,7 +27,7 @@ import {
   PageTitle,
   Field,
   PasswordField,
-} from "./components";
+} from "../components/components";
 import type {
   Bootstrap,
   DashboardData,
@@ -37,8 +37,8 @@ import type {
   Sector,
   Settings,
   User,
-} from "./types";
-import "./management.css";
+} from "../models/types";
+import "../styles/management.css";
 
 export interface CommonProps {
   data: Bootstrap;
@@ -1282,7 +1282,7 @@ export function Reports({ data, filters, notify }: CommonProps) {
       );
       if (mode === "detailed" && data.permissions.canExportDetails) {
         const { responses } = await api<{
-          responses: import("./types").ResponseRow[];
+          responses: import("../models/types").ResponseRow[];
         }>(`/api/responses${params}`);
         const sheet = workbook.addWorksheet("Avaliações e respostas");
         sheet.addRow([

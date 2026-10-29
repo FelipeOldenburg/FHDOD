@@ -12,7 +12,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { api, filterQuery } from "./api";
+import { api, filterQuery } from "../controllers/api";
 import {
   Card,
   EmptyState,
@@ -24,7 +24,7 @@ import {
   StatusBadge,
   formatDate,
   formatNumber,
-} from "./components";
+} from "../components/components";
 import type {
   Bootstrap,
   DashboardData,
@@ -33,7 +33,7 @@ import type {
   QuestionType,
   ResponseRow,
   Survey,
-} from "./types";
+} from "../models/types";
 
 export interface AdminProps {
   data: Bootstrap;

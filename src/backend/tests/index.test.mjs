@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createApplication } from "./index.mjs";
+import { createApplication } from "../app.mjs";
 
 test("preserva respostas e versões, exige troca de senha e isola dados por setor/perfil", async (t) => {
   const app = createApplication({ databasePath: ":memory:" });

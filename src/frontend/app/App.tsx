@@ -28,7 +28,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { api, ApiError } from "./api";
+import { api, ApiError } from "../controllers/api";
 import {
   Brand,
   Card,
@@ -36,17 +36,17 @@ import {
   Loading,
   PageTitle,
   PasswordField,
-} from "./components";
-import { Dashboard, QuestionEditor, Results, Surveys } from "./AdminPages";
+} from "../components/components";
+import { Dashboard, QuestionEditor, Results, Surveys } from "../views/AdminPages";
 import {
   Ombudsman,
   Reports,
   Sectors,
   SettingsPanel,
   Users,
-} from "./Management";
-import PatientSurvey from "./PatientSurvey";
-import type { Bootstrap, Filters, User } from "./types";
+} from "../views/Management";
+import PatientSurvey from "../views/PatientSurvey";
+import type { Bootstrap, Filters, User } from "../models/types";
 
 const roleNames = {
   superadmin: "Super Administrador",
