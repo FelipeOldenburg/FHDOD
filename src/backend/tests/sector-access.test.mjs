@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createApplication } from "../app.mjs";
+import { createTestApplication, dbGet, dbRun, hasTestDatabase } from "./helpers.mjs";
 
-test("cria um login por setor e preserva vínculo, isolamento e revogação de acesso", async (t) => {
-  const app = createApplication({ databasePath: ":memory:" });
+test("cria um login por setor e preserva vínculo, isolamento e revogação de acesso", { skip: !hasTestDatabase }, async (t) => {
+  const app = await createTestApplication();
   await new Promise((resolve) => app.server.listen(0, "127.0.0.1", resolve));
   t.after(() => app.close());
   const base = `http://127.0.0.1:${app.server.address().port}/api`;
@@ -136,9 +136,7 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
   );
   assert.equal((await read("/auth/me", changed.cookie)).status, 200);
 
-  const count = app.db
-    .prepare("SELECT COUNT(*) AS total FROM sectors")
-    .get().total;
+  const count = (await dbGet(app.db, "SELECT COUNT(*)::integer AS total FROM sectors")).total;
   assert.equal(
     (
       await save(
@@ -157,7 +155,7 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
     409,
   );
   assert.equal(
-    app.db.prepare("SELECT COUNT(*) AS total FROM sectors").get().total,
+    (await dbGet(app.db, "SELECT COUNT(*)::integer AS total FROM sectors")).total,
     count,
   );
   assert.equal(
@@ -170,7 +168,7 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
     409,
   );
   assert.equal(
-    app.db.prepare("SELECT name FROM sectors WHERE id=?").get(sector.id).name,
+    (await dbGet(app.db, "SELECT name FROM sectors WHERE id=?", sector.id)).name,
     "Recepção",
   );
 
@@ -228,9 +226,7 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
   await save(`/users/${user.id}`, { active: true });
 
   // Dados legados exigem correção explícita; não são migrados nem apagados ao iniciar.
-  app.db
-    .prepare("INSERT INTO sectors VALUES(?,?,?,?,?,?)")
-    .run("legacy", "Legado", "legado", "", 1, new Date().toISOString());
+  await dbRun(app.db, "INSERT INTO sectors VALUES(?,?,?,?,?,?)", "legacy", "Legado", "legado", "", 1, new Date().toISOString());
   const configured = await save("/sectors/legacy", {
     admin: {
       email: "legado@example.test",
@@ -242,7 +238,7 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
     (await login(reset.body.user.email, "Senha-final-recepcao-nova")).status,
     200,
   );
-  app.db.prepare("INSERT INTO user_sectors VALUES(?,?)").run(user.id, "legacy");
+  await dbRun(app.db, "INSERT INTO user_sectors VALUES(?,?)", user.id, "legacy");
   assert.equal(
     (await login(reset.body.user.email, "Senha-final-recepcao-nova")).status,
     409,
@@ -255,9 +251,7 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
     ).status,
     409,
   );
-  const legacyAccount = app.db
-    .prepare("SELECT * FROM users WHERE id=?")
-    .get(user.id);
+  const legacyAccount = await dbGet(app.db, "SELECT * FROM users WHERE id=?", user.id);
   const metadata = await save(`/sectors/${sector.id}`, {
     name: "Recepção atualizada",
     description: "Descrição atualizada",
@@ -267,26 +261,22 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
   assert.equal(metadata.body.sector.description, "Descrição atualizada");
   assert.equal(metadata.body.user, undefined);
   assert.deepEqual(
-    app.db.prepare("SELECT * FROM users WHERE id=?").get(user.id),
+    await dbGet(app.db, "SELECT * FROM users WHERE id=?", user.id),
     legacyAccount,
   );
   assert.ok(
-    app.db
-      .prepare("SELECT COUNT(*) AS total FROM sessions WHERE user_id=?")
-      .get(user.id).total > 0,
+    (await dbGet(app.db, "SELECT COUNT(*)::integer AS total FROM sessions WHERE user_id=?", user.id)).total > 0,
   );
   assert.equal(
     (await save(`/sectors/${sector.id}`, { active: false })).status,
     200,
   );
   assert.equal(
-    app.db
-      .prepare("SELECT COUNT(*) AS total FROM sessions WHERE user_id=?")
-      .get(user.id).total,
+    (await dbGet(app.db, "SELECT COUNT(*)::integer AS total FROM sessions WHERE user_id=?", user.id)).total,
     0,
   );
   assert.deepEqual(
-    app.db.prepare("SELECT * FROM users WHERE id=?").get(user.id),
+    await dbGet(app.db, "SELECT * FROM users WHERE id=?", user.id),
     legacyAccount,
   );
   assert.equal(
@@ -302,14 +292,12 @@ test("cria um login por setor e preserva vínculo, isolamento e revogação de a
     200,
   );
 
-  app.db
-    .prepare(
-      "INSERT INTO users SELECT 'legacy-duplicate',name,'duplicado@example.test',password_hash,role,must_change_password,active,created_at FROM users WHERE id=?",
-    )
-    .run(user.id);
-  app.db
-    .prepare("INSERT INTO user_sectors VALUES(?,?)")
-    .run("legacy-duplicate", sector.id);
+  await dbRun(
+    app.db,
+    "INSERT INTO users SELECT 'legacy-duplicate',name,'duplicado@example.test',password_hash,role,must_change_password,active,created_at FROM users WHERE id=?",
+    user.id,
+  );
+  await dbRun(app.db, "INSERT INTO user_sectors VALUES(?,?)", "legacy-duplicate", sector.id);
   assert.equal(
     (await login(reset.body.user.email, "Senha-final-recepcao-nova")).status,
     409,

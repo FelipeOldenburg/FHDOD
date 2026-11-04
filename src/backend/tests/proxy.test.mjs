@@ -2,10 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer, loadConfigFromFile } from "vite";
-import { createApplication } from "../app.mjs";
+import { createTestApplication, hasTestDatabase } from "./helpers.mjs";
 
-test("permite login da mesma origem pelo proxy e bloqueia origens externas", async (t) => {
-  const app = createApplication({ databasePath: ":memory:" });
+test("permite login da mesma origem pelo proxy e bloqueia origens externas", { skip: !hasTestDatabase }, async (t) => {
+  const app = await createTestApplication();
   await new Promise((resolve) => app.server.listen(0, "127.0.0.1", resolve));
   t.after(() => app.close());
   const target = `http://127.0.0.1:${app.server.address().port}`;

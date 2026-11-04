@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createApplication } from "../app.mjs";
+import { createTestApplication, dbRun, hasTestDatabase } from "./helpers.mjs";
 
-test("preserva respostas e versões, exige troca de senha e isola dados por setor/perfil", async (t) => {
-  const app = createApplication({ databasePath: ":memory:" });
+test("preserva respostas e versões, exige troca de senha e isola dados por setor/perfil", { skip: !hasTestDatabase }, async (t) => {
+  const app = await createTestApplication();
   await new Promise((resolve) => app.server.listen(0, "127.0.0.1", resolve));
   t.after(() => app.close());
   const base = `http://127.0.0.1:${app.server.address().port}`;
@@ -315,16 +315,16 @@ test("preserva respostas e versões, exige troca de senha e isola dados por seto
     ["timezone-a", "2040-01-02T01:30:00.000Z"],
     ["timezone-b", "2040-01-02T04:30:00.000Z"],
   ]) {
-    app.db
-      .prepare(
-        "INSERT INTO responses(id,survey_id,sector_id,token_hash,status,questions_json,created_at) VALUES(?,?,?,?,'partial','[]',?)",
-      )
-      .run(id, survey.id, a.id, id, timestamp);
-    app.db
-      .prepare(
-        "UPDATE responses SET status='submitted',submitted_at=?,nps=10 WHERE id=?",
-      )
-      .run(timestamp, id);
+    await dbRun(
+      app.db,
+      "INSERT INTO responses(id,survey_id,sector_id,token_hash,status,questions_json,created_at) VALUES(?,?,?,?,'partial','[]',?)",
+      id, survey.id, a.id, id, timestamp,
+    );
+    await dbRun(
+      app.db,
+      "UPDATE responses SET status='submitted',submitted_at=?,nps=10 WHERE id=?",
+      timestamp, id,
+    );
   }
   assert.equal(
     (
@@ -506,11 +506,8 @@ test("preserva respostas e versões, exige troca de senha e isola dados por seto
     (await api("/auth/me", "GET", undefined, sectorCookie)).status,
     401,
   );
-  assert.throws(
-    () =>
-      app.db
-        .prepare("UPDATE responses SET comment=? WHERE id=?")
-        .run("Alterado", draft.body.id),
+  await assert.rejects(
+    dbRun(app.db, "UPDATE responses SET comment=? WHERE id=?", "Alterado", draft.body.id),
     /imutáveis/,
   );
 });

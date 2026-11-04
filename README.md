@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/technology-stack.svg" alt="React 19 · TypeScript 7 · Node.js 24 ou superior · SQLite · Vite 8" width="820">
+  <img src="docs/assets/technology-stack.svg" alt="React 19 · TypeScript 7 · Node.js 24 ou superior · PostgreSQL · Vite 8" width="820">
 </p>
 
 <a name="o-projeto"></a>
@@ -93,18 +93,35 @@ Controles maiores, rótulos legíveis e cinco expressões para avaliar o atendim
 
 ## 🚀 Comece por aqui
 
-**Requisitos:** Node.js **24 ou superior**, npm e Git.
+**Requisitos:** Node.js **24 ou superior**, npm, Git e uma instância PostgreSQL.
 
-```sh
+```powershell
 git clone https://github.com/FelipeOldenburg/FHDOD.git
 cd FHDOD
 npm install
+$env:DATABASE_URL="postgresql://usuario:senha@localhost:5432/fhdod"
 npm run dev
 ```
 
 Abra **[http://127.0.0.1:5173](http://127.0.0.1:5173)**.
 
-O Vite encaminha `/api` para a API em `127.0.0.1:3001`. O banco padrão fica em `data/fhdod.sqlite`.
+Crie antes o banco PostgreSQL `fhdod` na sua instância. A API aplica migrações versionadas ao iniciar, preservando instalações PostgreSQL existentes. O Vite encaminha `/api` para a API própria em `127.0.0.1:3001`; a conexão usa `DATABASE_URL`.
+
+Para manter os dados locais existentes, pare a aplicação SQLite e rode a migração para um PostgreSQL vazio:
+
+```sh
+node scripts/migrate-sqlite-to-postgres.mjs data/fhdod.sqlite
+```
+
+O comando usa `DATABASE_URL`, mantém o arquivo SQLite intacto e cancela se encontrar dados nas tabelas do PostgreSQL. Para migrar a demonstração, configure `FHDOD_DEMO_DATABASE_URL` e selecione explicitamente o modo demo:
+
+```powershell
+$env:FHDOD_DEMO="1"
+node scripts/migrate-sqlite-to-postgres.mjs data/demo.sqlite
+Remove-Item Env:FHDOD_DEMO
+```
+
+Nesse modo, o comando exige `FHDOD_DEMO_DATABASE_URL` e não usa `DATABASE_URL` como alternativa. A importação verifica o destino vazio e copia os dados em uma transação; se falhar, os dados importados e as mudanças nos triggers são revertidos.
 
 ### Primeiro acesso
 
@@ -118,15 +135,15 @@ O Vite encaminha `/api` para a API em `127.0.0.1:3001`. O banco padrão fica em 
 <details>
 <summary><strong>🧪 Explorar com dados fictícios</strong></summary>
 
-Encerre a execução anterior e use:
+Configure um banco PostgreSQL separado em `FHDOD_DEMO_DATABASE_URL`, depois encerre a execução anterior e use:
 
 ```sh
 npm run dev:demo
 ```
 
-Esse modo usa **`data/demo.sqlite`**, separado do banco padrão, e identifica a demonstração na interface. Também exige a criação do primeiro administrador.
+Esse modo usa o banco indicado por **`FHDOD_DEMO_DATABASE_URL`**, separado do banco padrão, e identifica a demonstração na interface. Também exige a criação do primeiro administrador.
 
-**Atenção ao banco escolhido:** `FHDOD_DB` substitui o caminho padrão inclusive no modo demo. Não aponte essa variável para dados reais ao usar a demonstração.
+Não aponte a variável de demonstração para o banco com dados reais.
 
 </details>
 
@@ -171,23 +188,40 @@ Os servidores escutam somente no endereço local.
 | Camada | Implementação |
 | --- | --- |
 | **Interface** | React 19, TypeScript 7 e Vite 8. |
-| **API** | Node.js, servidor HTTP e permissões aplicadas no servidor. |
-| **Persistência** | SQLite local com `node:sqlite`. |
+| **API** | Node.js, servidor HTTP, controllers por domínio e permissões aplicadas no servidor. |
+| **Persistência** | PostgreSQL com o driver `pg`. |
 | **Interface visual** | Inter local, ícones Lucide e marca institucional. |
 | **Exportação** | ExcelJS carregado sob demanda para gerar XLSX no navegador. |
 | **Verificações** | Testes integrados com o executor nativo do Node.js. |
 
 ```text
-FHDOD/
-├── docs/assets/      # Imagens e animações deste README
-├── public/assets/    # Marca usada na aplicação
-├── scripts/          # Inicialização do ambiente local
-├── server/           # API, banco e testes integrados
-├── src/              # Painel e questionário em React
-├── DESIGN.md         # Identidade visual e componentes
-├── PRODUCT.md        # Contexto e limites do produto
-└── README.md         # Apresentação e instruções de uso
+src/
+├── backend/
+│   ├── app.mjs          # composição da aplicação e ciclo do servidor
+│   ├── routes/          # métodos, URLs e controllers correspondentes
+│   ├── controllers/     # entrada e saída HTTP, cookies e códigos de resposta
+│   ├── services/        # regras por domínio e coordenação das transações
+│   ├── middleware/      # autenticação, permissões, JSON, origem e limites
+│   ├── models/          # conexão PostgreSQL, execução SQL e transações
+│   │   └── migrations/  # evolução versionada do schema e integridade
+│   └── tests/           # testes HTTP, banco, migração e concorrência
+├── frontend/
+│   ├── app/             # entrada e composição React
+│   ├── views/           # telas e páginas
+│   ├── components/      # componentes reutilizáveis
+│   ├── controllers/     # composição dos filtros usados nas consultas
+│   ├── models/          # tipos usados pela interface
+│   ├── services/        # cliente HTTP e erros da API
+│   └── styles/          # CSS
+└── shared/
+    └── contracts.ts     # perfis, tipos de pergunta e valores do contrato
 ```
+
+As rotas apenas mapeiam endpoints. Controllers traduzem requisições e respostas; não executam SQL. Services aplicam as regras e coordenam operações atômicas usando o model de acesso ao PostgreSQL. Não recebem objetos HTTP. O `app.mjs` conecta esses módulos e controla a inicialização e o encerramento. O frontend não importa módulos do backend; contratos comuns ficam em `shared/` e podem ser usados pelo Node.js 24 e pelo TypeScript da interface.
+
+As migrações são registradas em `schema_migrations` e executadas uma vez, sob trava transacional. Funções e triggers deixam de ser recriados em cada inicialização. Cadastros de contas, envios e histórico da ouvidoria também são protegidos contra gravações simultâneas.
+
+`GET /api/health` verifica o PostgreSQL e retorna `503` quando o banco está indisponível. A API fornece `X-Request-Id` e inclui esse identificador nos erros internos do servidor, sem expor detalhes do banco na resposta. Conexões aguardam até 5 segundos e consultas até 15 segundos por padrão; parâmetros explícitos na URL PostgreSQL podem substituir esses valores.
 
 <details>
 <summary><strong>⚙️ Variáveis de ambiente</strong></summary>
@@ -196,7 +230,9 @@ As variáveis são lidas do **ambiente do processo**; o servidor **não carrega 
 
 | Variável | Uso |
 | --- | --- |
-| `FHDOD_DB` | Caminho alternativo do SQLite; substitui o padrão, inclusive no demo. |
+| `DATABASE_URL` | URL de conexão da instância PostgreSQL principal. |
+| `FHDOD_DEMO_DATABASE_URL` | URL de conexão PostgreSQL exclusiva para a demonstração. |
+| `FHDOD_TEST_DATABASE_URL` | URL de um banco de teste isolado para os testes integrados. |
 | `FHDOD_DEMO=1` | Ativa a demonstração; `dev:demo` já configura essa variável. |
 | `PORT` | Porta da API, com padrão `3001`. O proxy do Vite está configurado para `3001`. |
 | `FHDOD_ORIGIN` | Origem adicional aceita na proteção contra requisições entre sites. |
@@ -209,11 +245,12 @@ O banco local, os arquivos de ambiente e as dependências instaladas ficam fora 
 <details>
 <summary><strong>✅ Comandos e cobertura dos testes</strong></summary>
 
-```sh
+```powershell
+$env:FHDOD_TEST_DATABASE_URL="postgresql://usuario:senha@localhost:5432/fhdod_test"
 npm test
 ```
 
-Os testes integrados cobrem os cinco perfis, isolamento de setores, troca e redefinição de senha, preservação de respostas e versões, indicadores, NPS, distribuição das avaliações, proteção contra requisições entre sites, datas em São Paulo e auditoria de exportações.
+Os testes integrados cobrem os cinco perfis, isolamento de setores, troca e redefinição de senha, preservação de respostas e versões, indicadores, NPS, distribuição das avaliações, proteção contra requisições entre sites, datas em São Paulo e auditoria de exportações. Configure `FHDOD_TEST_DATABASE_URL` para executá-los; cada teste cria e remove seu próprio schema. Sem essa variável, a validação falha explicitamente em vez de terminar com todos os testes pulados. A suíte também verifica a migração SQLite, rollback, destino demo, concorrência dos cadastros e envios e preservação do histórico da ouvidoria.
 
 | Comando | Finalidade |
 | --- | --- |
@@ -246,6 +283,11 @@ Esta é uma implementação para execução local. Os itens abaixo **ainda não 
 - [ ] HTTPS e hospedagem.
 - [ ] Envio automático de e-mails.
 - [ ] Relatórios em PDF.
+- [ ] Recuperação local segura do acesso do único Super Admin.
+- [ ] Paginação de listagens e exportação em lotes para históricos volumosos.
+- [ ] Limites por cliente atrás de proxy e armazenamento compartilhado antes de usar múltiplas instâncias.
+
+A consulta detalhada busca as respostas das perguntas em lote. O período selecionado ainda é carregado em memória. A política de retenção e o formato das escalas dependem de definição institucional; a infraestrutura de produção e essas funcionalidades não são ativadas automaticamente.
 
 <details>
 <summary><strong>🎨 Créditos visuais e imagens</strong></summary>

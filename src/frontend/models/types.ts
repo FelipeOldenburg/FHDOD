@@ -1,6 +1,5 @@
-export type Role =
-  "superadmin" | "sector_admin" | "management" | "ombudsman" | "viewer";
-export type QuestionType = "rating" | "nps" | "yes_no" | "choice" | "text";
+import type { Role, QuestionType } from "../../shared/contracts";
+export type { Role, QuestionType } from "../../shared/contracts";
 export interface User {
   id: string;
   name: string;

@@ -6,7 +6,7 @@
 web
 
 ## Stack
-Delegada pelo usuário em 22/10/2026: React com TypeScript, API Node e SQLite para desenvolvimento local.
+Atualizado em 29/10/2026: React com TypeScript, API própria em Node.js e PostgreSQL.
 
 ## Users
 Super Admin administra usuários e todos os setores. Cada setor tem um único login de Admin de Setor, com e-mail e senha, que configura perguntas e acompanha respostas somente daquele setor. Gestão e Visualizador consultam indicadores; Ouvidoria acompanha manifestações. Pacientes respondem sem login por URL própria do setor, em celular ou tablet.

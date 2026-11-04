@@ -12,7 +12,8 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { api, filterQuery } from "../controllers/api";
+import { api } from "../services/api";
+import { filterQuery } from "../controllers/api";
 import {
   Card,
   EmptyState,

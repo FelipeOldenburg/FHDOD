@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { ArrowLeft, ArrowRight, Check, LoaderCircle } from "lucide-react";
-import { api } from "../controllers/api";
+import { api } from "../services/api";
 import { Brand, RatingFaces, usePageTransition } from "../components/components";
 import type { Question, Sector, Survey } from "../models/types";
 import "../styles/patient.css";

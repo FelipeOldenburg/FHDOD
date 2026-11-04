@@ -28,7 +28,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { api, ApiError } from "../controllers/api";
+import { api, ApiError } from "../services/api";
 import {
   Brand,
   Card,

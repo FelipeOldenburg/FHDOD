@@ -18,7 +18,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { api, filterQuery } from "../controllers/api";
+import { api } from "../services/api";
+import { filterQuery } from "../controllers/api";
 import {
   Card,
   EmptyState,
