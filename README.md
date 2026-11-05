@@ -99,25 +99,28 @@ Controles maiores, rótulos legíveis e cinco expressões para avaliar o atendim
 git clone https://github.com/FelipeOldenburg/FHDOD.git
 cd FHDOD
 npm install
-$env:DATABASE_URL="postgresql://usuario:senha@localhost:5432/fhdod"
+Copy-Item .env.example .env
+# Preencha DATABASE_URL no .env com seu banco, usuário e senha.
 npm run dev
 ```
 
 Abra **[http://127.0.0.1:5173](http://127.0.0.1:5173)**.
 
-Crie antes o banco PostgreSQL `fhdod` na sua instância. A API aplica migrações versionadas ao iniciar, preservando instalações PostgreSQL existentes. O Vite encaminha `/api` para a API própria em `127.0.0.1:3001`; a conexão usa `DATABASE_URL`.
+Crie antes o banco PostgreSQL `fhdod` na sua instância. A API aplica migrações versionadas ao iniciar, preservando instalações PostgreSQL existentes. O Vite encaminha `/api` para a API própria em `127.0.0.1:3001`; a conexão usa `DATABASE_URL`, lida do `.env` na raiz ou do ambiente do processo. Se já existir um `.env`, edite-o sem sobrescrever suas configurações. Senhas com caracteres reservados na URL, como `@`, devem ser codificadas no formato de URL.
+
+Se `DATABASE_URL` não estiver preenchida, `npm run dev` encerra antes de iniciar os servidores. Isso evita a interface aberta com erros `502` no proxy. No modo demo, é exigida `FHDOD_DEMO_DATABASE_URL`, sem usar o banco principal como alternativa.
 
 Para manter os dados locais existentes, pare a aplicação SQLite e rode a migração para um PostgreSQL vazio:
 
 ```sh
-node scripts/migrate-sqlite-to-postgres.mjs data/fhdod.sqlite
+npm run db:migrate -- data/fhdod.sqlite
 ```
 
 O comando usa `DATABASE_URL`, mantém o arquivo SQLite intacto e cancela se encontrar dados nas tabelas do PostgreSQL. Para migrar a demonstração, configure `FHDOD_DEMO_DATABASE_URL` e selecione explicitamente o modo demo:
 
 ```powershell
 $env:FHDOD_DEMO="1"
-node scripts/migrate-sqlite-to-postgres.mjs data/demo.sqlite
+npm run db:migrate -- data/demo.sqlite
 Remove-Item Env:FHDOD_DEMO
 ```
 
@@ -226,7 +229,7 @@ As migrações são registradas em `schema_migrations` e executadas uma vez, sob
 <details>
 <summary><strong>⚙️ Variáveis de ambiente</strong></summary>
 
-As variáveis são lidas do **ambiente do processo**; o servidor **não carrega arquivos `.env` automaticamente**.
+Os comandos `npm run dev`, `npm run dev:demo`, `npm start`, `npm test` e `npm run db:migrate` carregam o **`.env` na raiz do projeto** usando o suporte nativo do Node.js. Variáveis já definidas no ambiente do processo têm prioridade. Após editar o `.env`, reinicie o comando. O arquivo é ignorado pelo Git; `.env.example` contém apenas um modelo sem credenciais reais.
 
 | Variável | Uso |
 | --- | --- |
@@ -259,6 +262,7 @@ Os testes integrados cobrem os cinco perfis, isolamento de setores, troca e rede
 | `npm run build` | Verificar os tipos e gerar o build da interface. |
 | `npm start` | Servir o build local pela API. |
 | `npm test` | Executar os testes integrados. |
+| `npm run db:migrate -- caminho.sqlite` | Migrar SQLite para o PostgreSQL configurado. |
 
 O override de `uuid` mantém a correção da dependência transitiva usada pelo ExcelJS sem reduzir sua versão.
 

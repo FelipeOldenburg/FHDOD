@@ -6,6 +6,14 @@ const env = {
   ...process.env,
   ...(process.argv.includes("--demo") ? { FHDOD_DEMO: "1" } : {}),
 };
+const databaseVariable =
+  env.FHDOD_DEMO === "1" ? "FHDOD_DEMO_DATABASE_URL" : "DATABASE_URL";
+if (!env[databaseVariable]?.trim()) {
+  console.error(
+    `Configure ${databaseVariable} no arquivo .env da raiz do projeto e execute novamente npm run dev${env.FHDOD_DEMO === "1" ? ":demo" : ""}.`,
+  );
+  process.exit(1);
+}
 const children = [
   spawn(process.execPath, ["--watch", "src/backend/app.mjs"], {
     cwd: root,

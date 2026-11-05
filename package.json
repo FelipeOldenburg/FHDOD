@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev.mjs",
-    "dev:demo": "node scripts/dev.mjs --demo",
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "dev:demo": "node --env-file-if-exists=.env scripts/dev.mjs --demo",
     "build": "tsc -b && vite build",
-    "start": "node src/backend/app.mjs",
-    "test": "node --test src/backend/tests/*.test.mjs"
+    "start": "node --env-file-if-exists=.env src/backend/app.mjs",
+    "test": "node --env-file-if-exists=.env --test src/backend/tests/*.test.mjs",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate-sqlite-to-postgres.mjs"
   },
   "engines": {
     "node": ">=24"
