@@ -128,8 +128,8 @@ Nesse modo, o comando exige `FHDOD_DEMO_DATABASE_URL` e não usa `DATABASE_URL` 
 
 ### Primeiro acesso
 
-1. Abra a aplicação localmente e informe nome, e-mail e senha temporária para criar o **Super Admin**.
-2. Use uma senha de **12 a 128 caracteres**. A troca é obrigatória antes de acessar o painel, inclusive para o Super Admin.
+1. Abra a aplicação localmente e informe nome, e-mail e a senha pessoal do **Super Admin**.
+2. Use uma senha de **12 a 128 caracteres**. Como ela é definida pelo próprio Super Admin, o painel é liberado imediatamente após a configuração.
 3. Cadastre os setores e seus administradores pela tela **Setores**.
 4. Configure as perguntas e compartilhe a URL ou o QR Code do questionário com os pacientes.
 

@@ -33,21 +33,12 @@ test("preserva respostas e versões, exige troca de senha e isola dados por seto
     password: "Senha-admin-temporaria-2026",
   });
   assert.equal(installation.status, 201);
-  assert.equal(installation.body.user.mustChangePassword, true);
+  assert.equal(installation.body.user.mustChangePassword, false);
   assert.equal(
     (await api("/bootstrap", "GET", undefined, installation.cookie)).status,
-    403,
+    200,
   );
-  const admin = await api(
-    "/auth/password",
-    "POST",
-    {
-      currentPassword: "Senha-admin-temporaria-2026",
-      newPassword: "Senha-admin-teste-2026",
-    },
-    installation.cookie,
-  );
-  assert.equal(admin.status, 200);
+  const admin = installation;
   assert.equal(
     (
       await api("/auth/setup", "POST", {

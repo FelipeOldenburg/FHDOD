@@ -93,7 +93,7 @@ export function createAuthService({ get, all, run, transaction }, { audit }) {
       if (!(await needsSetup()))
         fail(409, "O administrador inicial já foi configurado.");
       await run(
-        "INSERT INTO users(id,name,email,password_hash,role,must_change_password,created_at) VALUES(?,?,?,?,?,1,?)",
+        "INSERT INTO users(id,name,email,password_hash,role,must_change_password,created_at) VALUES(?,?,?,?,?,0,?)",
         id,
         name,
         email,

@@ -163,7 +163,12 @@ function Authentication({
               />
             </Field>
             <PasswordField
-              label={needsSetup ? "Senha temporária de instalação" : "Senha"}
+              label={needsSetup ? "Senha do Super Admin" : "Senha"}
+              hint={
+                needsSetup
+                  ? "Crie sua senha pessoal com 12 a 128 caracteres."
+                  : undefined
+              }
               name="password"
               required
               minLength={needsSetup ? 12 : 1}
