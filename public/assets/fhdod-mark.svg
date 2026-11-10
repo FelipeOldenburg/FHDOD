@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Símbolo FHDOD">
+  <path
+    fill="#e52d3a"
+    d="M96 24h38c17 0 30 13 30 30v42h38c17 0 30 13 30 30v42h-68v38c0 17-13 30-30 30H96v-68H58c-17 0-30-13-30-30V96h68V24Z"
+  />
+  <path
+    fill="none"
+    stroke="#0b1118"
+    stroke-linecap="round"
+    stroke-width="7"
+    d="M28 96h66c20 0 34 14 34 34v4c0 20 16 34 36 34h68"
+  />
+</svg>
