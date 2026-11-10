@@ -8,3 +8,4 @@ data/
 *.tsbuildinfo
 .impeccable/review/
 tmp/
+.vercel

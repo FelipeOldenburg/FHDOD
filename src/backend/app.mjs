@@ -82,15 +82,15 @@ export async function createApplication({
     ...createAuthPublicRoutes(controllers),
     ...createApiRoutes(controllers),
   ];
-  const server = createServer(
-    createApiController({
-      root,
-      routes,
-      authenticate: createAuthentication(auth),
-    }),
-  );
+  const handler = createApiController({
+    root,
+    routes,
+    authenticate: createAuthentication(auth),
+  });
+  const server = createServer(handler);
   return {
     server,
+    handler,
     db,
     close: async () => {
       if (server.listening)

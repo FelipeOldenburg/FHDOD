@@ -12,7 +12,7 @@
     "db:migrate": "node --env-file-if-exists=.env scripts/migrate-sqlite-to-postgres.mjs"
   },
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

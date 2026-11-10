@@ -8,6 +8,7 @@ export async function createDatabase({ connectionString, schemaName }) {
     throw new Error("Nome de schema PostgreSQL inválido.");
   const options = {
     connectionString,
+    max: Number(process.env.FHDOD_DATABASE_POOL_SIZE || 3),
     connectionTimeoutMillis: 5000,
     statement_timeout: 15000,
     idle_in_transaction_session_timeout: 15000,

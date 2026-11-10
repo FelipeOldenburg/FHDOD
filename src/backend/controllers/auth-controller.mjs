@@ -3,7 +3,9 @@ import { getSessionToken } from "../middleware/authentication.mjs";
 
 function setSessionCookie(req, res, token) {
   const secure =
-    process.env.FHDOD_COOKIE_SECURE === "1" || req.socket.encrypted;
+    process.env.FHDOD_COOKIE_SECURE === "1" ||
+    req.socket.encrypted ||
+    req.headers["x-forwarded-proto"] === "https";
   res.setHeader(
     "Set-Cookie",
     `fhdod_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${token ? 28800 : 0}${secure ? "; Secure" : ""}`,
