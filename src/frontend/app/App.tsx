@@ -214,7 +214,7 @@ function Authentication({
                   : needsSetup
                     ? "Configurar administrador"
                     : "Entrar no painel"}
-                <ArrowRight size={17} />
+                <ArrowRight size={18} strokeWidth={2.25} aria-hidden="true" />
               </span>
             </button>
           </form>

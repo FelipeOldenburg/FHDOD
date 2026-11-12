@@ -1539,6 +1539,17 @@ textarea.input {
   min-height: 44px;
   width: 100%;
 }
+.auth-submit-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1;
+}
+.auth-submit-content svg {
+  display: block;
+  flex: 0 0 auto;
+}
 .auth-recovery {
   margin-top: -8px;
 }
