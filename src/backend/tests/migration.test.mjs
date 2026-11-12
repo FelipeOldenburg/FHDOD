@@ -60,11 +60,14 @@ test("migra os dados SQLite completos e mantém a origem e a imutabilidade", { s
   assert.ok(Object.values(counts).every((count) => count === 1));
   const source = new DatabaseSync(filename, { readOnly: true });
   try {
-    for (const table of Object.keys(counts))
-      assert.deepEqual(
-        (await db.query(`SELECT * FROM ${table}`)).rows,
-        source.prepare(`SELECT * FROM ${table}`).all().map((row) => ({ ...row })),
+    for (const table of Object.keys(counts)) {
+      const expected = source.prepare(`SELECT * FROM ${table}`).all().map((row) => ({ ...row }));
+      const columns = expected[0] ? Object.keys(expected[0]) : [];
+      const actual = (await db.query(`SELECT * FROM ${table}`)).rows.map((row) =>
+        Object.fromEntries(columns.map((column) => [column, row[column]])),
       );
+      assert.deepEqual(actual, expected);
+    }
   } finally { source.close(); }
   assert.deepEqual(readFileSync(filename), original);
   await assert.rejects(db.query("UPDATE responses SET comment='Alterado' WHERE id='r'"), /imutáveis/);

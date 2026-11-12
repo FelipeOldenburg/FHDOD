@@ -9,6 +9,7 @@ import {
 import {
   ArrowDownToLine,
   ArrowUpRight,
+  CalendarClock,
   Check,
   Copy,
   KeyRound,
@@ -1293,6 +1294,7 @@ export function Reports({ data, filters, notify }: CommonProps) {
           "Pesquisa",
           "Situação",
           "Data do atendimento",
+          "Horário do atendimento",
           "Turno",
           "Início (UTC)",
           "Envio (UTC)",
@@ -1310,6 +1312,7 @@ export function Reports({ data, filters, notify }: CommonProps) {
             row.surveyTitle,
             row.status === "submitted" ? "Enviada" : "Parcial",
             row.attendedOn || "",
+            row.attendedTime || "",
             row.shift || "",
             row.createdAt,
             row.submittedAt || "",
@@ -1787,25 +1790,32 @@ export function SettingsPanel({ data, onRefresh, notify, onNavigate }: CommonPro
         description="Gerencie os parâmetros da plataforma e a segurança da sua conta."
       />
       {data.permissions.canManageSettings && (
-        <section className="tv-settings-callout">
-          <div>
-            <MonitorUp size={24} aria-hidden="true" />
+        <div className="settings-quick-actions">
+          <section className="tv-settings-callout">
             <div>
-              <h2>Dispositivos TV Wall</h2>
-              <p>
-                Cadastre várias telas, defina setores e revogue acessos sem
-                compartilhar sua senha.
-              </p>
+              <MonitorUp size={24} aria-hidden="true" />
+              <div>
+                <h2>Dispositivos TV Wall</h2>
+                <p>Configure telas, indicadores e o QR Code de participação.</p>
+              </div>
             </div>
-          </div>
-          <button
-            className="button secondary"
-            onClick={() => onNavigate("/tv-dispositivos")}
-          >
-            Gerenciar TVs
-            <ArrowUpRight size={15} />
-          </button>
-        </section>
+            <button className="button secondary" onClick={() => onNavigate("/tv-dispositivos")}>
+              Gerenciar TVs <ArrowUpRight size={15} />
+            </button>
+          </section>
+          <section className="tv-settings-callout schedule-settings-callout">
+            <div>
+              <CalendarClock size={24} aria-hidden="true" />
+              <div>
+                <h2>Escalas médicas</h2>
+                <p>Importe o Excel de plantões para cruzar atendimentos e equipes.</p>
+              </div>
+            </div>
+            <button className="button secondary" onClick={() => onNavigate("/escalas")}>
+              Importar escalas <ArrowUpRight size={15} />
+            </button>
+          </section>
+        </div>
       )}
       <div className="management-split settings-layout">
         {data.permissions.canManageSettings ? (

@@ -38,6 +38,7 @@ type Draft = {
   name: string;
   allSectors: boolean;
   sectorIds: string[];
+  qrSectorId: string;
   metrics: TVMetric[];
   period: TVDevice["period"];
   refreshSeconds: number;
@@ -67,6 +68,7 @@ const emptyDraft = (): Draft => ({
   name: "",
   allSectors: true,
   sectorIds: [],
+  qrSectorId: "",
   metrics: allMetrics.map((metric) => metric.id),
   period: "current_month",
   refreshSeconds: 30,
@@ -76,6 +78,7 @@ const toDraft = (device: TVDevice): Draft => ({
   name: device.name,
   allSectors: device.allSectors,
   sectorIds: device.sectorIds,
+  qrSectorId: device.qrSectorId || "",
   metrics: device.metrics,
   period: device.period,
   refreshSeconds: device.refreshSeconds,
@@ -129,7 +132,10 @@ export function TVDevices({ data, notify }: TVDevicesProps) {
   function openEditor(device: TVDevice | "new") {
     setError("");
     setEditing(device);
-    setDraft(device === "new" ? emptyDraft() : toDraft(device));
+    const next = device === "new" ? emptyDraft() : toDraft(device);
+    if (device === "new" && data.sectors.length)
+      next.qrSectorId = data.sectors.find((sector) => sector.active)?.id || "";
+    setDraft(next);
   }
 
   async function save(event: FormEvent) {
@@ -308,6 +314,11 @@ export function TVDevices({ data, notify }: TVDevicesProps) {
                     </span>
                     <span>Atualiza a cada {device.refreshSeconds}s</span>
                     <span>{device.metrics.length} indicadores</span>
+                    <span>
+                      {device.qrSectorName
+                        ? `QR: ${device.qrSectorName}`
+                        : "QR Code desativado"}
+                    </span>
                   </div>
                   <div className="tv-device-actions">
                     <button
@@ -452,6 +463,10 @@ export function TVDevices({ data, notify }: TVDevicesProps) {
                               sectorIds: event.target.checked
                                 ? [...current.sectorIds, sector.id]
                                 : current.sectorIds.filter((id) => id !== sector.id),
+                              qrSectorId:
+                                !event.target.checked && current.qrSectorId === sector.id
+                                  ? ""
+                                  : current.qrSectorId,
                             }))
                           }
                         />
@@ -467,6 +482,35 @@ export function TVDevices({ data, notify }: TVDevicesProps) {
                 </>
               )}
             </fieldset>
+
+            <Field
+              label="Pesquisa do QR Code"
+              hint="A TV mostrará um QR Code para a pesquisa ativa deste setor."
+            >
+              <select
+                className="input"
+                value={draft.qrSectorId}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    qrSectorId: event.target.value,
+                  }))
+                }
+              >
+                <option value="">Não exibir QR Code</option>
+                {data.sectors
+                  .filter(
+                    (sector) =>
+                      sector.active &&
+                      (draft.allSectors || draft.sectorIds.includes(sector.id)),
+                  )
+                  .map((sector) => (
+                    <option key={sector.id} value={sector.id}>
+                      {sector.name}
+                    </option>
+                  ))}
+              </select>
+            </Field>
 
             <fieldset className="tv-device-options">
               <legend>Indicadores exibidos</legend>

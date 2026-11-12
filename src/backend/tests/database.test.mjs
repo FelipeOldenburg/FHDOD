@@ -102,7 +102,13 @@ test("atualiza schema legado sem perder dados e não recria triggers em novos bo
   assert.equal((await db.query("SELECT status FROM responses WHERE id='r'")).rows[0].status, "submitted");
   assert.deepEqual(
     (await db.query("SELECT version FROM schema_migrations ORDER BY version")).rows,
-    [{ version: 1 }, { version: 2 }, { version: 3 }],
+    [
+      { version: 1 },
+      { version: 2 },
+      { version: 3 },
+      { version: 4 },
+      { version: 5 },
+    ],
   );
   const triggers = (await db.query("SELECT oid FROM pg_trigger WHERE tgrelid IN ('responses'::regclass,'answers'::regclass) ORDER BY oid")).rows;
   await Promise.all([migrateDatabase(db), migrateDatabase(db)]);

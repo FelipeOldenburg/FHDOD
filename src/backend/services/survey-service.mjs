@@ -231,19 +231,25 @@ export function createSurveyService(
     if (attendedOn && attendedOn > hospitalDay(timestamp))
       fail(400, "A data do atendimento não pode estar no futuro.");
     const shift = text(body.shift, "Turno", 80, true);
+    const attendedTime = text(body.attendedTime, "Horário do atendimento", 5, true);
+    if (attendedTime && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(attendedTime))
+      fail(400, "Horário do atendimento: informe um horário válido.");
+    if (attendedTime && !attendedOn)
+      fail(400, "Informe a data do atendimento junto com o horário.");
     const id = randomUUID();
     const token = randomBytes(32).toString("hex");
     const questions = parse(survey.questions_json, []).filter(
       (question) => question.active,
     );
     await run(
-      "INSERT INTO responses(id,survey_id,sector_id,token_hash,questions_json,attended_on,shift,created_at) VALUES(?,?,?,?,?,?,?,?)",
+      "INSERT INTO responses(id,survey_id,sector_id,token_hash,questions_json,attended_on,attended_time,shift,created_at) VALUES(?,?,?,?,?,?,?,?,?)",
       id,
       survey.id,
       sector.id,
       hashToken(token),
       JSON.stringify(questions),
       attendedOn,
+      attendedTime,
       shift,
       timestamp,
     );

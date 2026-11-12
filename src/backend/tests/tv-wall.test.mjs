@@ -48,6 +48,12 @@ test("vincula várias TVs, isola configurações e revoga apenas um dispositivo"
     "INSERT INTO sectors VALUES('internacao','Internação','internacao','',1,?)",
     timestamp,
   );
+  await dbRun(
+    db,
+    "INSERT INTO surveys VALUES('survey-recepcao','recepcao','Pesquisa Recepção','',1,'[]',?,?)",
+    timestamp,
+    timestamp,
+  );
 
   const first = await api("/tv-devices", {
     method: "POST",
@@ -56,6 +62,7 @@ test("vincula várias TVs, isola configurações e revoga apenas um dispositivo"
       name: "TV Recepção",
       allSectors: false,
       sectorIds: ["recepcao"],
+      qrSectorId: "recepcao",
       metrics: ["satisfaction", "responses", "nps", "trend"],
       period: "last_7_days",
       refreshSeconds: 30,
@@ -103,6 +110,11 @@ test("vincula várias TVs, isola configurações e revoga apenas um dispositivo"
     displayFirst.body.dashboard.bySector.map((sector) => sector.id),
     ["recepcao"],
   );
+  assert.deepEqual(displayFirst.body.surveyTarget, {
+    id: "recepcao",
+    name: "Recepção",
+    slug: "recepcao",
+  });
 
   const revoked = await api(`/tv-devices/${first.body.device.id}`, {
     method: "DELETE",

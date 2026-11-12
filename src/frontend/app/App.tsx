@@ -10,6 +10,7 @@ import {
   ArrowDownToLine,
   ArrowRight,
   Bell,
+  CalendarClock,
   ChartNoAxesColumn,
   Check,
   ChevronDown,
@@ -50,6 +51,7 @@ import PatientSurvey from "../views/PatientSurvey";
 import { TVDevices } from "../views/TVDevices";
 import { TVPairing } from "../views/TVPairing";
 import { TVWall } from "../views/TVWall";
+import { Schedules } from "../views/Schedules";
 import type { Bootstrap, Filters, User } from "../models/types";
 
 const roleNames = {
@@ -579,6 +581,12 @@ function AdminApp() {
                     Minha conta e senha
                   </button>
                   {data.permissions.canManageSettings && (
+                    <button onClick={() => navigate("/escalas")}>
+                      <CalendarClock size={16} />
+                      Escalas médicas
+                    </button>
+                  )}
+                  {data.permissions.canManageSettings && (
                     <button onClick={() => navigate("/tv-dispositivos")}>
                       <MonitorUp size={16} />
                       Dispositivos TV Wall
@@ -717,27 +725,32 @@ function AdminApp() {
                     </div>
                     <fieldset className="date-range">
                       <legend className="sr-only">Período das respostas</legend>
-                      <input
-                        className="input"
-                        type="date"
-                        aria-label="Data inicial"
-                        value={filters.from}
-                        max={filters.to || undefined}
-                        onChange={(e) =>
-                          setFilters({ ...filters, from: e.target.value })
-                        }
-                      />
-                      <span>até</span>
-                      <input
-                        className="input"
-                        type="date"
-                        aria-label="Data final"
-                        value={filters.to}
-                        min={filters.from || undefined}
-                        onChange={(e) =>
-                          setFilters({ ...filters, to: e.target.value })
-                        }
-                      />
+                      <label>
+                        <span>De</span>
+                        <input
+                          className="input"
+                          type="date"
+                          aria-label="Data inicial"
+                          value={filters.from}
+                          max={filters.to || undefined}
+                          onChange={(e) =>
+                            setFilters({ ...filters, from: e.target.value })
+                          }
+                        />
+                      </label>
+                      <label>
+                        <span>Até</span>
+                        <input
+                          className="input"
+                          type="date"
+                          aria-label="Data final"
+                          value={filters.to}
+                          min={filters.from || undefined}
+                          onChange={(e) =>
+                            setFilters({ ...filters, to: e.target.value })
+                          }
+                        />
+                      </label>
                     </fieldset>
                   </div>
                 </div>
@@ -800,6 +813,9 @@ function AdminApp() {
                 <Reports {...props} />
               ) : route === "/configuracoes" ? (
                 <SettingsPanel {...props} />
+              ) : route === "/escalas" &&
+                data.permissions.canManageSettings ? (
+                <Schedules data={data} notify={notify} />
               ) : route === "/tv-dispositivos" &&
                 data.permissions.canManageSettings ? (
                 <TVDevices data={data} notify={notify} />

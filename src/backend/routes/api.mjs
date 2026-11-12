@@ -1,4 +1,4 @@
-export function createApiRoutes({ auth, admin, survey, reports, management, tvWall }) {
+export function createApiRoutes({ auth, admin, survey, reports, management, tvWall, schedules }) {
   return [
     ["GET", /^\/api\/auth\/me$/, auth.me, true],
     ["POST", /^\/api\/auth\/password$/, auth.password, true],
@@ -28,6 +28,13 @@ export function createApiRoutes({ auth, admin, survey, reports, management, tvWa
     ]),
     ["DELETE", /^\/api\/surveys\/([^/]+)$/, survey.deactivate],
     ["GET", /^\/api\/responses$/, reports.responses],
+    ...(schedules
+      ? [[
+          "GET",
+          /^\/api\/responses\/([^/]+)\/scheduled-professionals$/,
+          schedules.professionals,
+        ]]
+      : []),
     ["GET", /^\/api\/dashboard$/, reports.dashboard],
     ["POST", /^\/api\/exports$/, reports.export],
     ["GET", /^\/api\/manifestations(?:\/([^/]+))?$/, management.manifestations],
@@ -42,6 +49,16 @@ export function createApiRoutes({ auth, admin, survey, reports, management, tvWa
       management.settings,
     ]),
     ["GET", /^\/api\/audit$/, management.audit],
+    ...(schedules
+      ? [
+          ...["GET", "POST"].map((method) => [
+            method,
+            /^\/api\/schedules$/,
+            schedules.collection,
+          ]),
+          ["DELETE", /^\/api\/schedules\/([^/]+)$/, schedules.remove],
+        ]
+      : []),
     ...["GET", "POST"].map((method) => [
       method,
       /^\/api\/tv-devices$/,

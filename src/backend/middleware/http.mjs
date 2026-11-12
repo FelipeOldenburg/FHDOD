@@ -13,14 +13,14 @@ export function csrf(req) {
     fail(403, "Origem da solicitação não autorizada.");
 }
 
-export async function readBody(req) {
+export async function readBody(req, maxBytes = 65536) {
   if (!(req.headers["content-type"] || "").startsWith("application/json"))
     fail(415, "Envie os dados como JSON.");
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 65536)
+    if (size > maxBytes)
       fail(413, "O conteúdo enviado excede o limite permitido.");
     chunks.push(chunk);
   }

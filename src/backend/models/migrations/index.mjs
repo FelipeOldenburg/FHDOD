@@ -4,6 +4,8 @@ const migrations = [
   "001-initial.sql",
   "002-response-integrity.sql",
   "003-tv-wall-devices.sql",
+  "004-tv-qr-code.sql",
+  "005-medical-schedules.sql",
 ];
 
 export async function migrateDatabase(db) {

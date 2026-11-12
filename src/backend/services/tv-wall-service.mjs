@@ -87,6 +87,20 @@ export function createTvWallService(
       if (available.length !== sectorIds.length)
         fail(400, "Um dos setores selecionados não está disponível.");
     }
+    const qrSectorId =
+      (Object.prototype.hasOwnProperty.call(body, "qrSectorId")
+        ? body.qrSectorId
+        : current.qr_sector_id) || null;
+    if (qrSectorId) {
+      const qrSector = await get(
+        "SELECT id FROM sectors WHERE id=? AND active=1",
+        qrSectorId,
+      );
+      if (!qrSector)
+        fail(400, "O setor escolhido para o QR Code não está disponível.");
+      if (!allSectors && !sectorIds.includes(qrSectorId))
+        fail(400, "O setor do QR Code precisa estar entre os setores exibidos.");
+    }
     const sourceMetrics = body.metrics ?? parse(current.metrics_json, tvMetrics);
     if (!Array.isArray(sourceMetrics))
       fail(400, "Selecione indicadores válidos para esta TV.");
@@ -105,6 +119,7 @@ export function createTvWallService(
       name,
       allSectors,
       sectorIds: allSectors ? [] : sectorIds,
+      qrSectorId,
       metrics,
       period,
       refreshSeconds,
@@ -149,6 +164,8 @@ export function createTvWallService(
       sectorNames: row.all_sectors
         ? ["Todos os setores"]
         : sectorIds.map((id) => sectors.get(id)).filter(Boolean),
+      qrSectorId: row.qr_sector_id || null,
+      qrSectorName: row.qr_sector_id ? sectors.get(row.qr_sector_id) || null : null,
       metrics: parse(row.metrics_json, tvMetrics),
       period: row.period,
       refreshSeconds: Number(row.refresh_seconds),
@@ -185,13 +202,14 @@ export function createTvWallService(
     const now = new Date().toISOString();
     const expiresAt = new Date(Date.now() + pairingLifetimeMs).toISOString();
     await run(
-      "INSERT INTO tv_devices(id,name,pairing_code_hash,pairing_expires_at,all_sectors,sector_ids_json,metrics_json,period,refresh_seconds,created_by,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO tv_devices(id,name,pairing_code_hash,pairing_expires_at,all_sectors,sector_ids_json,qr_sector_id,metrics_json,period,refresh_seconds,created_by,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
       id,
       config.name,
       pairingHash(code),
       expiresAt,
       config.allSectors ? 1 : 0,
       JSON.stringify(config.sectorIds),
+      config.qrSectorId,
       JSON.stringify(config.metrics),
       config.period,
       config.refreshSeconds,
@@ -203,6 +221,7 @@ export function createTvWallService(
       name: config.name,
       allSectors: config.allSectors,
       sectorIds: config.sectorIds,
+      qrSectorId: config.qrSectorId,
     });
     return {
       device: view(await find(id), await sectorMap()),
@@ -217,10 +236,11 @@ export function createTvWallService(
     const config = await validateConfig(body, current);
     const now = new Date().toISOString();
     await run(
-      "UPDATE tv_devices SET name=?,all_sectors=?,sector_ids_json=?,metrics_json=?,period=?,refresh_seconds=?,updated_at=? WHERE id=?",
+      "UPDATE tv_devices SET name=?,all_sectors=?,sector_ids_json=?,qr_sector_id=?,metrics_json=?,period=?,refresh_seconds=?,updated_at=? WHERE id=?",
       config.name,
       config.allSectors ? 1 : 0,
       JSON.stringify(config.sectorIds),
+      config.qrSectorId,
       JSON.stringify(config.metrics),
       config.period,
       config.refreshSeconds,
@@ -231,6 +251,7 @@ export function createTvWallService(
       name: config.name,
       allSectors: config.allSectors,
       sectorIds: config.sectorIds,
+      qrSectorId: config.qrSectorId,
       metrics: config.metrics,
       period: config.period,
       refreshSeconds: config.refreshSeconds,
@@ -341,6 +362,14 @@ export function createTvWallService(
       { id: `tv:${row.id}`, role: "viewer", sectorIds: activeIds },
       url,
     );
+    const fallbackQrSectorId = activeIds.length === 1 ? activeIds[0] : null;
+    const qrSectorId = row.qr_sector_id || fallbackQrSectorId;
+    const surveyTarget = qrSectorId
+      ? await get(
+          "SELECT s.id,s.name,s.slug FROM sectors s JOIN surveys v ON v.sector_id=s.id AND v.active=1 WHERE s.id=? AND s.active=1",
+          qrSectorId,
+        )
+      : null;
     const updated = { ...row, last_seen_at: now };
     return {
       device: {
@@ -348,6 +377,13 @@ export function createTvWallService(
         periodLabel: filters.label,
       },
       dashboard,
+      surveyTarget: surveyTarget
+        ? {
+            id: surveyTarget.id,
+            name: surveyTarget.name,
+            slug: surveyTarget.slug,
+          }
+        : null,
       settings: { hospitalName: (await settings()).hospitalName },
     };
   }

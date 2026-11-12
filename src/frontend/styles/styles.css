@@ -740,25 +740,25 @@ textarea.input {
   }
 }
 .global-filters {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(360px, 420px);
+  align-items: end;
+  column-gap: 28px;
+  row-gap: 16px;
   order: -1;
   background: #fff;
   border-radius: 16px;
-  padding: 11px 17px;
-  min-height: 68px;
+  padding: 16px 20px;
+  min-height: 82px;
 }
 .global-filters > label {
-  min-width: 180px;
-  max-width: 280px;
-  flex: 1;
+  min-width: 0;
 }
 .global-filters > label > span {
   display: block;
   color: var(--muted);
   font-size: 10px;
-  margin-bottom: 4px;
+  margin-bottom: 7px;
 }
 .global-filters .input {
   font-size: 11px;
@@ -767,30 +767,34 @@ textarea.input {
   border-radius: 99px;
 }
 .filter-period {
+  width: 100%;
   min-width: 0;
 }
 .filter-period-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 4px;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 7px;
 }
 .filter-period-heading > span {
   color: var(--muted);
   font-size: 10px;
 }
 .filter-period-heading > .text-button {
-  min-height: 0;
-  padding: 0;
+  min-height: 24px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--pink);
   font-size: 10px;
   font-weight: 650;
   white-space: nowrap;
 }
 .date-range {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
   border: 0;
   padding: 0;
 }
@@ -800,12 +804,19 @@ textarea.input {
   padding: 0;
   margin-bottom: 4px;
 }
-.date-range > span {
-  font-size: 11px;
+.date-range > label {
+  min-width: 0;
+}
+.date-range > label > span {
+  display: block;
+  margin-bottom: 5px;
   color: var(--muted);
+  font-size: 9px;
 }
 .date-range .input {
-  width: 145px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 .app-footer {
   display: flex;
@@ -1444,6 +1455,66 @@ textarea.input {
   color: #38343b;
   font-weight: 500;
 }
+
+.schedule-match {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #faf9fa;
+}
+
+.schedule-match > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.schedule-match h3 {
+  font-size: 16px;
+}
+
+.schedule-match p,
+.schedule-match > small,
+.schedule-match li span,
+.schedule-match li small {
+  color: var(--muted);
+}
+
+.schedule-match > div:first-child p,
+.schedule-match > small {
+  font-size: 12px;
+}
+
+.schedule-match ul {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.schedule-match li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.schedule-match li span {
+  grid-column: 1;
+  font-size: 12px;
+}
+
+.schedule-match li small {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 12px;
+}
 .patient-original {
   background: #f7f7f8;
   border-radius: 12px;
@@ -1764,15 +1835,14 @@ textarea.input {
     font-size: 11px;
   }
   .global-filters {
-    flex-wrap: wrap;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(320px, 1.2fr);
     gap: 12px;
   }
   .global-filters > label {
-    max-width: none;
-    min-width: 140px;
+    min-width: 0;
   }
   .date-range .input {
-    width: 128px;
+    width: 100%;
   }
   .editor-layout {
     grid-template-columns: 1fr;
@@ -1923,9 +1993,10 @@ textarea.input {
     min-height: 36px;
   }
   .global-filters {
+    grid-template-columns: minmax(0, 1fr);
     padding: 12px;
     border-radius: 14px;
-    gap: 12px;
+    gap: 20px;
     align-items: flex-end;
   }
   .global-filters > label {
@@ -1933,18 +2004,15 @@ textarea.input {
     max-width: none;
   }
   .date-range {
-    flex: 1;
     min-width: 0;
-    gap: 7px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
   .date-range .input {
     width: 100%;
-    min-width: 105px;
+    min-width: 0;
     font-size: 10px;
     padding: 7px 9px;
-  }
-  .date-range > span {
-    font-size: 10px;
   }
   .global-filters > .text-button {
     font-size: 10px;
@@ -2362,6 +2430,12 @@ textarea.input {
   }
 }
 
+@media (max-width: 380px) {
+  .app-shell .date-range {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 360px) {
   .auth-brand {
     padding-right: max(20px, env(safe-area-inset-right));
@@ -2662,7 +2736,7 @@ textarea.input {
     order: -1;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
+    gap: 20px;
     min-height: 0;
     padding: 16px;
     border: 1px solid #e7e5e8;
@@ -2674,7 +2748,8 @@ textarea.input {
     min-width: 0;
   }
   .app-shell .global-filters > label > span,
-  .app-shell .filter-period-heading > span {
+  .app-shell .filter-period-heading > span,
+  .app-shell .date-range > label > span {
     margin-bottom: 7px;
     color: #555862;
     font-size: 13px;
@@ -2701,24 +2776,26 @@ textarea.input {
     box-shadow: inset 0 0 0 1px var(--red);
   }
   .app-shell .filter-period-heading {
-    margin-bottom: 7px;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .app-shell .filter-period-heading > span {
+    margin-bottom: 0;
   }
   .app-shell .filter-period-heading > .text-button {
-    min-height: 32px;
-    padding: 4px 1px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--pink);
     color: var(--red);
     font-size: 13px;
     line-height: 1;
   }
   .app-shell .date-range {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: center;
-    gap: 8px;
-  }
-  .app-shell .date-range > span {
-    color: #6b6d76;
-    font-size: 13px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: 12px;
   }
   .app-shell .date-range input[type="date"] {
     padding-right: 8px;
@@ -2728,10 +2805,6 @@ textarea.input {
     input[type="date"]::-webkit-calendar-picker-indicator {
     margin: 0;
     padding: 5px;
-  }
-  .app-shell .date-range > span {
-    color: #73757d;
-    font-size: 10px;
   }
   .app-shell .dashboard-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
 import {
   ArrowLeft,
   Maximize2,
   Minimize2,
+  QrCode,
   RefreshCw,
   Wifi,
 } from "lucide-react";
@@ -66,6 +68,10 @@ export function TVWall({
 }) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [device, setDevice] = useState<TVDevice | null>(null);
+  const [publicSurveyTarget, setPublicSurveyTarget] = useState<
+    TVDisplayPayload["surveyTarget"]
+  >(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [hospitalName, setHospitalName] = useState(
     bootstrap?.settings?.hospitalName || "FHDOD",
   );
@@ -103,6 +109,7 @@ export function TVWall({
         const payload = result as TVDisplayPayload;
         setData(payload.dashboard);
         setDevice(payload.device);
+        setPublicSurveyTarget(payload.surveyTarget);
         setHospitalName(payload.settings.hospitalName);
       } else {
         if (!filters) throw new Error("Período do TV Wall não informado.");
@@ -150,6 +157,49 @@ export function TVWall({
         .slice(0, 5),
     [data?.bySector],
   );
+  const previewSurveyTarget = useMemo(() => {
+    if (!bootstrap) return null;
+    const available = bootstrap.sectors.filter((sector) =>
+      bootstrap.surveys.some(
+        (survey) => survey.active && survey.sectorId === sector.id,
+      ),
+    );
+    const selected = filters?.sectorId
+      ? available.find((sector) => sector.id === filters.sectorId)
+      : available[0];
+    return selected
+      ? { id: selected.id, name: selected.name, slug: selected.slug }
+      : null;
+  }, [bootstrap, filters?.sectorId]);
+  const surveyTarget = publicDisplay ? publicSurveyTarget : previewSurveyTarget;
+
+  useEffect(() => {
+    let active = true;
+    if (!surveyTarget) {
+      setQrDataUrl("");
+      return () => {
+        active = false;
+      };
+    }
+    void QRCode.toDataURL(
+      `${window.location.origin}/avaliar/${surveyTarget.slug}`,
+      {
+        width: 360,
+        margin: 2,
+        errorCorrectionLevel: "M",
+        color: { dark: "#232429", light: "#ffffff" },
+      },
+    )
+      .then((value) => {
+        if (active) setQrDataUrl(value);
+      })
+      .catch(() => {
+        if (active) setQrDataUrl("");
+      });
+    return () => {
+      active = false;
+    };
+  }, [surveyTarget]);
   const monthly = data?.monthly ?? [];
   const monthlyMax = Math.max(1, ...monthly.map((item) => item.count));
   const metrics = device?.metrics ?? ALL_METRICS;
@@ -209,6 +259,32 @@ export function TVWall({
           </span>
           <span>{periodLabel} · a cada {refreshLabel}</span>
         </div>
+        <aside
+          className={`tv-wall-qr${qrDataUrl && surveyTarget ? "" : " is-empty"}`}
+          aria-label="Pesquisa de satisfação"
+        >
+          {qrDataUrl && surveyTarget ? (
+            <img
+              src={qrDataUrl}
+              alt={`QR Code da pesquisa de ${surveyTarget.name}`}
+            />
+          ) : (
+            <span className="tv-wall-qr-placeholder" aria-hidden="true">
+              <QrCode size={34} />
+            </span>
+          )}
+          <div>
+            <span>{surveyTarget ? "Conte como foi" : "Participação"}</span>
+            <strong>
+              {surveyTarget ? "Escaneie para avaliar" : "QR Code indisponível"}
+            </strong>
+            <small>
+              {surveyTarget
+                ? surveyTarget.name
+                : "Publique uma pesquisa e configure o setor desta TV"}
+            </small>
+          </div>
+        </aside>
         <div className="tv-wall-time" aria-label={`${date}, ${clock}`}>
           <strong>{clock}</strong>
           <span>{date}</span>

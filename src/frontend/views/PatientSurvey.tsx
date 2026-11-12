@@ -41,6 +41,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   const [draftText, setDraftText] = useState("");
   const [dateMode, setDateMode] = useState("");
   const [otherDate, setOtherDate] = useState("");
+  const [attendedTime, setAttendedTime] = useState("");
   const [shift, setShift] = useState("");
   const [comment, setComment] = useState("");
   const [manifestationType, setManifestationType] = useState("outro");
@@ -116,6 +117,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
     setQuestionIndex(0);
     setDateMode("");
     setOtherDate("");
+    setAttendedTime("");
     setShift("");
     setComment("");
     setManifestationType("outro");
@@ -159,6 +161,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
         body: {
           sectorId: context.sector.id,
           attendedOn,
+          attendedTime: attendedOn && attendedTime ? attendedTime : undefined,
           shift: shift || undefined,
         },
       });
@@ -394,6 +397,16 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                   />
                 </label>
               )}
+              <label className="patient-field">
+                Horário aproximado
+                <input
+                  type="time"
+                  value={attendedTime}
+                  disabled={!dateMode || dateMode === "unknown"}
+                  onChange={(event) => setAttendedTime(event.target.value)}
+                />
+                <small>Opcional. Ajuda a localizar a equipe que estava de plantão.</small>
+              </label>
               <label className="patient-field">
                 Em qual turno?
                 <select

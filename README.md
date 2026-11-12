@@ -281,16 +281,23 @@ O override de `uuid` mantém a correção da dependência transitiva usada pelo 
 ### Vincular uma televisão
 
 1. O Super Admin abre **Configurações → Dispositivos TV Wall** ou `/tv-dispositivos`.
-2. Cadastra a tela, escolhe período, intervalo de atualização, setores e indicadores.
+2. Cadastra a tela, escolhe período, intervalo de atualização, setores, indicadores e o setor da pesquisa exibida no QR Code.
 3. Na televisão, abre `/tv` e informa o código de 6 dígitos. O código é válido por 10 minutos e funciona uma única vez.
 
 A televisão não recebe credenciais administrativas. A vinculação usa um token próprio em cookie protegido; revogar ou gerar um novo código para um dispositivo não desconecta as outras telas. O painel administrativo também mostra o estado da conexão e o último acesso de cada TV.
+
+### Importar escalas médicas
+
+1. O Super Admin abre **Configurações → Escalas médicas** ou `/escalas`.
+2. Baixa o modelo e preenche as colunas `Data`, `Início`, `Fim`, `Setor` e `Profissional`. `CRM` e `Especialidade` são opcionais.
+3. Importa o arquivo `.xlsx`. A importação é validada por inteiro e registrada na auditoria.
+
+Quando a avaliação possui data e horário do atendimento, o detalhe cruza a informação com os plantões do setor. Se o paciente não informar a hora e responder no mesmo dia do atendimento, o sistema usa a hora de início da avaliação como estimativa e identifica isso na tela. O resultado indica presença em escala; não atribui responsabilidade individual automaticamente.
 
 ### Em desenvolvimento
 
 Os itens abaixo **ainda não estão implementados**:
 
-- [ ] Importação de escalas e associação a profissionais.
 - [ ] Backup e retenção conforme a política institucional.
 - [ ] Envio automático de e-mails.
 - [ ] Relatórios em PDF.
@@ -298,7 +305,7 @@ Os itens abaixo **ainda não estão implementados**:
 - [ ] Paginação de listagens e exportação em lotes para históricos volumosos.
 - [ ] Limites por cliente atrás de proxy e armazenamento compartilhado antes de usar múltiplas instâncias.
 
-A consulta detalhada busca as respostas das perguntas em lote. O período selecionado ainda é carregado em memória. A política de retenção e o formato das escalas dependem de definição institucional; a infraestrutura de produção e essas funcionalidades não são ativadas automaticamente.
+A consulta detalhada busca as respostas das perguntas em lote. O período selecionado ainda é carregado em memória. A política de retenção depende de definição institucional; a infraestrutura de produção e essas funcionalidades não são ativadas automaticamente.
 
 <details>
 <summary><strong>🎨 Créditos visuais e imagens</strong></summary>

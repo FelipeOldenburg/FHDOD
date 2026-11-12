@@ -33,6 +33,7 @@ import type {
   Question,
   QuestionType,
   ResponseRow,
+  ScheduledProfessional,
   Survey,
 } from "../models/types";
 
@@ -154,6 +155,28 @@ export function ResponseDetail({
   response: ResponseRow;
   onClose: () => void;
 }) {
+  const [scheduleMatch, setScheduleMatch] = useState<{
+    professionals: ScheduledProfessional[];
+    precision: "time" | "response_time" | "date" | "none";
+  } | null>(null);
+  const [scheduleError, setScheduleError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    api<{
+      professionals: ScheduledProfessional[];
+      precision: "time" | "response_time" | "date" | "none";
+    }>(`/api/responses/${encodeURIComponent(response.id)}/scheduled-professionals`, {
+      signal: controller.signal,
+    })
+      .then(setScheduleMatch)
+      .catch((cause) => {
+        if (!controller.signal.aborted)
+          setScheduleError(cause instanceof Error ? cause.message : "Não foi possível consultar a escala.");
+      });
+    return () => controller.abort();
+  }, [response.id]);
+
   return (
     <Modal title="Detalhes da avaliação" onClose={onClose}>
       <p className="muted">
@@ -165,12 +188,52 @@ export function ResponseDetail({
           NPS <strong>{response.nps ?? "—"} / 10</strong>
         </span>
         <span>
-          Atendimento <strong>{formatDate(response.attendedOn)}</strong>
+          Atendimento <strong>{formatDate(response.attendedOn)}{response.attendedTime ? ` às ${response.attendedTime}` : ""}</strong>
         </span>
         <span>
           Turno <strong>{response.shift || "Não informado"}</strong>
         </span>
       </div>
+      <section className="schedule-match" aria-labelledby="schedule-match-title">
+        <div>
+          <h3 id="schedule-match-title">Profissionais em escala</h3>
+          <p>
+            {scheduleMatch?.precision === "time"
+              ? "Correspondência por setor, data e horário informados."
+              : scheduleMatch?.precision === "response_time"
+                ? "Horário estimado pelo momento em que a avaliação foi iniciada."
+              : scheduleMatch?.precision === "date"
+                ? "O paciente não informou o horário; mostrando os plantões do dia."
+                : "Informe data e horário na avaliação para uma correspondência mais precisa."}
+          </p>
+        </div>
+        {scheduleError ? (
+          <p className="muted text-small">{scheduleError}</p>
+        ) : scheduleMatch ? (
+          scheduleMatch.professionals.length ? (
+            <ul>
+              {scheduleMatch.professionals.map((professional) => (
+                <li key={professional.id}>
+                  <strong>{professional.name}</strong>
+                  <span>
+                    {[professional.registration, professional.specialty]
+                      .filter(Boolean)
+                      .join(" · ") || "Registro não informado"}
+                  </span>
+                  <small>
+                    {professional.startsAt.slice(11, 16)} a {professional.endsAt.slice(11, 16)}
+                  </small>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted text-small">Nenhuma escala importada corresponde a este atendimento.</p>
+          )
+        ) : (
+          <p className="muted text-small">Consultando escala…</p>
+        )}
+        <small>Este cruzamento indica presença em plantão e não atribui responsabilidade individual.</small>
+      </section>
       <div className="answer-list">
         {response.answers?.map((answer) => (
           <div key={answer.questionId}>

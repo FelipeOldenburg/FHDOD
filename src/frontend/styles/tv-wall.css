@@ -14,13 +14,74 @@
 
 .tv-wall-header {
   display: grid;
-  grid-template-columns: minmax(340px, 1.2fr) minmax(280px, 0.9fr) auto auto;
+  grid-template-columns: minmax(340px, 1.2fr) minmax(220px, 0.65fr) minmax(270px, 0.78fr) auto auto;
   align-items: center;
   gap: clamp(18px, 2.2vw, 42px);
   min-height: 104px;
   padding: 18px clamp(24px, 3vw, 56px);
   background: #fff;
   border-bottom: 1px solid #dedfe3;
+}
+
+.tv-wall-qr {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 8px 12px 8px 8px;
+  border: 1px solid #e0e1e4;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.tv-wall-qr img {
+  display: block;
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+}
+
+.tv-wall-qr-placeholder {
+  display: grid;
+  width: 88px;
+  height: 88px;
+  place-items: center;
+  border-radius: 8px;
+  background: #f2f2f4;
+  color: #8a8b92;
+}
+
+.tv-wall-qr.is-empty {
+  background: #fafafa;
+}
+
+.tv-wall-qr div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tv-wall-qr span {
+  color: var(--wall-red);
+  font-size: clamp(9px, 0.65vw, 12px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tv-wall-qr strong {
+  font-size: clamp(13px, 0.9vw, 17px);
+  line-height: 1.2;
+}
+
+.tv-wall-qr small {
+  overflow: hidden;
+  color: var(--wall-muted);
+  font-size: clamp(9px, 0.65vw, 12px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tv-wall-brand {
@@ -509,7 +570,7 @@
   }
 
   .tv-wall-header {
-    grid-template-columns: minmax(320px, 1fr) auto auto;
+    grid-template-columns: minmax(320px, 1fr) minmax(250px, 0.8fr) auto auto;
   }
 
   .tv-wall-status {
@@ -544,6 +605,22 @@
     gap: 12px;
     min-height: 72px;
     padding: 12px 16px;
+  }
+
+  .tv-wall-qr {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .tv-wall-qr img {
+    width: 70px;
+    height: 70px;
+  }
+
+  .tv-wall-qr-placeholder {
+    width: 70px;
+    height: 70px;
   }
 
   .tv-wall-brand .brand-symbol {

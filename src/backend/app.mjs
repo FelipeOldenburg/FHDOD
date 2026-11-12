@@ -15,6 +15,7 @@ import { createReportService } from "./services/report-service.mjs";
 import { createSettingsService } from "./services/settings-service.mjs";
 import { createSurveyService } from "./services/survey-service.mjs";
 import { createTvWallService } from "./services/tv-wall-service.mjs";
+import { createScheduleService } from "./services/schedule-service.mjs";
 import { createApiController } from "./controllers/api-controller.mjs";
 import { createAuthController } from "./controllers/auth-controller.mjs";
 import { createAdminController } from "./controllers/admin-controller.mjs";
@@ -23,6 +24,7 @@ import { createPublicController } from "./controllers/public-controller.mjs";
 import { createReportController } from "./controllers/report-controller.mjs";
 import { createSurveyController } from "./controllers/survey-controller.mjs";
 import { createTvWallController } from "./controllers/tv-wall-controller.mjs";
+import { createScheduleController } from "./controllers/schedule-controller.mjs";
 import { createAuthPublicRoutes } from "./routes/auth-public.mjs";
 import { createApiRoutes } from "./routes/api.mjs";
 
@@ -62,6 +64,7 @@ export async function createApplication({
     reports,
     settings: settings.get,
   });
+  const schedules = createScheduleService(store, { audit: audit.record });
   const bootstrap = createBootstrapService(store, {
     auth,
     survey,
@@ -85,6 +88,7 @@ export async function createApplication({
       readBody,
     }),
     tvWall: createTvWallController({ tvWall, readBody, rateLimit }),
+    schedules: createScheduleController({ schedules, readBody }),
   };
   const routes = [
     ...createAuthPublicRoutes(controllers),

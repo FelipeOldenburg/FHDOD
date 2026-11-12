@@ -29,6 +29,17 @@
   border-radius: 20px;
   background: #fff;
 }
+.settings-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.settings-quick-actions .tv-settings-callout {
+  min-width: 0;
+}
+.settings-quick-actions .tv-settings-callout p {
+  max-width: 42ch;
+}
 .tv-settings-callout > div,
 .tv-device-guide > div {
   display: flex;
@@ -796,5 +807,99 @@
   }
   .management-form .button {
     min-height: 44px;
+  }
+}
+.schedule-upload-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 14px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.schedule-upload-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--pink);
+  color: var(--red);
+}
+
+.schedule-upload-card h2 {
+  font-size: 18px;
+}
+
+.schedule-upload-card p,
+.schedule-privacy-note,
+.schedule-import-list span {
+  color: var(--muted);
+}
+
+.schedule-upload-card p {
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.schedule-privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  font-size: 13px;
+}
+
+.schedule-import-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.schedule-import-list article:first-child {
+  border-top: 0;
+}
+
+.schedule-import-list article > svg {
+  color: var(--red);
+}
+
+.schedule-import-list article > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.schedule-import-list strong,
+.schedule-import-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-import-list span {
+  font-size: 12px;
+}
+
+@media (max-width: 650px) {
+  .settings-quick-actions {
+    grid-template-columns: 1fr;
+  }
+  .schedule-upload-card {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 18px;
+  }
+
+  .schedule-upload-card .button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }

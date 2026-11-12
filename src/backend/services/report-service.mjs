@@ -61,6 +61,7 @@ export function createReportService({ all }, { settings, audit }) {
       surveyTitle: row.survey_title,
       status: row.status,
       attendedOn: row.attended_on,
+      attendedTime: row.attended_time || null,
       shift: row.shift,
       createdAt: row.created_at,
       submittedAt: row.submitted_at,
