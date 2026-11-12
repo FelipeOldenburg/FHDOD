@@ -113,6 +113,41 @@ export interface DashboardData {
     satisfactionDelta: number | null;
   };
 }
+export type TVMetric =
+  | "satisfaction"
+  | "responses"
+  | "nps"
+  | "pending"
+  | "trend"
+  | "sectors";
+export type TVDeviceStatus =
+  | "online"
+  | "offline"
+  | "awaiting_pairing"
+  | "pairing_expired"
+  | "revoked";
+export interface TVDevice {
+  id: string;
+  name: string;
+  allSectors: boolean;
+  sectorIds: string[];
+  sectorNames: string[];
+  metrics: TVMetric[];
+  period: "current_month" | "last_7_days" | "last_30_days";
+  periodLabel?: string;
+  refreshSeconds: number;
+  status: TVDeviceStatus;
+  pairedAt: string | null;
+  lastSeenAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+  pairingExpiresAt: string | null;
+}
+export interface TVDisplayPayload {
+  device: TVDevice;
+  dashboard: DashboardData;
+  settings: { hospitalName: string };
+}
 export interface Manifestation {
   id: string;
   responseId: string;

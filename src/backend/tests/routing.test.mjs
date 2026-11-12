@@ -16,6 +16,7 @@ test("métodos de criação e atualização exigem o caminho correto antes de ch
     survey: { list: handle, save: handle, deactivate: handle },
     reports: { responses: handle, dashboard: handle, export: handle },
     management: { bootstrap: handle, manifestations: handle, settings: handle, audit: handle },
+    tvWall: { devices: handle, pairingCode: handle },
   });
   const server = createServer(createApiController({
     root: process.cwd(),

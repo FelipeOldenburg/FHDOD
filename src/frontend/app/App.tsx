@@ -47,6 +47,8 @@ import {
   Users,
 } from "../views/Management";
 import PatientSurvey from "../views/PatientSurvey";
+import { TVDevices } from "../views/TVDevices";
+import { TVPairing } from "../views/TVPairing";
 import { TVWall } from "../views/TVWall";
 import type { Bootstrap, Filters, User } from "../models/types";
 
@@ -576,6 +578,12 @@ function AdminApp() {
                     <KeyRound size={16} />
                     Minha conta e senha
                   </button>
+                  {data.permissions.canManageSettings && (
+                    <button onClick={() => navigate("/tv-dispositivos")}>
+                      <MonitorUp size={16} />
+                      Dispositivos TV Wall
+                    </button>
+                  )}
                   <button onClick={() => void logout()}>
                     <LogOut size={16} />
                     Sair
@@ -792,6 +800,9 @@ function AdminApp() {
                 <Reports {...props} />
               ) : route === "/configuracoes" ? (
                 <SettingsPanel {...props} />
+              ) : route === "/tv-dispositivos" &&
+                data.permissions.canManageSettings ? (
+                <TVDevices data={data} notify={notify} />
               ) : (
                 <Card title="Página não encontrada">
                   <p>Escolha uma das áreas no menu para continuar.</p>
@@ -844,7 +855,10 @@ function AdminApp() {
 
 export default function App() {
   const slug = window.location.pathname.match(/^\/avaliar\/([^/]+)\/?$/);
-  return slug ? (
+  const isTvPairing = /^\/tv\/?$/.test(window.location.pathname);
+  return isTvPairing ? (
+    <TVPairing />
+  ) : slug ? (
     <PatientSurvey slug={decodeURIComponent(slug[1])} />
   ) : (
     <AdminApp />

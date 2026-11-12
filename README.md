@@ -7,7 +7,7 @@
 <p align="center">
   <strong>Escutar cada paciente. Acompanhar cada setor. Melhorar o cuidado.</strong><br>
   Pesquisas de satisfação e gestão da experiência hospitalar.<br>
-  <sub>🏥 Fundação Hospitalar Dr. Oswaldo Diesel · Em desenvolvimento · Execução local</sub>
+  <sub>🏥 Fundação Hospitalar Dr. Oswaldo Diesel · Em desenvolvimento · Aplicação web responsiva</sub>
 </p>
 
 <p align="center">
@@ -276,15 +276,22 @@ O override de `uuid` mantém a correção da dependência transitiva usada pelo 
 - **[Sistema visual](DESIGN.md):** cores, tipografia, componentes e comportamento da interface.
 - **[Referência no Figma](https://www.figma.com/design/KarxSPvzNUwEGQgLbMbhB2):** base visual fornecida para o projeto.
 - **[Histórico do desenvolvimento](https://github.com/FelipeOldenburg/FHDOD/commits/main/):** evolução do projeto por alteração.
-- **TV Wall:** painel em `/tv-wall` com indicadores consolidados, atualização automática e modo de tela cheia.
+- **TV Wall:** prévia administrativa em `/tv-wall` e telas vinculadas por código em `/tv`. Cada dispositivo recebe acesso próprio, pode exibir setores e indicadores diferentes e continua independente das demais TVs.
+
+### Vincular uma televisão
+
+1. O Super Admin abre **Configurações → Dispositivos TV Wall** ou `/tv-dispositivos`.
+2. Cadastra a tela, escolhe período, intervalo de atualização, setores e indicadores.
+3. Na televisão, abre `/tv` e informa o código de 6 dígitos. O código é válido por 10 minutos e funciona uma única vez.
+
+A televisão não recebe credenciais administrativas. A vinculação usa um token próprio em cookie protegido; revogar ou gerar um novo código para um dispositivo não desconecta as outras telas. O painel administrativo também mostra o estado da conexão e o último acesso de cada TV.
 
 ### Em desenvolvimento
 
-Esta é uma implementação para execução local. Os itens abaixo **ainda não estão implementados**:
+Os itens abaixo **ainda não estão implementados**:
 
 - [ ] Importação de escalas e associação a profissionais.
 - [ ] Backup e retenção conforme a política institucional.
-- [ ] HTTPS e hospedagem.
 - [ ] Envio automático de e-mails.
 - [ ] Relatórios em PDF.
 - [ ] Recuperação local segura do acesso do único Super Admin.

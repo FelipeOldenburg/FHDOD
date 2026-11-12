@@ -8,10 +8,25 @@ import {
 } from "lucide-react";
 import { Brand } from "../components/components";
 import { filterQuery } from "../controllers/api";
-import type { Bootstrap, DashboardData, Filters } from "../models/types";
+import type {
+  Bootstrap,
+  DashboardData,
+  Filters,
+  TVDevice,
+  TVDisplayPayload,
+  TVMetric,
+} from "../models/types";
 import { api } from "../services/api";
 
 const REFRESH_INTERVAL = 30_000;
+const ALL_METRICS: TVMetric[] = [
+  "satisfaction",
+  "responses",
+  "nps",
+  "pending",
+  "trend",
+  "sectors",
+];
 
 function formatMetric(value: number | null, decimals = 0) {
   if (value == null) return "—";
@@ -40,12 +55,20 @@ export function TVWall({
   bootstrap,
   filters,
   onExit,
+  publicDisplay = false,
+  onUnpaired,
 }: {
-  bootstrap: Bootstrap;
-  filters: Filters;
-  onExit: () => void;
+  bootstrap?: Bootstrap;
+  filters?: Filters;
+  onExit?: () => void;
+  publicDisplay?: boolean;
+  onUnpaired?: (message?: string) => void;
 }) {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [device, setDevice] = useState<TVDevice | null>(null);
+  const [hospitalName, setHospitalName] = useState(
+    bootstrap?.settings?.hospitalName || "FHDOD",
+  );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -57,10 +80,37 @@ export function TVWall({
     if (!quiet) setRefreshing(true);
     setError("");
     try {
-      const next = await api<DashboardData>(
-        `/api/dashboard${filterQuery(filters)}`,
-      );
-      setData(next);
+      if (publicDisplay) {
+        const response = await fetch("/api/public/tv/dashboard", {
+          credentials: "same-origin",
+        });
+        const result = (await response.json().catch(() => ({}))) as
+          | TVDisplayPayload
+          | { error?: string };
+        if (!response.ok) {
+          if (response.status === 401) {
+            onUnpaired?.(
+              "A vinculação desta TV expirou ou foi revogada. Use um novo código.",
+            );
+            return;
+          }
+          throw new Error(
+            "error" in result && result.error
+              ? result.error
+              : "Não foi possível atualizar os indicadores.",
+          );
+        }
+        const payload = result as TVDisplayPayload;
+        setData(payload.dashboard);
+        setDevice(payload.device);
+        setHospitalName(payload.settings.hospitalName);
+      } else {
+        if (!filters) throw new Error("Período do TV Wall não informado.");
+        const next = await api<DashboardData>(
+          `/api/dashboard${filterQuery(filters)}`,
+        );
+        setData(next);
+      }
       setLastUpdated(new Date());
     } catch (cause) {
       setError((cause as Error).message);
@@ -68,7 +118,7 @@ export function TVWall({
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filters]);
+  }, [filters, onUnpaired, publicDisplay]);
 
   useEffect(() => {
     void load(true);
@@ -78,7 +128,7 @@ export function TVWall({
     const clock = window.setInterval(() => setNow(new Date()), 1_000);
     const refresh = window.setInterval(() => {
       if (document.visibilityState === "visible") void load(true);
-    }, REFRESH_INTERVAL);
+    }, (device?.refreshSeconds ?? REFRESH_INTERVAL / 1000) * 1000);
     const onVisible = () => {
       if (document.visibilityState === "visible") void load(true);
     };
@@ -91,7 +141,7 @@ export function TVWall({
       document.removeEventListener("visibilitychange", onVisible);
       document.removeEventListener("fullscreenchange", onFullscreen);
     };
-  }, [load]);
+  }, [device?.refreshSeconds, load]);
 
   const sectors = useMemo(
     () =>
@@ -102,6 +152,20 @@ export function TVWall({
   );
   const monthly = data?.monthly ?? [];
   const monthlyMax = Math.max(1, ...monthly.map((item) => item.count));
+  const metrics = device?.metrics ?? ALL_METRICS;
+  const showSatisfaction = metrics.includes("satisfaction");
+  const keyMetrics = metrics.filter((metric) =>
+    ["responses", "nps", "pending"].includes(metric),
+  );
+  const showTrend = metrics.includes("trend");
+  const showSectors = metrics.includes("sectors");
+  const hasOverview = showSatisfaction || keyMetrics.length > 0;
+  const periodLabel = publicDisplay
+    ? device?.periodLabel || "Período configurado"
+    : filters
+      ? formatPeriod(filters)
+      : "Período configurado";
+  const refreshLabel = `${device?.refreshSeconds ?? 30}s`;
   const clock = new Intl.DateTimeFormat("pt-BR", {
     timeZone: "America/Sao_Paulo",
     hour: "2-digit",
@@ -128,12 +192,14 @@ export function TVWall({
         <div className="tv-wall-brand">
           <Brand />
           <div className="tv-wall-mobile-context">
-            <strong>TV Wall</strong>
-            <span>{formatPeriod(filters)} · atualiza a cada 30s</span>
+            <strong>{device?.name || "TV Wall"}</strong>
+            <span>{periodLabel} · atualiza a cada {refreshLabel}</span>
           </div>
           <div className="tv-wall-heading">
             <h1>Experiência do paciente</h1>
-            <p>{bootstrap.settings?.hospitalName || "FHDOD"} · TV Wall</p>
+            <p>
+              {hospitalName} · {device?.name || "TV Wall"}
+            </p>
           </div>
         </div>
         <div className="tv-wall-status">
@@ -141,7 +207,7 @@ export function TVWall({
             <Wifi size={16} aria-hidden="true" />
             Atualização automática
           </span>
-          <span>{formatPeriod(filters)}</span>
+          <span>{periodLabel} · a cada {refreshLabel}</span>
         </div>
         <div className="tv-wall-time" aria-label={`${date}, ${clock}`}>
           <strong>{clock}</strong>
@@ -165,18 +231,24 @@ export function TVWall({
           >
             {fullscreen ? <Minimize2 size={22} /> : <Maximize2 size={22} />}
           </button>
-          <button
-            type="button"
-            onClick={onExit}
-            aria-label="Voltar ao painel"
-            title="Voltar ao painel"
-          >
-            <ArrowLeft size={22} />
-          </button>
+          {onExit && (
+            <button
+              type="button"
+              onClick={onExit}
+              aria-label="Voltar ao painel"
+              title="Voltar ao painel"
+            >
+              <ArrowLeft size={22} />
+            </button>
+          )}
         </div>
       </header>
 
-      <main id="tv-wall-content" className="tv-wall-content" tabIndex={-1}>
+      <main
+        id="tv-wall-content"
+        className={`tv-wall-content${!showTrend && !showSectors ? " without-details" : ""}${!hasOverview ? " without-overview" : ""}`}
+        tabIndex={-1}
+      >
         {error && !data ? (
           <section className="tv-wall-message" role="alert">
             <h2>Não foi possível atualizar os indicadores</h2>
@@ -192,44 +264,63 @@ export function TVWall({
           </section>
         ) : (
           <>
-            <section className="tv-wall-overview" aria-label="Indicadores principais">
-              <article className="tv-wall-satisfaction">
-                <div>
-                  <h2>Satisfação geral</h2>
-                  <p>Média das avaliações recebidas</p>
+            {hasOverview && <section
+              className={`tv-wall-overview${!showSatisfaction ? " without-satisfaction" : ""}${!keyMetrics.length ? " without-key-metrics" : ""}`}
+              aria-label="Indicadores principais"
+            >
+              {showSatisfaction && (
+                <article className="tv-wall-satisfaction">
+                  <div>
+                    <h2>Satisfação geral</h2>
+                    <p>Média das avaliações recebidas</p>
+                  </div>
+                  <strong>
+                    {formatMetric(data?.satisfaction ?? null, 1)}
+                    <small>/5</small>
+                  </strong>
+                  <p className="tv-wall-satisfaction-note">
+                    {data?.positivePercent == null
+                      ? "Aguardando novas avaliações"
+                      : `${formatMetric(data.positivePercent)}% das avaliações são positivas`}
+                  </p>
+                </article>
+              )}
+
+              {!!keyMetrics.length && (
+                <div
+                  className="tv-wall-key-metrics"
+                  style={{
+                    gridTemplateColumns: `repeat(${keyMetrics.length}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {keyMetrics.includes("responses") && (
+                    <article>
+                      <h2>Respostas</h2>
+                      <strong>{formatMetric(data?.responseCount ?? 0)}</strong>
+                      <p>No período selecionado</p>
+                    </article>
+                  )}
+                  {keyMetrics.includes("nps") && (
+                    <article>
+                      <h2>NPS geral</h2>
+                      <strong>{formatMetric(data?.nps ?? null)}</strong>
+                      <p>Recomendação dos pacientes</p>
+                    </article>
+                  )}
+                  {keyMetrics.includes("pending") && (
+                    <article>
+                      <h2>Atenção necessária</h2>
+                      <strong>{formatMetric(data?.pendingCount ?? 0)}</strong>
+                      <p>Manifestações pendentes</p>
+                    </article>
+                  )}
                 </div>
-                <strong>
-                  {formatMetric(data?.satisfaction ?? null, 1)}
-                  <small>/5</small>
-                </strong>
-                <p className="tv-wall-satisfaction-note">
-                  {data?.positivePercent == null
-                    ? "Aguardando novas avaliações"
-                    : `${formatMetric(data.positivePercent)}% das avaliações são positivas`}
-                </p>
-              </article>
+              )}
+            </section>}
 
-              <div className="tv-wall-key-metrics">
-                <article>
-                  <h2>Respostas</h2>
-                  <strong>{formatMetric(data?.responseCount ?? 0)}</strong>
-                  <p>No período selecionado</p>
-                </article>
-                <article>
-                  <h2>NPS geral</h2>
-                  <strong>{formatMetric(data?.nps ?? null)}</strong>
-                  <p>Recomendação dos pacientes</p>
-                </article>
-                <article>
-                  <h2>Atenção necessária</h2>
-                  <strong>{formatMetric(data?.pendingCount ?? 0)}</strong>
-                  <p>Manifestações pendentes</p>
-                </article>
-              </div>
-            </section>
-
-            <section className="tv-wall-details">
-              <article className="tv-wall-trend">
+            {(showTrend || showSectors) && (
+            <section className={`tv-wall-details${showTrend !== showSectors ? " single-detail" : ""}`}>
+              {showTrend && <article className="tv-wall-trend">
                 <header>
                   <div>
                     <h2>Respostas ao longo dos meses</h2>
@@ -271,9 +362,9 @@ export function TVWall({
                     </p>
                   )}
                 </div>
-              </article>
+              </article>}
 
-              <article className="tv-wall-sectors">
+              {showSectors && <article className="tv-wall-sectors">
                 <header>
                   <h2>Participação por setor</h2>
                   <p>Setores com mais respostas no período</p>
@@ -301,8 +392,9 @@ export function TVWall({
                     Ainda não há respostas por setor neste período.
                   </p>
                 )}
-              </article>
+              </article>}
             </section>
+            )}
           </>
         )}
       </main>

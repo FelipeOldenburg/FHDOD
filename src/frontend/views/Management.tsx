@@ -12,6 +12,7 @@ import {
   Check,
   Copy,
   KeyRound,
+  MonitorUp,
   Plus,
   QrCode,
   Save,
@@ -1713,7 +1714,7 @@ function AuditHistory({ sectors }: { sectors: Sector[] }) {
   );
 }
 
-export function SettingsPanel({ data, onRefresh, notify }: CommonProps) {
+export function SettingsPanel({ data, onRefresh, notify, onNavigate }: CommonProps) {
   const [settings, setSettings] = useState<Settings>(
     data.settings ?? {
       hospitalName: "Fundação Hospitalar Dr. Oswaldo Diesel",
@@ -1785,6 +1786,27 @@ export function SettingsPanel({ data, onRefresh, notify }: CommonProps) {
         title="Configurações"
         description="Gerencie os parâmetros da plataforma e a segurança da sua conta."
       />
+      {data.permissions.canManageSettings && (
+        <section className="tv-settings-callout">
+          <div>
+            <MonitorUp size={24} aria-hidden="true" />
+            <div>
+              <h2>Dispositivos TV Wall</h2>
+              <p>
+                Cadastre várias telas, defina setores e revogue acessos sem
+                compartilhar sua senha.
+              </p>
+            </div>
+          </div>
+          <button
+            className="button secondary"
+            onClick={() => onNavigate("/tv-dispositivos")}
+          >
+            Gerenciar TVs
+            <ArrowUpRight size={15} />
+          </button>
+        </section>
+      )}
       <div className="management-split settings-layout">
         {data.permissions.canManageSettings ? (
           <Card

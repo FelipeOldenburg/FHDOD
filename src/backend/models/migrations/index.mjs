@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 
-const migrations = ["001-initial.sql", "002-response-integrity.sql"];
+const migrations = [
+  "001-initial.sql",
+  "002-response-integrity.sql",
+  "003-tv-wall-devices.sql",
+];
 
 export async function migrateDatabase(db) {
   const client = await db.connect();

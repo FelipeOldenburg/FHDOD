@@ -1,4 +1,4 @@
-export function createApiRoutes({ auth, admin, survey, reports, management }) {
+export function createApiRoutes({ auth, admin, survey, reports, management, tvWall }) {
   return [
     ["GET", /^\/api\/auth\/me$/, auth.me, true],
     ["POST", /^\/api\/auth\/password$/, auth.password, true],
@@ -42,6 +42,21 @@ export function createApiRoutes({ auth, admin, survey, reports, management }) {
       management.settings,
     ]),
     ["GET", /^\/api\/audit$/, management.audit],
+    ...["GET", "POST"].map((method) => [
+      method,
+      /^\/api\/tv-devices$/,
+      tvWall.devices,
+    ]),
+    ...["PUT", "PATCH", "DELETE"].map((method) => [
+      method,
+      /^\/api\/tv-devices\/([^/]+)$/,
+      tvWall.devices,
+    ]),
+    [
+      "POST",
+      /^\/api\/tv-devices\/([^/]+)\/pairing-code$/,
+      tvWall.pairingCode,
+    ],
   ].map(([method, pattern, handle, allowTemporaryPassword = false]) => ({
     method,
     pattern,
