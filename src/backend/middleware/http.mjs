@@ -30,6 +30,22 @@ export async function readBody(req) {
   return body;
 }
 
+export function requestAddress(req) {
+  if (req.socket?.remoteAddress) return req.socket.remoteAddress;
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string" && forwarded.trim())
+    return forwarded.split(",")[0].trim();
+  return "unknown";
+}
+
+export function secureRequest(req) {
+  return (
+    process.env.FHDOD_COOKIE_SECURE === "1" ||
+    !!req.socket?.encrypted ||
+    req.headers["x-forwarded-proto"] === "https"
+  );
+}
+
 export function createRateLimit() {
   // shortcut: limites por processo e IP da conexão; adaptar ao proxy confiável e compartilhar antes de usar várias instâncias.
   const buckets = new Map();
@@ -37,7 +53,7 @@ export function createRateLimit() {
     const current = Date.now();
     for (const [key, bucket] of buckets)
       if (bucket.until < current) buckets.delete(key);
-    const key = `${scope}:${req.socket.remoteAddress}`;
+    const key = `${scope}:${requestAddress(req)}`;
     const bucket = buckets.get(key) || { count: 0, until: current + interval };
     buckets.set(key, bucket);
     if (++bucket.count > max)

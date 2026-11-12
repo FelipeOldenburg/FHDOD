@@ -1,10 +1,8 @@
 import { getTvToken } from "../middleware/authentication.mjs";
+import { secureRequest } from "../middleware/http.mjs";
 
 function setTvCookie(req, res, token) {
-  const secure =
-    process.env.FHDOD_COOKIE_SECURE === "1" ||
-    req.socket.encrypted ||
-    req.headers["x-forwarded-proto"] === "https";
+  const secure = secureRequest(req);
   res.setHeader(
     "Set-Cookie",
     `fhdod_tv=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${token ? 7776000 : 0}${secure ? "; Secure" : ""}`,

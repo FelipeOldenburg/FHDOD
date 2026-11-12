@@ -2,7 +2,40 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { createApiController } from "../controllers/api-controller.mjs";
+import { createAuthController } from "../controllers/auth-controller.mjs";
+import { createTvWallController } from "../controllers/tv-wall-controller.mjs";
 import { createApiRoutes } from "../routes/api.mjs";
+
+test("cookies seguros funcionam em requisições serverless sem socket", async () => {
+  const headers = {};
+  const req = { headers: { "x-forwarded-proto": "https" }, socket: null };
+  const res = { setHeader: (name, value) => { headers[name] = value; } };
+  const send = (value, status = 200) => ({ value, status });
+  const auth = createAuthController({
+    auth: {
+      login: async () => ({ user: { id: "admin" }, token: "session-token" }),
+    },
+    readBody: async () => ({}),
+    rateLimit: () => {},
+    demo: false,
+  });
+  const login = await auth.login({ req, res, send });
+  assert.deepEqual(login, { value: { user: { id: "admin" } }, status: 200 });
+  assert.match(headers["Set-Cookie"], /fhdod_session=session-token/);
+  assert.match(headers["Set-Cookie"], /; Secure$/);
+
+  const tvWall = createTvWallController({
+    tvWall: {
+      pair: async () => ({ token: "tv-token", device: { id: "tv" } }),
+    },
+    readBody: async () => ({ code: "123456" }),
+    rateLimit: () => {},
+  });
+  const paired = await tvWall.pair({ req, res, send });
+  assert.deepEqual(paired, { value: { device: { id: "tv" } }, status: 200 });
+  assert.match(headers["Set-Cookie"], /fhdod_tv=tv-token/);
+  assert.match(headers["Set-Cookie"], /; Secure$/);
+});
 
 test("métodos de criação e atualização exigem o caminho correto antes de chamar o controller", async (t) => {
   const calls = [];

@@ -1,11 +1,9 @@
 import { fail } from "../middleware/validation.mjs";
 import { getSessionToken } from "../middleware/authentication.mjs";
+import { requestAddress, secureRequest } from "../middleware/http.mjs";
 
 function setSessionCookie(req, res, token) {
-  const secure =
-    process.env.FHDOD_COOKIE_SECURE === "1" ||
-    req.socket.encrypted ||
-    req.headers["x-forwarded-proto"] === "https";
+  const secure = secureRequest(req);
   res.setHeader(
     "Set-Cookie",
     `fhdod_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${token ? 28800 : 0}${secure ? "; Secure" : ""}`,
@@ -24,7 +22,7 @@ export function createAuthController({ auth, readBody, rateLimit, demo }) {
       const hostname = new URL(`http://${req.headers.host}`).hostname;
       if (
         !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(
-          req.socket.remoteAddress,
+          requestAddress(req),
         ) ||
         !["127.0.0.1", "localhost", "[::1]"].includes(hostname)
       )
