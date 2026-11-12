@@ -21,6 +21,7 @@ import {
   KeyRound,
   LogOut,
   MessageCircle,
+  MonitorUp,
   Plus,
   RotateCw,
   Settings,
@@ -46,6 +47,7 @@ import {
   Users,
 } from "../views/Management";
 import PatientSurvey from "../views/PatientSurvey";
+import { TVWall } from "../views/TVWall";
 import type { Bootstrap, Filters, User } from "../models/types";
 
 const roleNames = {
@@ -62,6 +64,7 @@ const links = [
   { path: "/resultados", name: "Resultados", icon: ChartNoAxesColumn },
   { path: "/ouvidoria", name: "Ouvidoria", icon: MessageCircle },
   { path: "/relatorios", name: "Relatórios", icon: FileBarChart2 },
+  { path: "/tv-wall", name: "TV Wall", icon: MonitorUp },
 ];
 function initialFilters(): Filters {
   const date = new Intl.DateTimeFormat("sv-SE", {
@@ -479,6 +482,14 @@ function AdminApp() {
       <TemporaryPassword onSuccess={refresh} onLogout={() => void logout()} />
     );
   if (!data) return <Loading />;
+  if (route === "/tv-wall")
+    return (
+      <TVWall
+        bootstrap={data}
+        filters={filters}
+        onExit={() => navigate("/")}
+      />
+    );
   const visibleLinks = links.filter(
     (link) =>
       link.path !== "/ouvidoria" || data.permissions.canViewManifestations,
@@ -738,6 +749,13 @@ function AdminApp() {
                         >
                           <ArrowDownToLine size={15} />
                           Exportar Excel
+                        </button>
+                        <button
+                          className="button secondary dashboard-wall-action"
+                          onClick={() => navigate("/tv-wall")}
+                        >
+                          <MonitorUp size={15} />
+                          Abrir TV Wall
                         </button>
                         {data.permissions.canEditSurveys && (
                           <button

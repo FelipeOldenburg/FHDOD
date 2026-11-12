@@ -2,6 +2,7 @@
 @import "@fontsource/inter/latin-500.css";
 @import "@fontsource/inter/latin-600.css";
 @import "@fontsource/inter/latin-700.css";
+@import "./tv-wall.css";
 
 :root {
   font-family: Inter, Arial, sans-serif;
@@ -2612,6 +2613,17 @@ textarea.input {
   }
   .app-shell .page-actions .dashboard-export-action {
     display: none;
+  }
+  .app-shell .page-actions .dashboard-wall-action {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    padding: 0;
+    font-size: 0;
+  }
+  .app-shell .page-actions .dashboard-wall-action svg {
+    width: 20px;
+    height: 20px;
   }
   .app-shell .page-actions .mobile-icon-action {
     width: 46px;

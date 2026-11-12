@@ -276,13 +276,13 @@ O override de `uuid` mantém a correção da dependência transitiva usada pelo 
 - **[Sistema visual](DESIGN.md):** cores, tipografia, componentes e comportamento da interface.
 - **[Referência no Figma](https://www.figma.com/design/KarxSPvzNUwEGQgLbMbhB2):** base visual fornecida para o projeto.
 - **[Histórico do desenvolvimento](https://github.com/FelipeOldenburg/FHDOD/commits/main/):** evolução do projeto por alteração.
+- **TV Wall:** painel em `/tv-wall` com indicadores consolidados, atualização automática e modo de tela cheia.
 
 ### Em desenvolvimento
 
 Esta é uma implementação para execução local. Os itens abaixo **ainda não estão implementados**:
 
 - [ ] Importação de escalas e associação a profissionais.
-- [ ] TV Wall para acompanhamento dos indicadores.
 - [ ] Backup e retenção conforme a política institucional.
 - [ ] HTTPS e hospedagem.
 - [ ] Envio automático de e-mails.
