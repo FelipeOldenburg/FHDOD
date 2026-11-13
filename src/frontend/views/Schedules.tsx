@@ -244,6 +244,11 @@ export function Schedules({
         <button className="button" disabled={busy || !data.sectors.length} onClick={() => inputRef.current?.click()}>
           <Upload size={16} /> {busy ? "Importando…" : "Selecionar Excel"}
         </button>
+        {!data.sectors.length && (
+          <small className="tv-field-error schedule-sector-warning" role="alert">
+            Cadastre pelo menos um setor antes de importar as escalas.
+          </small>
+        )}
       </section>
       <p className="schedule-privacy-note">
         <CalendarClock size={16} /> O sistema indica profissionais em escala; a avaliação não atribui responsabilidade individual automaticamente.
