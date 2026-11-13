@@ -741,15 +741,15 @@ textarea.input {
 }
 .global-filters {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(360px, 420px);
-  align-items: end;
-  column-gap: 28px;
+  grid-template-columns: minmax(260px, 340px) minmax(500px, 640px);
+  align-items: start;
+  column-gap: 32px;
   row-gap: 16px;
   order: -1;
   background: #fff;
   border-radius: 16px;
-  padding: 16px 20px;
-  min-height: 82px;
+  padding: 20px 24px;
+  min-height: 112px;
 }
 .global-filters > label {
   min-width: 0;
@@ -757,14 +757,18 @@ textarea.input {
 .global-filters > label > span {
   display: block;
   color: var(--muted);
-  font-size: 10px;
-  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 0;
 }
 .global-filters .input {
-  font-size: 11px;
-  min-height: 34px;
-  padding: 7px 12px;
-  border-radius: 99px;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+.global-filters > label > .input {
+  margin-top: 35px;
 }
 .filter-period {
   width: 100%;
@@ -779,7 +783,8 @@ textarea.input {
 }
 .filter-period-heading > span {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 600;
 }
 .filter-period-heading > .text-button {
   min-height: 24px;
@@ -811,7 +816,8 @@ textarea.input {
   display: block;
   margin-bottom: 5px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
+  font-weight: 600;
 }
 .date-range .input {
   width: 100%;
@@ -2747,6 +2753,9 @@ textarea.input {
   .app-shell .global-filters > label {
     min-width: 0;
   }
+  .app-shell .global-filters > label > .input {
+    margin-top: 0;
+  }
   .app-shell .global-filters > label > span,
   .app-shell .filter-period-heading > span,
   .app-shell .date-range > label > span {
@@ -2793,11 +2802,19 @@ textarea.input {
   }
   .app-shell .date-range {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     align-items: end;
-    gap: 12px;
+    gap: 14px;
+    width: 100%;
+  }
+  .app-shell .date-range > label {
+    min-width: 0;
+    overflow: hidden;
   }
   .app-shell .date-range input[type="date"] {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding-right: 8px;
   }
   .app-shell

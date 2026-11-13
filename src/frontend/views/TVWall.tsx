@@ -150,13 +150,6 @@ export function TVWall({
     };
   }, [device?.refreshSeconds, load]);
 
-  const sectors = useMemo(
-    () =>
-      [...(data?.bySector ?? [])]
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5),
-    [data?.bySector],
-  );
   const previewSurveyTarget = useMemo(() => {
     if (!bootstrap) return null;
     const available = bootstrap.sectors.filter((sector) =>
@@ -259,32 +252,6 @@ export function TVWall({
           </span>
           <span>{periodLabel} · a cada {refreshLabel}</span>
         </div>
-        <aside
-          className={`tv-wall-qr${qrDataUrl && surveyTarget ? "" : " is-empty"}`}
-          aria-label="Pesquisa de satisfação"
-        >
-          {qrDataUrl && surveyTarget ? (
-            <img
-              src={qrDataUrl}
-              alt={`QR Code da pesquisa de ${surveyTarget.name}`}
-            />
-          ) : (
-            <span className="tv-wall-qr-placeholder" aria-hidden="true">
-              <QrCode size={34} />
-            </span>
-          )}
-          <div>
-            <span>{surveyTarget ? "Conte como foi" : "Participação"}</span>
-            <strong>
-              {surveyTarget ? "Escaneie para avaliar" : "QR Code indisponível"}
-            </strong>
-            <small>
-              {surveyTarget
-                ? surveyTarget.name
-                : "Publique uma pesquisa e configure o setor desta TV"}
-            </small>
-          </div>
-        </aside>
         <div className="tv-wall-time" aria-label={`${date}, ${clock}`}>
           <strong>{clock}</strong>
           <span>{date}</span>
@@ -440,35 +407,36 @@ export function TVWall({
                 </div>
               </article>}
 
-              {showSectors && <article className="tv-wall-sectors">
-                <header>
-                  <h2>Participação por setor</h2>
-                  <p>Setores com mais respostas no período</p>
-                </header>
-                {sectors.length ? (
-                  <ol>
-                    {sectors.map((sector, index) => (
-                      <li key={sector.id}>
-                        <span className="tv-wall-sector-position">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <div>
-                          <strong>{sector.name}</strong>
-                          <span>{formatMetric(sector.count)} respostas</span>
-                        </div>
-                        <b>
-                          {formatMetric(sector.satisfaction, 1)}
-                          <small>/5</small>
-                        </b>
-                      </li>
-                    ))}
-                  </ol>
-                ) : (
-                  <p className="tv-wall-sectors-empty">
-                    Ainda não há respostas por setor neste período.
-                  </p>
-                )}
-              </article>}
+              {showSectors && (
+                <article
+                  className={`tv-wall-participation${qrDataUrl && surveyTarget ? "" : " is-empty"}`}
+                  aria-label="Participação na pesquisa de satisfação"
+                >
+                  <div className="tv-wall-participation-code">
+                    {qrDataUrl && surveyTarget ? (
+                      <img
+                        src={qrDataUrl}
+                        alt={`QR Code da pesquisa de ${surveyTarget.name}`}
+                      />
+                    ) : (
+                      <QrCode aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="tv-wall-participation-copy">
+                    <h2>
+                      {surveyTarget
+                        ? "Avalie seu atendimento"
+                        : "QR Code indisponível"}
+                    </h2>
+                    <p>
+                      {surveyTarget
+                        ? "Aponte a câmera do celular para o código e conte como foi sua experiência."
+                        : "Publique uma pesquisa e escolha o setor do QR Code nas configurações desta TV."}
+                    </p>
+                    {surveyTarget && <strong>{surveyTarget.name}</strong>}
+                  </div>
+                </article>
+              )}
             </section>
             )}
           </>
