@@ -185,7 +185,7 @@ A navegação administrativa usa uma cápsula branca flutuante, horizontal e cen
 
 ### Patient rating
 
-As cinco avaliações combinam rosto e rótulo: Muito ruim em roxo (`#b77bea`), Ruim em laranja (`#f39732`), Regular em castanho (`#ae845b`), Bom em amarelo (`#f6c51b`) e Muito bom em verde (`#91ad51`). Olhos e bocas usam traços escuros tonais, com expressões aproximadas da referência JPG: olhos fechados e boca triste aberta, expressão triste, sorriso suave, sorriso e olhos alegres com boca aberta. Cada opção pública tem altura mínima de 208px no desktop; seleção e hover acrescentam borda vermelha e fundo rosa claro. O NPS usa botões numerados, com seleção indicada por borda, fundo e estado acessível.
+As cinco avaliações combinam rosto e rótulo conforme a referência enviada: Muito ruim em roxo (`#d7b7ff` → `#bb8df1`), Ruim em azul (`#c4d9ff` → `#9dbcf0`), Regular em cinza (`#dddddd` → `#bdbdbd`), Bom em amarelo (`#ffe29b` → `#f7c96c`) e Muito bom em verde (`#c9e3bd` → `#a8cc99`). As expressões são, respectivamente: olhos fechados com boca triste aberta, olhos redondos com boca triste, olhos redondos com boca reta, olhos redondos com sorriso e olhos felizes com sorriso aberto. Cada opção pública tem altura mínima de 208px no desktop; seleção e hover acrescentam borda vermelha e fundo rosa claro. O NPS usa botões numerados, com seleção indicada por borda, fundo e estado acessível.
 
 ## Do's and Don'ts
 

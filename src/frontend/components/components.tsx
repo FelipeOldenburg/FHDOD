@@ -50,6 +50,88 @@ export function Brand({ patient = false }: { patient?: boolean }) {
 }
 
 const faceLabels = ["Muito ruim", "Ruim", "Regular", "Bom", "Muito bom"];
+const facePalette = [
+  { start: "#d7b7ff", end: "#bb8df1", ink: "#50377e" },
+  { start: "#c4d9ff", end: "#9dbcf0", ink: "#26466f" },
+  { start: "#dddddd", end: "#bdbdbd", ink: "#303030" },
+  { start: "#ffe29b", end: "#f7c96c", ink: "#5b4300" },
+  { start: "#c9e3bd", end: "#a8cc99", ink: "#46613f" },
+] as const;
+
+function RatingFaceIcon({ index }: { index: number }) {
+  const gradientId = `rating-face-${useId().replaceAll(":", "")}`;
+  const palette = facePalette[index];
+
+  return (
+    <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true">
+      <defs>
+        <linearGradient id={gradientId} x1="18" y1="12" x2="82" y2="88" gradientUnits="userSpaceOnUse">
+          <stop stopColor={palette.start} />
+          <stop offset="1" stopColor={palette.end} />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="47" fill={`url(#${gradientId})`} />
+      {index === 0 ? (
+        <path
+          d="M28 39 C32 48 41 49 45 39 M55 39 C59 49 68 48 72 39"
+          fill="none"
+          stroke={palette.ink}
+          strokeWidth="7"
+          strokeLinecap="round"
+        />
+      ) : index === 4 ? (
+        <path
+          d="M28 42 C32 32 41 31 45 42 M55 42 C59 31 68 32 72 42"
+          fill="none"
+          stroke={palette.ink}
+          strokeWidth="7"
+          strokeLinecap="round"
+        />
+      ) : (
+        <g fill={palette.ink}>
+          <circle cx="35" cy="40" r="6" />
+          <circle cx="65" cy="40" r="6" />
+        </g>
+      )}
+      {index === 0 ? (
+        <path
+          d="M31 69 C31 57 39 50 50 50 C61 50 69 57 69 69 C69 71 68 72 66 72 H34 C32 72 31 71 31 69 Z"
+          fill={palette.ink}
+        />
+      ) : index === 1 ? (
+        <path
+          d="M31 65 Q50 44 69 65"
+          fill="none"
+          stroke={palette.ink}
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+      ) : index === 2 ? (
+        <path
+          d="M33 61 H67"
+          fill="none"
+          stroke={palette.ink}
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+      ) : index === 3 ? (
+        <path
+          d="M31 57 Q50 76 69 57"
+          fill="none"
+          stroke={palette.ink}
+          strokeWidth="8"
+          strokeLinecap="round"
+        />
+      ) : (
+        <path
+          d="M31 55 H69 C68 68 61 75 50 75 C39 75 32 68 31 55 Z"
+          fill={palette.ink}
+        />
+      )}
+    </svg>
+  );
+}
+
 export function RatingFaces({
   value,
   onChange,
@@ -59,8 +141,6 @@ export function RatingFaces({
   onChange: (value: number) => void;
   disabled?: boolean;
 }) {
-  const colors = ["#b77bea", "#f39732", "#ae845b", "#f6c51b", "#91ad51"];
-  const inks = ["#641d8f", "#8b3914", "#512d20", "#88430c", "#344d19"];
   return (
     <div className="rating-faces" role="group" aria-label="Avaliação de 1 a 5">
       {faceLabels.map((label, index) => (
@@ -73,66 +153,7 @@ export function RatingFaces({
           aria-pressed={value === index + 1}
           aria-label={`${index + 1} — ${label}`}
         >
-          <svg viewBox="0 0 100 100" width="72" height="72" aria-hidden="true">
-            <circle cx="50" cy="50" r="49" fill={colors[index]} />
-            {index === 0 ? (
-              <path
-                d="M30 39 Q36 48 43 39 M57 39 Q64 48 70 39"
-                fill="none"
-                stroke={inks[index]}
-                strokeWidth="7"
-                strokeLinecap="round"
-              />
-            ) : index === 4 ? (
-              <path
-                d="M30 42 Q36 32 43 42 M57 42 Q64 32 70 42"
-                fill="none"
-                stroke={inks[index]}
-                strokeWidth="7"
-                strokeLinecap="round"
-              />
-            ) : (
-              <g fill={inks[index]}>
-                <circle cx="36" cy="41" r="6" />
-                <circle cx="64" cy="41" r="6" />
-              </g>
-            )}
-            {index === 0 ? (
-              <path
-                d="M33 62 Q50 46 67 62 Q73 70 64 70 H36 Q27 70 33 62 Z"
-                fill={inks[index]}
-              />
-            ) : index === 1 ? (
-              <path
-                d="M35 63 Q50 49 65 63"
-                fill="none"
-                stroke={inks[index]}
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-            ) : index === 2 ? (
-              <path
-                d="M35 60 Q50 75 65 60"
-                fill="none"
-                stroke={inks[index]}
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-            ) : index === 3 ? (
-              <path
-                d="M35 59 Q50 75 65 59"
-                fill="none"
-                stroke={inks[index]}
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-            ) : (
-              <path
-                d="M35 55 H65 Q72 55 67 63 Q61 72 50 72 Q39 72 33 63 Q28 55 35 55 Z"
-                fill={inks[index]}
-              />
-            )}
-          </svg>
+          <RatingFaceIcon index={index} />
           <span>{label}</span>
         </button>
       ))}
