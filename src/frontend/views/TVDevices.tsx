@@ -233,6 +233,7 @@ export function TVDevices({ data, notify }: TVDevicesProps) {
       <PageTitle
         title="Dispositivos TV Wall"
         description="Vincule, configure e acompanhe cada tela do hospital sem compartilhar contas administrativas."
+        mobileContext="Telas do hospital"
         action={
           <button className="button" onClick={() => openEditor("new")}>
             <Plus size={16} />

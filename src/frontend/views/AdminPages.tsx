@@ -470,6 +470,7 @@ export function Surveys({ data, onRefresh, notify, onNavigate }: AdminProps) {
       <PageTitle
         title="Pesquisas"
         description="Gerencie os questionários publicados para cada setor."
+        mobileContext="Gestão de pesquisas"
         action={
           data.permissions.canEditSurveys && (
             <button
@@ -748,6 +749,7 @@ export function QuestionEditor({
       <PageTitle
         title="Editor de perguntas"
         description={`${sector?.name} · ${draft.title}`}
+        mobileContext="Edição da pesquisa"
         action={
           editable && (
             <>
@@ -1064,6 +1066,7 @@ export function Results(props: AdminProps) {
       <PageTitle
         title="Resultados"
         description="Analise as avaliações por setor e período."
+        mobileContext="Análise de experiência"
         action={
           <button
             className="button desktop-page-action"

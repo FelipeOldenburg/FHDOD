@@ -27,6 +27,7 @@ import {
   RotateCw,
   Settings,
   ShieldCheck,
+  SlidersHorizontal,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -75,6 +76,42 @@ function initialFilters(): Filters {
     timeZone: "America/Sao_Paulo",
   }).format(new Date());
   return { sectorId: "", from: `${date.slice(0, 7)}-01`, to: date };
+}
+
+type PeriodPreset = "month" | "7days" | "30days" | "custom";
+
+function dateValue(date: Date) {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "America/Sao_Paulo",
+  }).format(date);
+}
+
+function periodPreset(filters: Filters): PeriodPreset {
+  const today = new Date(`${dateValue(new Date())}T12:00:00`);
+  const current = initialFilters();
+  if (filters.from === current.from && filters.to === current.to) return "month";
+  for (const [days, preset] of [
+    [7, "7days"],
+    [30, "30days"],
+  ] as const) {
+    const from = new Date(today);
+    from.setDate(today.getDate() - days + 1);
+    if (filters.from === dateValue(from) && filters.to === dateValue(today)) {
+      return preset;
+    }
+  }
+  return "custom";
+}
+
+function formattedPeriod(filters: Filters) {
+  const format = (value: string) =>
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "UTC",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(`${value}T00:00:00Z`));
+  return `${format(filters.from)} a ${format(filters.to)}`;
 }
 
 function Authentication({
@@ -334,6 +371,7 @@ function AdminApp() {
   const [dirty, setDirty] = useState(false);
   const [menu, setMenu] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [mobileDateFiltersOpen, setMobileDateFiltersOpen] = useState(false);
   const notify = useCallback((message: string) => setToast(message), []);
   const refresh = useCallback(async () => {
     const auth = await api<{ user: User }>("/api/auth/me");
@@ -533,6 +571,23 @@ function AdminApp() {
       : { path: "/setores", name: "Setores", icon: Hospital },
     { path: "/configuracoes", name: "Perfil", icon: UserRound },
   ];
+  const routeKey = route === "/" ? "overview" : route.split("/")[1];
+  const updatePeriodPreset = (preset: PeriodPreset) => {
+    if (preset === "month") {
+      setFilters(initialFilters());
+      setMobileDateFiltersOpen(false);
+      return;
+    }
+    if (preset === "custom") {
+      setMobileDateFiltersOpen(true);
+      return;
+    }
+    const today = new Date(`${dateValue(new Date())}T12:00:00`);
+    const from = new Date(today);
+    from.setDate(today.getDate() - (preset === "7days" ? 6 : 29));
+    setFilters({ ...filters, from: dateValue(from), to: dateValue(today) });
+    setMobileDateFiltersOpen(false);
+  };
   return (
     <>
       <a href="#conteudo" className="skip-link">
@@ -687,7 +742,11 @@ function AdminApp() {
             </div>
           </aside>
           <ViewTransition name="admin-content">
-            <main id="conteudo" className="route-content" tabIndex={-1}>
+            <main
+              id="conteudo"
+              className={`route-content route-${routeKey}`}
+              tabIndex={-1}
+            >
               {showFilters && (
                 <div className="global-filters">
                   <label>
@@ -713,45 +772,81 @@ function AdminApp() {
                     </select>
                   </label>
                   <div className="filter-period">
-                    <div className="filter-period-heading">
-                      <span>Período das respostas</span>
+                    <label className="mobile-period-preset">
+                      <span>Período</span>
+                      <select
+                        className="input"
+                        aria-label="Período dos indicadores"
+                        value={periodPreset(filters)}
+                        onChange={(event) =>
+                          updatePeriodPreset(event.target.value as PeriodPreset)
+                        }
+                      >
+                        <option value="month">Este mês</option>
+                        <option value="7days">Últimos 7 dias</option>
+                        <option value="30days">Últimos 30 dias</option>
+                        <option value="custom">Personalizado</option>
+                      </select>
+                    </label>
+                    <div className="mobile-filter-summary">
+                      <span>{formattedPeriod(filters)}</span>
                       <button
                         type="button"
-                        className="text-button"
-                        onClick={() => setFilters(initialFilters())}
+                        className="mobile-filter-toggle"
+                        aria-expanded={mobileDateFiltersOpen}
+                        onClick={() =>
+                          setMobileDateFiltersOpen((current) => !current)
+                        }
                       >
-                        Este mês
+                        <SlidersHorizontal size={18} />
+                        Mais filtros
                       </button>
                     </div>
-                    <fieldset className="date-range">
-                      <legend className="sr-only">Período das respostas</legend>
-                      <label>
-                        <span>De</span>
-                        <input
-                          className="input"
-                          type="date"
-                          aria-label="Data inicial"
-                          value={filters.from}
-                          max={filters.to || undefined}
-                          onChange={(e) =>
-                            setFilters({ ...filters, from: e.target.value })
-                          }
-                        />
-                      </label>
-                      <label>
-                        <span>Até</span>
-                        <input
-                          className="input"
-                          type="date"
-                          aria-label="Data final"
-                          value={filters.to}
-                          min={filters.from || undefined}
-                          onChange={(e) =>
-                            setFilters({ ...filters, to: e.target.value })
-                          }
-                        />
-                      </label>
-                    </fieldset>
+                    <div
+                      className={`filter-period-exact${
+                        mobileDateFiltersOpen ? " mobile-open" : ""
+                      }`}
+                    >
+                      <div className="filter-period-heading">
+                        <span>Período das respostas</span>
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() => setFilters(initialFilters())}
+                        >
+                          Este mês
+                        </button>
+                      </div>
+                      <fieldset className="date-range">
+                        <legend className="sr-only">Período das respostas</legend>
+                        <label>
+                          <span>De</span>
+                          <input
+                            className="input"
+                            type="date"
+                            aria-label="Data inicial"
+                            value={filters.from}
+                            max={filters.to || undefined}
+                            onChange={(e) =>
+                              setFilters({ ...filters, from: e.target.value })
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Até</span>
+                          <input
+                            className="input"
+                            type="date"
+                            aria-label="Data final"
+                            value={filters.to}
+                            min={filters.from || undefined}
+                            onChange={(e) =>
+                              setFilters({ ...filters, to: e.target.value })
+                            }
+                          />
+                        </label>
+                      </fieldset>
+                    </div>
                   </div>
                 </div>
               )}
@@ -760,8 +855,9 @@ function AdminApp() {
                   <PageTitle
                     title="Visão geral"
                     description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
-                    mobileTitle={`${greeting}, ${firstName}!`}
-                    mobileDescription="Resumo da experiência dos pacientes."
+                    mobileContext="Painel principal"
+                    mobileTitle="Visão geral"
+                    mobileDescription={`${greeting}, ${firstName}. Acompanhe a experiência dos pacientes.`}
                     action={
                       <>
                         <button

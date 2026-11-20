@@ -221,6 +221,7 @@ export function Schedules({
       <PageTitle
         title="Escalas médicas"
         description="Importe os plantões para localizar quem estava trabalhando no setor e horário informados pelo paciente."
+        mobileContext="Gestão de equipes"
         action={
           <button className="button secondary" onClick={() => void downloadTemplate()}>
             <Download size={16} /> Baixar modelo

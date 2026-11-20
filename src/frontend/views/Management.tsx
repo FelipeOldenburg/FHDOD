@@ -297,6 +297,7 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
     <>
       <PageTitle
         title="Setores"
+        mobileContext="Estrutura hospitalar"
         description={
           data.permissions.canManageSectors
             ? "Cada setor tem um administrador com login próprio e acesso restrito."
@@ -715,6 +716,7 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
         <PageTitle
           title="Usuários e permissões"
           description="Controle de acesso por perfil e setor."
+          mobileContext="Administração de acessos"
         />
         <EmptyState
           title="Acesso restrito ao Super Admin"
@@ -727,6 +729,7 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
       <PageTitle
         title="Usuários e permissões"
         description="Controle o acesso à plataforma por perfil e setor."
+        mobileContext="Administração de acessos"
         action={
           <button className="button" onClick={() => open("new")}>
             <Plus size={16} />
@@ -1025,7 +1028,8 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
     <>
       <PageTitle
         title="Ouvidoria"
-        description="Acompanhe manifestações e avaliações que exigem atenção."
+        description="Gerencie manifestações, acompanhe atendimentos e mantenha cada solicitação sob controle."
+        mobileContext="Central de atendimento"
       />
       <FormError value={error} />
       {!data.permissions.canViewManifestations ? (
@@ -1059,7 +1063,7 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
           </div>
           <div className="management-split ombudsman-layout">
             <Card
-              title="Manifestações recebidas"
+              title="Manifestações"
               subtitle="O relato original do paciente é preservado."
             >
               {loading ? (
@@ -1404,6 +1408,7 @@ export function Reports({ data, filters, notify }: CommonProps) {
       <PageTitle
         title="Relatórios e exportação"
         description="Exporte os resultados respeitando os filtros e as permissões do seu perfil."
+        mobileContext="Análise e dados"
       />
       <div className="management-split reports-layout">
         <Card
@@ -1788,6 +1793,7 @@ export function SettingsPanel({ data, onRefresh, notify, onNavigate }: CommonPro
       <PageTitle
         title="Configurações"
         description="Gerencie os parâmetros da plataforma e a segurança da sua conta."
+        mobileContext="Conta e plataforma"
       />
       {data.permissions.canManageSettings && (
         <div className="settings-quick-actions">
