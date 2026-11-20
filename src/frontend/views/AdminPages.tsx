@@ -112,13 +112,15 @@ export function ResponseTable({
         <tbody>
           {safeResponses.map((response) => (
             <tr key={response.id}>
-              <td>{response.sectorName}</td>
-              <td>{formatDate(response.submittedAt || response.createdAt)}</td>
-              <td className="red-text">
+              <td data-label="Setor">{response.sectorName}</td>
+              <td data-label="Respondido em">
+                {formatDate(response.submittedAt || response.createdAt)}
+              </td>
+              <td className="red-text" data-label="NPS">
                 {response.nps ?? "—"}
                 {response.nps != null && <small> / 10</small>}
               </td>
-              <td>
+              <td data-label="Situação">
                 <StatusBadge
                   tone={response.status === "submitted" ? "green" : "amber"}
                 >
@@ -126,7 +128,7 @@ export function ResponseTable({
                 </StatusBadge>
               </td>
               {onSelect && (
-                <td>
+                <td className="response-action">
                   <button
                     className="text-button"
                     onClick={() => onSelect(response)}
@@ -1133,6 +1135,7 @@ export function Results(props: AdminProps) {
         <Card
           title="Avaliações recebidas"
           subtitle="Abra uma avaliação para consultar as respostas originais."
+          className="results-responses-card"
         >
           <ResponseTable responses={responses} onSelect={setSelected} />
         </Card>

@@ -3512,3 +3512,119 @@ textarea.input {
     align-self: flex-end;
   }
 }
+
+@media (max-width: 650px) {
+  .app-shell .results-responses-card {
+    padding: 18px 16px 8px;
+    border-radius: 22px;
+  }
+
+  .app-shell .results-responses-card .card-heading {
+    margin-bottom: 8px;
+  }
+
+  .app-shell .results-responses-card .card-heading h2 {
+    font-size: 20px;
+    letter-spacing: -0.4px;
+  }
+
+  .app-shell .results-responses-card .table-wrap {
+    overflow: visible;
+  }
+
+  .app-shell .results-responses-card .data-table,
+  .app-shell .results-responses-card .data-table tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-shell .results-responses-card .data-table thead {
+    display: none;
+  }
+
+  .app-shell .results-responses-card .data-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .app-shell .results-responses-card .data-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .app-shell .results-responses-card .data-table td {
+    display: flex;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .app-shell .results-responses-card .data-table td:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    align-items: center;
+    overflow-wrap: anywhere;
+    color: #27282d;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .app-shell .results-responses-card .data-table td:nth-child(2),
+  .app-shell .results-responses-card .data-table td:nth-child(3) {
+    grid-column: 1;
+    align-items: baseline;
+    gap: 7px;
+    color: #4f515a;
+    font-size: 12px;
+  }
+
+  .app-shell .results-responses-card .data-table td:nth-child(2)::before,
+  .app-shell .results-responses-card .data-table td:nth-child(3)::before {
+    flex: 0 0 auto;
+    color: #777982;
+    font-size: 10px;
+    font-weight: 500;
+    content: attr(data-label) ":";
+  }
+
+  .app-shell .results-responses-card .data-table td:nth-child(3) {
+    color: var(--red);
+    font-weight: 600;
+  }
+
+  .app-shell .results-responses-card .data-table td:nth-child(4) {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .app-shell .results-responses-card .status-badge {
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  .app-shell .results-responses-card .response-action {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    align-self: center;
+    justify-self: end;
+  }
+
+  .app-shell .results-responses-card .response-action .text-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 0 8px 10px;
+    font-size: 11px;
+  }
+
+  .app-shell .results-responses-card .response-action .text-button::after {
+    content: "Abrir";
+  }
+}
