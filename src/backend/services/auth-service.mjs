@@ -7,6 +7,9 @@ import {
 } from "node:crypto";
 import { fail, text, validEmail } from "../middleware/validation.mjs";
 
+const defaultSessionLifetimeMs = 8 * 60 * 60 * 1000;
+const rememberedSessionLifetimeMs = 365 * 24 * 60 * 60 * 1000;
+
 export const hashToken = (value) =>
   createHash("sha256").update(value).digest("hex");
 
@@ -110,6 +113,7 @@ export function createAuthService({ get, all, run, transaction }, { audit }) {
   }
   async function login(body) {
     const email = validEmail(body.email);
+    const persistent = body.rememberMe === true;
     return transaction(async () => {
       await run(
         "SELECT pg_advisory_xact_lock(hashtext(current_schema()),hashtext('fhdod-admin-accounts'))",
@@ -125,7 +129,14 @@ export function createAuthService({ get, all, run, transaction }, { audit }) {
       );
       if (!valid || !row) fail(401, "E-mail ou senha incorretos.");
       const user = await sectorAccount(row);
-      return { user, token: await createSession(user.id) };
+      return {
+        user,
+        token: await createSession(
+          user.id,
+          persistent ? rememberedSessionLifetimeMs : defaultSessionLifetimeMs,
+        ),
+        persistent,
+      };
     });
   }
   async function authenticate(token) {
@@ -142,13 +153,13 @@ export function createAuthService({ get, all, run, transaction }, { audit }) {
     if (!row) fail(401, "Sua sessão expirou. Entre novamente.");
     return sectorAccount(row);
   }
-  async function createSession(userId) {
+  async function createSession(userId, lifetimeMs = defaultSessionLifetimeMs) {
     const token = randomBytes(32).toString("hex");
     await run(
       "INSERT INTO sessions VALUES(?,?,?)",
       hashToken(token),
       userId,
-      new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+      new Date(Date.now() + lifetimeMs).toISOString(),
     );
     return token;
   }

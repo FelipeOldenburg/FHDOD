@@ -43,6 +43,28 @@ test("login valida o setor antes de criar sessão e devolve o usuário resolvido
   assert.equal(valid.body.user.mustChangePassword, true);
   assert.deepEqual(valid.body.user.sectorIds, ["sector"]);
   assert.match(valid.cookie, /fhdod_session=/);
+  assert.doesNotMatch(valid.cookie, /Max-Age=/);
+  const defaultSession = await dbGet(
+    db,
+    "SELECT expires_at FROM sessions WHERE user_id='admin'",
+  );
+  assert.ok(Date.parse(defaultSession.expires_at) <= Date.now() + 8 * 60 * 60 * 1000 + 5_000);
+
+  await dbRun(db, "DELETE FROM sessions WHERE user_id='admin'");
+  const remembered = await api("/auth/login", "POST", {
+    ...credentials,
+    rememberMe: true,
+  });
+  assert.equal(remembered.status, 200);
+  assert.match(remembered.cookie, /Max-Age=31536000/);
+  const rememberedSession = await dbGet(
+    db,
+    "SELECT expires_at FROM sessions WHERE user_id='admin'",
+  );
+  assert.ok(
+    Date.parse(rememberedSession.expires_at) >=
+      Date.now() + 364 * 24 * 60 * 60 * 1000,
+  );
 
   await dbRun(db, "INSERT INTO sectors VALUES('legacy','Legado','legado','',1,?)", timestamp);
   await dbRun(db, "INSERT INTO user_sectors VALUES('admin','legacy')");

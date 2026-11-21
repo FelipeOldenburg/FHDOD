@@ -1635,8 +1635,46 @@ textarea.input {
   display: block;
   flex: 0 0 auto;
 }
-.auth-recovery {
+.auth-account-options {
   margin-top: -8px;
+}
+.auth-session-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 18px;
+}
+.auth-remember {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 44px;
+  padding: 7px 0;
+  color: #45464e;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.auth-remember input {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.auth-remember span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.auth-remember small {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.auth-remember:has(input:focus-visible) {
+  border-radius: 6px;
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
 }
 .auth-forgot-button {
   display: inline-flex;
@@ -2342,6 +2380,15 @@ textarea.input {
   .auth-forgot-button {
     min-height: 44px;
     font-size: 13px;
+  }
+  .auth-session-row {
+    flex-wrap: wrap;
+  }
+  .auth-remember {
+    font-size: 13px;
+  }
+  .auth-remember small {
+    font-size: 10px;
   }
   .auth-recovery-help {
     padding: 14px;

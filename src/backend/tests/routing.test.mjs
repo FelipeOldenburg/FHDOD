@@ -14,6 +14,7 @@ test("cookies seguros funcionam em requisições serverless sem socket", async (
   const auth = createAuthController({
     auth: {
       login: async () => ({ user: { id: "admin" }, token: "session-token" }),
+      logout: async () => {},
     },
     readBody: async () => ({}),
     rateLimit: () => {},
@@ -22,7 +23,29 @@ test("cookies seguros funcionam em requisições serverless sem socket", async (
   const login = await auth.login({ req, res, send });
   assert.deepEqual(login, { value: { user: { id: "admin" } }, status: 200 });
   assert.match(headers["Set-Cookie"], /fhdod_session=session-token/);
+  assert.doesNotMatch(headers["Set-Cookie"], /Max-Age=/);
   assert.match(headers["Set-Cookie"], /; Secure$/);
+
+  const rememberedAuth = createAuthController({
+    auth: {
+      login: async () => ({
+        user: { id: "admin" },
+        token: "remembered-token",
+        persistent: true,
+      }),
+    },
+    readBody: async () => ({ rememberMe: true }),
+    rateLimit: () => {},
+    demo: false,
+  });
+  await rememberedAuth.login({ req, res, send });
+  assert.match(headers["Set-Cookie"], /fhdod_session=remembered-token/);
+  assert.match(headers["Set-Cookie"], /Max-Age=31536000/);
+  assert.match(headers["Set-Cookie"], /; Secure$/);
+
+  await auth.logout({ req, res, send });
+  assert.match(headers["Set-Cookie"], /fhdod_session=;/);
+  assert.match(headers["Set-Cookie"], /Max-Age=0/);
 
   const tvWall = createTvWallController({
     tvWall: {

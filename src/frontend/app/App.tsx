@@ -138,6 +138,7 @@ function Authentication({
           name: form.get("name"),
           email: form.get("email"),
           password: form.get("password"),
+          rememberMe: !needsSetup && form.get("rememberMe") === "on",
         },
       });
       await onSuccess();
@@ -220,16 +221,25 @@ function Authentication({
               autoComplete={needsSetup ? "new-password" : "current-password"}
             />
             {!needsSetup && (
-              <div className="auth-recovery">
-                <button
-                  type="button"
-                  className="auth-forgot-button"
-                  aria-expanded={recoveryOpen}
-                  aria-controls="password-recovery-help"
-                  onClick={() => setRecoveryOpen((current) => !current)}
-                >
-                  Esqueceu a senha?
-                </button>
+              <div className="auth-account-options">
+                <div className="auth-session-row">
+                  <label className="auth-remember">
+                    <input type="checkbox" name="rememberMe" />
+                    <span>
+                      Manter conectado
+                      <small>Somente em dispositivo confiável.</small>
+                    </span>
+                  </label>
+                  <button
+                    type="button"
+                    className="auth-forgot-button"
+                    aria-expanded={recoveryOpen}
+                    aria-controls="password-recovery-help"
+                    onClick={() => setRecoveryOpen((current) => !current)}
+                  >
+                    Esqueceu a senha?
+                  </button>
+                </div>
                 {recoveryOpen && (
                   <div id="password-recovery-help" className="auth-recovery-help">
                     <KeyRound size={18} aria-hidden="true" />

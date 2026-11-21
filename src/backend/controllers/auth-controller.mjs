@@ -2,17 +2,30 @@ import { fail } from "../middleware/validation.mjs";
 import { getSessionToken } from "../middleware/authentication.mjs";
 import { requestAddress, secureRequest } from "../middleware/http.mjs";
 
-function setSessionCookie(req, res, token) {
+const rememberedSessionMaxAge = 365 * 24 * 60 * 60;
+
+function setSessionCookie(req, res, token, persistent = false) {
   const secure = secureRequest(req);
+  const lifetime = token
+    ? persistent
+      ? `; Max-Age=${rememberedSessionMaxAge}`
+      : ""
+    : "; Max-Age=0";
   res.setHeader(
     "Set-Cookie",
-    `fhdod_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${token ? 28800 : 0}${secure ? "; Secure" : ""}`,
+    `fhdod_session=${token}; HttpOnly; SameSite=Strict; Path=/${lifetime}${secure ? "; Secure" : ""}`,
   );
 }
 
 export function createAuthController({ auth, readBody, rateLimit, demo }) {
-  function signedIn(req, res, send, { user, token }, status = 200) {
-    setSessionCookie(req, res, token);
+  function signedIn(
+    req,
+    res,
+    send,
+    { user, token, persistent = false },
+    status = 200,
+  ) {
+    setSessionCookie(req, res, token, persistent);
     return send({ user }, status);
   }
   return {
