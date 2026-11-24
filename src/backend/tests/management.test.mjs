@@ -119,6 +119,51 @@ test("dashboard devolve contagens numéricas e respeita período, base de data e
   assert.equal((await api("/dashboard?from=2040-02-01&to=2040-01-01", { cookie })).status, 400);
 });
 
+test("pagina mais de mil avaliações e manifestações com contagens e isolamento de setor", async (t) => {
+  const { db, api } = await start(t);
+  for (const sector of ["sector-a", "sector-b"]) {
+    await seedSector(db, sector);
+    await dbRun(
+      db,
+      `INSERT INTO responses(id,survey_id,sector_id,token_hash,status,questions_json,created_at,submitted_at,nps,comment,manifestation_type)
+       SELECT concat(s.sector_id,'-',i),s.id,s.sector_id,concat(s.sector_id,'-',i),'submitted',
+              s.questions_json,'2040-01-01T12:00:00Z','2040-01-01T12:00:00Z',4,'Relato de teste',
+              CASE WHEN i=1001 THEN 'sugestao' ELSE 'reclamacao' END
+       FROM surveys s CROSS JOIN generate_series(1, 1001) i WHERE s.sector_id=?`,
+      sector,
+    );
+  }
+  await dbRun(
+    db,
+    `INSERT INTO manifestations(id,response_id,status,created_at,updated_at)
+     SELECT concat('m-',id),id,CASE WHEN manifestation_type='sugestao' THEN 'resolvida' ELSE 'nova' END,
+            created_at,created_at FROM responses`,
+  );
+  const cookie = await seedUser(db, api, "analista", "ombudsman", "sector-a");
+  const first = await api("/responses?page=1&review=complaints", { cookie });
+  const second = await api("/responses?page=2&review=complaints", { cookie });
+  assert.equal(first.status, 200);
+  assert.equal(second.status, 200);
+  assert.deepEqual(first.body.pagination, { page: 1, pageSize: 25, total: 1000 });
+  assert.equal(first.body.responses.length, 25);
+  assert.equal(second.body.responses.length, 25);
+  assert.equal(new Set([...first.body.responses, ...second.body.responses].map((row) => row.id)).size, 50);
+  assert.ok(first.body.responses.every((row) => row.sectorId === "sector-a" && row.manifestationType === "reclamacao"));
+  const dashboard = await api("/dashboard?from=2040-01-01&to=2040-01-01", { cookie });
+  assert.equal(dashboard.status, 200);
+  assert.equal(dashboard.body.responseCount, 1001);
+  assert.equal(dashboard.body.recent.length, 8);
+  assert.equal(dashboard.body.manifestationCounts.reclamacao, 1000);
+  const cases = await api("/manifestations?page=40&type=reclamacao&status=nova", { cookie });
+  assert.equal(cases.status, 200);
+  assert.deepEqual(cases.body.pagination, { page: 40, pageSize: 25, total: 1000 });
+  assert.equal(cases.body.manifestations.length, 25);
+  assert.equal(cases.body.counts.nova, 1000);
+  assert.ok(cases.body.manifestations.every((row) => row.sectorId === "sector-a"));
+  assert.equal((await api("/manifestations?page=1&sectorId=sector-b", { cookie })).status, 403);
+  assert.equal((await api("/responses?page=0", { cookie })).status, 400);
+});
+
 test("health responde 503 quando a consulta do banco falha sem expor o erro interno", async (t) => {
   let available = false;
   const management = createManagementController({ health: async () => {

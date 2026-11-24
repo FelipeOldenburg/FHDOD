@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
   ArrowDown,
@@ -26,14 +26,16 @@ import {
   formatDate,
   formatNumber,
 } from "../components/components";
+import { Pagination } from "../components/Pagination";
+import { ScheduleMatch } from "../components/ScheduleMatch";
 import type {
   Bootstrap,
   DashboardData,
   Filters,
+  PaginationInfo,
   Question,
   QuestionType,
   ResponseRow,
-  ScheduledProfessional,
   Survey,
 } from "../models/types";
 
@@ -153,32 +155,12 @@ export function ResponseTable({
 export function ResponseDetail({
   response,
   onClose,
+  canOpenSchedule,
 }: {
   response: ResponseRow;
   onClose: () => void;
+  canOpenSchedule: boolean;
 }) {
-  const [scheduleMatch, setScheduleMatch] = useState<{
-    professionals: ScheduledProfessional[];
-    precision: "time" | "response_time" | "date" | "none";
-  } | null>(null);
-  const [scheduleError, setScheduleError] = useState("");
-
-  useEffect(() => {
-    const controller = new AbortController();
-    api<{
-      professionals: ScheduledProfessional[];
-      precision: "time" | "response_time" | "date" | "none";
-    }>(`/api/responses/${encodeURIComponent(response.id)}/scheduled-professionals`, {
-      signal: controller.signal,
-    })
-      .then(setScheduleMatch)
-      .catch((cause) => {
-        if (!controller.signal.aborted)
-          setScheduleError(cause instanceof Error ? cause.message : "Não foi possível consultar a escala.");
-      });
-    return () => controller.abort();
-  }, [response.id]);
-
   return (
     <Modal title="Detalhes da avaliação" onClose={onClose}>
       <p className="muted">
@@ -196,46 +178,7 @@ export function ResponseDetail({
           Turno <strong>{response.shift || "Não informado"}</strong>
         </span>
       </div>
-      <section className="schedule-match" aria-labelledby="schedule-match-title">
-        <div>
-          <h3 id="schedule-match-title">Profissionais em escala</h3>
-          <p>
-            {scheduleMatch?.precision === "time"
-              ? "Correspondência por setor, data e horário informados."
-              : scheduleMatch?.precision === "response_time"
-                ? "Horário estimado pelo momento em que a avaliação foi iniciada."
-              : scheduleMatch?.precision === "date"
-                ? "O paciente não informou o horário; mostrando os plantões do dia."
-                : "Informe data e horário na avaliação para uma correspondência mais precisa."}
-          </p>
-        </div>
-        {scheduleError ? (
-          <p className="muted text-small">{scheduleError}</p>
-        ) : scheduleMatch ? (
-          scheduleMatch.professionals.length ? (
-            <ul>
-              {scheduleMatch.professionals.map((professional) => (
-                <li key={professional.id}>
-                  <strong>{professional.name}</strong>
-                  <span>
-                    {[professional.registration, professional.specialty]
-                      .filter(Boolean)
-                      .join(" · ") || "Registro não informado"}
-                  </span>
-                  <small>
-                    {professional.startsAt.slice(11, 16)} a {professional.endsAt.slice(11, 16)}
-                  </small>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="muted text-small">Nenhuma escala importada corresponde a este atendimento.</p>
-          )
-        ) : (
-          <p className="muted text-small">Consultando escala…</p>
-        )}
-        <small>Este cruzamento indica presença em plantão e não atribui responsabilidade individual.</small>
-      </section>
+      <ScheduleMatch key={response.id} responseId={response.id} canOpenSchedule={canOpenSchedule} />
       <div className="answer-list">
         {response.answers?.map((answer) => (
           <div key={answer.questionId}>
@@ -991,31 +934,83 @@ export function QuestionEditor({
   );
 }
 
+function ResultResponses({ filters, data }: Pick<AdminProps, "filters" | "data">) {
+  const [result, setResult] = useState<{ responses: ResponseRow[]; pagination: PaginationInfo } | null>(null);
+  const [selected, setSelected] = useState<ResponseRow | null>(null);
+  const [page, setPage] = useState(1);
+  const [review, setReview] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const listStart = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setError("");
+    setLoading(true);
+    const query = filterQuery({ ...filters, page: String(page), review });
+    api<{ responses: ResponseRow[]; pagination: PaginationInfo }>(`/api/responses${query}`, {
+      signal: controller.signal,
+    }).then((next) => {
+      if (controller.signal.aborted) return;
+      setResult(next);
+      setLoading(false);
+    }).catch((cause: unknown) => {
+      if (controller.signal.aborted) return;
+      setError(cause instanceof Error ? cause.message : "Não foi possível carregar as avaliações.");
+      setLoading(false);
+    });
+    return () => controller.abort();
+  }, [filters, data, page, review, retry]);
+
+  return (
+    <Card title="Avaliações recebidas" className="results-responses-card">
+      <div className="record-filters" ref={listStart}>
+        <Field label="Tipo de avaliação">
+          <select className="input" value={review} onChange={(event) => {
+            setPage(1);
+            setReview(event.target.value);
+          }}>
+            <option value="">Todas as avaliações</option>
+            <option value="complaints">Com reclamação</option>
+            <option value="submitted">Recebidas</option>
+            <option value="partial">Parciais</option>
+          </select>
+        </Field>
+      </div>
+      <div aria-busy={loading}>
+        {error ? (
+          <>
+            <p className="error-banner" role="alert">{error}</p>
+            <button type="button" className="text-button" onClick={() => setRetry((n) => n + 1)}>Tentar novamente</button>
+          </>
+        ) : loading ? <Loading label="Carregando avaliações…" /> : (
+          <ResponseTable responses={result?.responses ?? []} onSelect={setSelected} />
+        )}
+      </div>
+      {result && !error && (
+        <Pagination data={result.pagination} busy={loading} label="Páginas de avaliações" onPage={(next) => {
+          setPage(next);
+          listStart.current?.scrollIntoView({ block: "start" });
+        }} />
+      )}
+      {selected && (
+        <ResponseDetail response={selected} onClose={() => setSelected(null)} canOpenSchedule={data.permissions.canManageSettings} />
+      )}
+    </Card>
+  );
+}
+
 export function Results(props: AdminProps) {
   const [stats, setStats] = useState<DashboardData | null>(null);
-  const [responses, setResponses] = useState<ResponseRow[]>([]);
-  const [selected, setSelected] = useState<ResponseRow | null>(null);
   const [error, setError] = useState("");
   useEffect(() => {
     const controller = new AbortController();
     setError("");
-    Promise.all([
-      api<DashboardData>(`/api/dashboard${filterQuery(props.filters)}`, {
-        signal: controller.signal,
-      }),
-      props.data.permissions.canViewResponses
-        ? api<{ responses: ResponseRow[] }>(
-            `/api/responses${filterQuery(props.filters)}`,
-            { signal: controller.signal },
-          )
-        : Promise.resolve({ responses: [] }),
-    ])
-      .then(([d, r]) => {
-        startTransition(() => {
-          setStats(d);
-          setResponses(Array.isArray(r.responses) ? r.responses : []);
-        });
-      })
+    api<DashboardData>(`/api/dashboard${filterQuery(props.filters)}`, {
+      signal: controller.signal,
+    })
+      .then((d) => startTransition(() => setStats(d)))
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);
       });
@@ -1094,6 +1089,9 @@ export function Results(props: AdminProps) {
           </Card>
         ))}
       </div>
+      {props.data.permissions.canViewResponses && (
+        <ResultResponses key={filterQuery(props.filters)} filters={props.filters} data={props.data} />
+      )}
       <div className="results-grid">
         <Card
           title="Evolução das respostas"
@@ -1131,18 +1129,6 @@ export function Results(props: AdminProps) {
           </div>
         </Card>
       </div>
-      {props.data.permissions.canViewResponses && (
-        <Card
-          title="Avaliações recebidas"
-          subtitle="Abra uma avaliação para consultar as respostas originais."
-          className="results-responses-card"
-        >
-          <ResponseTable responses={responses} onSelect={setSelected} />
-        </Card>
-      )}
-      {selected && (
-        <ResponseDetail response={selected} onClose={() => setSelected(null)} />
-      )}
     </>
   );
 }

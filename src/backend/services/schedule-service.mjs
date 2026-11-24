@@ -5,6 +5,7 @@ import {
   demandSector,
 } from "../middleware/permissions.mjs";
 import { hospitalDay } from "./calendar.mjs";
+import { paginate, pageOffset } from "../middleware/pagination.mjs";
 
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
@@ -24,14 +25,22 @@ function importView(row) {
   };
 }
 
+function shiftEndDate(row) {
+  if (row.ends_at > row.starts_at) return row.shift_date;
+  const nextDay = new Date(`${row.shift_date}T12:00:00Z`);
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  return nextDay.toISOString().slice(0, 10);
+}
+
 function professionalView(row) {
   return {
     id: row.id,
+    importId: row.import_id,
     name: row.professional_name,
     registration: row.registration,
     specialty: row.specialty,
     startsAt: `${row.shift_date}T${row.starts_at}:00`,
-    endsAt: `${row.shift_date}T${row.ends_at}:00`,
+    endsAt: `${shiftEndDate(row)}T${row.ends_at}:00`,
   };
 }
 
@@ -146,6 +155,30 @@ export function createScheduleService(
     return importView(imported);
   }
 
+  async function preview(user, id, query) {
+    demandPermission(user, "canManageSettings");
+    const item = await get(
+      `SELECT i.*,u.name AS imported_by_name FROM schedule_imports i
+       LEFT JOIN users u ON u.id=i.imported_by WHERE i.id=?`,
+      id,
+    );
+    if (!item) fail(404, "Importação de escala não encontrada.");
+    const pagination = paginate(query, Number(item.row_count));
+    const rows = await all(
+      `SELECT s.*,sector.name AS sector_name FROM medical_shifts s
+       JOIN sectors sector ON sector.id=s.sector_id WHERE s.import_id=?
+       ORDER BY s.shift_date,s.starts_at,sector.name,s.professional_name,s.id LIMIT ? OFFSET ?`,
+      id,
+      pagination.pageSize,
+      pageOffset(pagination),
+    );
+    return {
+      imported: importView(item),
+      pagination,
+      rows: rows.map((row) => ({ ...professionalView(row), sectorName: row.sector_name })),
+    };
+  }
+
   async function remove(user, id) {
     demandPermission(user, "canManageSettings");
     const current = await get("SELECT * FROM schedule_imports WHERE id=?", id);
@@ -198,8 +231,7 @@ export function createScheduleService(
     const attended = Date.parse(`${effectiveDate}T${matchTime}:00`);
     const matching = candidates.filter((row) => {
       const start = Date.parse(`${row.shift_date}T${row.starts_at}:00`);
-      let end = Date.parse(`${row.shift_date}T${row.ends_at}:00`);
-      if (end <= start) end += 24 * 60 * 60 * 1000;
+      const end = Date.parse(`${shiftEndDate(row)}T${row.ends_at}:00`);
       return attended >= start && attended < end;
     });
     return {
@@ -209,6 +241,6 @@ export function createScheduleService(
     };
   }
 
-  return { list, importRows, remove, professionalsForResponse };
+  return { list, importRows, preview, remove, professionalsForResponse };
 }
 

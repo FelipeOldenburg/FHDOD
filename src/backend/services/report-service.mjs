@@ -8,6 +8,7 @@ import {
   permissions,
 } from "../middleware/permissions.mjs";
 import { hospitalDay } from "./calendar.mjs";
+import { paginate, pageOffset } from "../middleware/pagination.mjs";
 
 const now = () => new Date().toISOString();
 
@@ -44,12 +45,15 @@ export function createReportService({ all }, { settings, audit }) {
     }
     return { sql: where.length ? `WHERE ${where.join(" AND ")}` : "", params };
   }
-  async function responseRows(user, url) {
-    // shortcut: carrega o período em memória; paginar consultas/exportações se o volume afetar o tempo de resposta.
+  async function responseRows(user, url, limit) {
     const scope = scopedWhere(user, url);
     return all(
-      `SELECT r.*,s.name AS sector_name,v.title AS survey_title,m.status AS manifestation_status FROM responses r JOIN sectors s ON s.id=r.sector_id JOIN surveys v ON v.id=r.survey_id LEFT JOIN manifestations m ON m.response_id=r.id ${scope.sql} ORDER BY COALESCE(r.submitted_at,r.created_at) DESC`,
+      `SELECT r.*,s.name AS sector_name,v.title AS survey_title,m.status AS manifestation_status
+       FROM responses r JOIN sectors s ON s.id=r.sector_id JOIN surveys v ON v.id=r.survey_id
+       LEFT JOIN manifestations m ON m.response_id=r.id ${scope.sql}
+       ORDER BY COALESCE(r.submitted_at,r.created_at) DESC,r.id DESC${limit ? " LIMIT ?" : ""}`,
       ...scope.params,
+      ...(limit ? [limit] : []),
     );
   }
   function responseView(row, user, details = true, answers = []) {
@@ -89,51 +93,52 @@ export function createReportService({ all }, { settings, audit }) {
       }),
     };
   }
-  function ratings(rows, byResponse) {
-    const values = rows.flatMap((row) => byResponse.get(row.id) || []);
-    return values.length
-      ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) /
-          100
-      : null;
+  const count = (rows, predicate = () => true) =>
+    rows.reduce((sum, row) => sum + (predicate(row) ? row.count : 0), 0);
+
+  function ratings(rows) {
+    const total = count(rows);
+    const points = rows.reduce((sum, row) => sum + row.score * row.count, 0);
+    return total ? Math.round((points / total) * 100) / 100 : null;
   }
+
   function nps(rows) {
-    const values = rows
-      .filter((r) => r.status === "submitted" && Number.isInteger(r.nps))
-      .map((r) => r.nps);
-    return values.length
-      ? Math.round(
-          ((values.filter((v) => v >= 9).length -
-            values.filter((v) => v <= 6).length) /
-            values.length) *
-            100,
-        )
-      : null;
+    const total = count(rows, (row) => Number.isInteger(row.nps));
+    const promoters = count(rows, (row) => row.nps >= 9);
+    const detractors = count(rows, (row) => row.nps != null && row.nps <= 6);
+    return total ? Math.round(((promoters - detractors) / total) * 100) : null;
   }
 
   async function dashboard(user, url) {
     demandPermission(user, "canViewDashboard");
-    const rows = await responseRows(user, url);
-    const submitted = rows.filter((r) => r.status === "submitted");
     const scope = scopedWhere(user, url);
-    const ratingMap = new Map();
-    const ratingValues = await all(
-      `SELECT a.response_id,a.value_json FROM answers a JOIN responses r ON r.id=a.response_id JOIN LATERAL jsonb_array_elements(r.questions_json::jsonb) q(value) ON q.value->>'id'=a.question_id WHERE q.value->>'type'='rating' ${scope.sql.replace(/^WHERE/, "AND")}`,
+    const rows = await all(
+      `SELECT r.sector_id,r.status,r.nps,CASE WHEN r.comment<>'' THEN r.manifestation_type END AS type,
+              (m.status IS NOT NULL AND m.status<>'resolvida') AS pending,COUNT(*)::int AS count
+       FROM responses r LEFT JOIN manifestations m ON m.response_id=r.id ${scope.sql}
+       GROUP BY r.sector_id,r.status,r.nps,type,pending`,
       ...scope.params,
     );
-    for (const answer of ratingValues) {
-      const value = parse(answer.value_json);
-      if (Number.isFinite(value))
-        ratingMap.set(answer.response_id, [
-          ...(ratingMap.get(answer.response_id) || []),
-          value,
-        ]);
-    }
+    const submitted = rows.filter((row) => row.status === "submitted");
+    const ratingValues = await all(
+      `SELECT r.sector_id,a.value_json,COUNT(*)::int AS count
+       FROM answers a JOIN responses r ON r.id=a.response_id
+       JOIN LATERAL jsonb_array_elements(r.questions_json::jsonb) q(value) ON q.value->>'id'=a.question_id
+       WHERE r.status='submitted' AND q.value->>'type'='rating' ${scope.sql.replace(/^WHERE/, "AND")}
+       GROUP BY r.sector_id,a.value_json`,
+      ...scope.params,
+    );
+    const submittedRatings = ratingValues
+      .map((row) => ({ ...row, score: parse(row.value_json) }))
+      .filter((row) => Number.isFinite(row.score));
     const end =
       dateOnly(url.searchParams.get("to"), "Data final") || hospitalDay(now());
     const endMonth = new Date(`${end.slice(0, 7)}-01T12:00:00Z`);
     const monthlyUrl = new URL(url);
-    monthlyUrl.searchParams.delete("from");
-    monthlyUrl.searchParams.delete("to");
+    const year = endMonth.getUTCFullYear();
+    const month = endMonth.getUTCMonth();
+    monthlyUrl.searchParams.set("from", new Date(Date.UTC(year, month - 5, 1)).toISOString().slice(0, 10));
+    monthlyUrl.searchParams.set("to", new Date(Date.UTC(year, month + 1, 0)).toISOString().slice(0, 10));
     const historyScope = scopedWhere(user, monthlyUrl);
     const monthColumn =
       url.searchParams.get("dateBasis") === "attendance"
@@ -181,52 +186,43 @@ export function createReportService({ all }, { settings, audit }) {
         return {
           id: s.id,
           name: s.name,
-          count: selected.length,
+          count: count(selected),
           nps: nps(selected),
-          satisfaction: ratings(selected, ratingMap),
+          satisfaction: ratings(submittedRatings.filter((row) => row.sector_id === s.id)),
         };
       });
     const manifestationCounts = Object.fromEntries(
       manifestationTypes.map((type) => [
         type,
-        submitted.filter((r) => r.comment && r.manifestation_type === type)
-          .length,
+        count(submitted, (row) => row.type === type),
       ]),
     );
-    const satisfaction = ratings(submitted, ratingMap);
-    const submittedRatings = submitted.flatMap(
-      (row) => ratingMap.get(row.id) || [],
-    );
+    const satisfaction = ratings(submittedRatings);
     const ratingDistribution = Array.from({ length: 5 }, (_, i) => ({
       score: i + 1,
-      count: submittedRatings.filter((value) => value === i + 1).length,
+      count: count(submittedRatings, (row) => row.score === i + 1),
     }));
     const lowScoreThreshold = (await settings()).lowScoreThreshold;
-    const criticalCount = submitted.filter(
-      (row) => row.nps <= lowScoreThreshold,
-    ).length;
+    const criticalCount = count(submitted, (row) => row.nps <= lowScoreThreshold);
+    const responseCount = count(submitted);
     const previous = monthly.at(-2)?.count || 0;
+    const recent = await responseRows(user, url, 8);
     return {
       nps: nps(submitted),
       satisfaction,
-      responseCount: submitted.length,
-      partialCount: rows.length - submitted.length,
-      pendingCount: submitted.filter(
-        (r) => r.manifestation_status && r.manifestation_status !== "resolvida",
-      ).length,
+      responseCount,
+      partialCount: count(rows) - responseCount,
+      pendingCount: count(submitted, (row) => row.pending),
       criticalCount,
-      positivePercent: submitted.length
-        ? Math.round(
-            (submitted.filter((r) => r.nps >= 9).length / submitted.length) *
-              100,
-          )
+      positivePercent: responseCount
+        ? Math.round((count(submitted, (row) => row.nps >= 9) / responseCount) * 100)
         : null,
       monthly,
-      recent: rows.slice(0, 8).map((row) => responseView(row, user, false)),
+      recent: recent.map((row) => responseView(row, user, false)),
       bySector,
       distribution: Array.from({ length: 11 }, (_, score) => ({
         score,
-        count: submitted.filter((r) => r.nps === score).length,
+        count: count(submitted, (row) => row.nps === score),
       })),
       ratingDistribution,
       manifestationCounts,
@@ -242,6 +238,40 @@ export function createReportService({ all }, { settings, audit }) {
   async function responses(user, url) {
     demandPermission(user, "canViewResponses");
     const rows = await responseRows(user, url);
+    return withAnswers(rows, user);
+  }
+
+  async function responsePage(user, url) {
+    demandPermission(user, "canViewResponses");
+    const scope = scopedWhere(user, url);
+    const review = url.searchParams.get("review");
+    const predicates = {
+      complaints: "r.manifestation_type='reclamacao' AND m.response_id IS NOT NULL",
+      submitted: "r.status='submitted'",
+      partial: "r.status='partial'",
+    };
+    if (review && !Object.hasOwn(predicates, review))
+      fail(400, "Filtro de avaliações inválido.");
+    const where = review
+      ? `${scope.sql || "WHERE TRUE"} AND ${predicates[review]}`
+      : scope.sql;
+    const source = "FROM responses r JOIN sectors s ON s.id=r.sector_id JOIN surveys v ON v.id=r.survey_id LEFT JOIN manifestations m ON m.response_id=r.id";
+    const [{ total }] = await all(
+      `SELECT COUNT(*) AS total ${source} ${where}`,
+      ...scope.params,
+    );
+    const pagination = paginate(url.searchParams, Number(total));
+    const rows = await all(
+      `SELECT r.*,s.name AS sector_name,v.title AS survey_title,m.status AS manifestation_status ${source} ${where}
+       ORDER BY COALESCE(r.submitted_at,r.created_at) DESC,r.id DESC LIMIT ? OFFSET ?`,
+      ...scope.params,
+      pagination.pageSize,
+      pageOffset(pagination),
+    );
+    return { responses: await withAnswers(rows, user), pagination };
+  }
+
+  async function withAnswers(rows, user) {
     if (!rows.length) return [];
     const answers = await all(
       "SELECT * FROM answers WHERE response_id=ANY(?::text[]) ORDER BY answered_at",
@@ -283,5 +313,5 @@ export function createReportService({ all }, { settings, audit }) {
     });
     return { recorded: true };
   }
-  return { dashboard, responses, scopedWhere, recordExport };
+  return { dashboard, responses, responsePage, scopedWhere, recordExport };
 }

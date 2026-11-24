@@ -56,6 +56,7 @@ export function createApiRoutes({ auth, admin, survey, reports, management, tvWa
             /^\/api\/schedules$/,
             schedules.collection,
           ]),
+          ["GET", /^\/api\/schedules\/([^/]+)$/, schedules.preview],
           ["DELETE", /^\/api\/schedules\/([^/]+)$/, schedules.remove],
         ]
       : []),

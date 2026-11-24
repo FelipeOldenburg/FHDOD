@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import {
   CalendarClock,
   Download,
+  Eye,
   FileSpreadsheet,
   Trash2,
   Upload,
 } from "lucide-react";
 import { api } from "../services/api";
-import { Card, EmptyState, Loading, PageTitle } from "../components/components";
-import type { Bootstrap, ScheduleImport } from "../models/types";
+import { Card, EmptyState, Loading, PageTitle, formatDate, formatNumber } from "../components/components";
+import { Pagination } from "../components/Pagination";
+import type { Bootstrap, ScheduleImport, SchedulePreviewData } from "../models/types";
 
 type ImportRow = {
   sectorId: string;
@@ -60,6 +62,82 @@ const formatDateTime = (value: string) =>
     timeStyle: "short",
   });
 
+function SchedulePreview({ id, onClose }: { id: string; onClose: () => void }) {
+  const [data, setData] = useState<SchedulePreviewData | null>(null);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const start = useRef<HTMLDivElement>(null);
+  useEffect(() => start.current?.scrollIntoView({ block: "start" }), []);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError("");
+    api<SchedulePreviewData>(`/api/schedules/${encodeURIComponent(id)}?page=${page}`, {
+      signal: controller.signal,
+    }).then((next) => {
+      if (controller.signal.aborted) return;
+      setData(next);
+      setLoading(false);
+    }).catch((cause: unknown) => {
+      if (controller.signal.aborted) return;
+      setError(cause instanceof Error ? cause.message : "Não foi possível abrir a escala.");
+      setLoading(false);
+    });
+    return () => controller.abort();
+  }, [id, page, retry]);
+  return (
+    <div ref={start} className="schedule-preview-start">
+      <Card className="schedule-preview">
+        <header className="schedule-preview-heading">
+          <div>
+            <h2>Plantões importados</h2>
+            {data && <p>{data.imported.filename} · {formatNumber(data.imported.rowCount)} {data.imported.rowCount === 1 ? "plantão" : "plantões"}</p>}
+          </div>
+          <button type="button" className="text-button" onClick={onClose}>Fechar prévia</button>
+        </header>
+        {error ? (
+          <>
+            <p className="error-banner" role="alert">{error}</p>
+            <button type="button" className="text-button" onClick={() => setRetry((n) => n + 1)}>Tentar novamente</button>
+          </>
+        ) : loading ? <Loading label="Carregando plantões…" /> : data && (
+          <>
+            <div className="table-wrap" aria-label="Linhas da escala importada">
+              <table className="data-table schedule-preview-table" role="table">
+                <thead role="rowgroup">
+                  <tr role="row">
+                    <th scope="col">Data</th><th scope="col">Início</th><th scope="col">Fim</th>
+                    <th scope="col">Setor</th><th scope="col">Profissional</th><th scope="col">CRM</th><th scope="col">Especialidade</th>
+                  </tr>
+                </thead>
+                <tbody role="rowgroup">
+                  {data.rows.map((row) => (
+                    <tr key={row.id} role="row">
+                      <td data-label="Data">{formatDate(row.startsAt.slice(0, 10))}</td>
+                      <td data-label="Início">{row.startsAt.slice(11, 16)}</td>
+                      <td data-label="Fim">{row.endsAt.slice(11, 16)}{row.startsAt.slice(0, 10) !== row.endsAt.slice(0, 10) && <small> (dia seguinte)</small>}</td>
+                      <td data-label="Setor">{row.sectorName}</td>
+                      <td data-label="Profissional">{row.name}</td>
+                      <td data-label="CRM">{row.registration || "—"}</td>
+                      <td data-label="Especialidade">{row.specialty || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination data={data.pagination} label="Páginas da escala" onPage={(next) => {
+              setPage(next);
+              start.current?.scrollIntoView({ block: "start" });
+            }} />
+          </>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 export function Schedules({
   data,
   notify,
@@ -72,6 +150,7 @@ export function Schedules({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [previewId, setPreviewId] = useState(() => new URLSearchParams(window.location.search).get("import") ?? "");
 
   async function load() {
     try {
@@ -207,12 +286,22 @@ export function Schedules({
     setBusy(true);
     try {
       await api(`/api/schedules/${item.id}`, { method: "DELETE" });
+      if (previewId === item.id) closePreview();
       notify("Importação de escala excluída.");
       await load();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível excluir.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  function closePreview() {
+    setPreviewId("");
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("import")) {
+      url.searchParams.delete("import");
+      window.history.replaceState(window.history.state, "", url);
     }
   }
 
@@ -254,6 +343,7 @@ export function Schedules({
       <p className="schedule-privacy-note">
         <CalendarClock size={16} /> O sistema indica profissionais em escala; a avaliação não atribui responsabilidade individual automaticamente.
       </p>
+      {previewId && <SchedulePreview key={previewId} id={previewId} onClose={closePreview} />}
       <Card title="Histórico de importações" subtitle="Cada arquivo fica registrado para auditoria e pode ser removido integralmente.">
         {loading ? <Loading /> : imports.length ? (
           <div className="schedule-import-list">
@@ -261,9 +351,14 @@ export function Schedules({
               <article key={item.id}>
                 <FileSpreadsheet size={20} />
                 <div><strong>{item.filename}</strong><span>{item.rowCount} escalas · {formatDateTime(item.importedAt)} · {item.importedByName}</span></div>
-                <button className="icon-button danger-icon-button" disabled={busy} onClick={() => void remove(item)} aria-label={`Excluir ${item.filename}`}>
-                  <Trash2 size={16} />
-                </button>
+                <div className="schedule-import-actions">
+                  <button type="button" className="button secondary" onClick={() => setPreviewId(item.id)}>
+                    <Eye size={16} aria-hidden="true" /> Ver plantões
+                  </button>
+                  <button type="button" className="icon-button danger-icon-button" disabled={busy} onClick={() => void remove(item)} aria-label={`Excluir ${item.filename}`}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </article>
             ))}
           </div>

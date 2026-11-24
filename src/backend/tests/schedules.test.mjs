@@ -89,6 +89,17 @@ test("importa escalas e cruza profissionais pelo setor, data e horário", async 
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported.rowCount, 2);
 
+  const previewPath = `/schedules/${imported.body.imported.id}`;
+  const preview = await api(`${previewPath}?page=1`, { cookie });
+  assert.equal(preview.status, 200);
+  assert.equal(preview.body.imported.filename, "escala-novembro.xlsx");
+  assert.deepEqual(preview.body.pagination, { page: 1, pageSize: 25, total: 2 });
+  assert.deepEqual(preview.body.rows.map(({ name, sectorName, registration }) => [name, sectorName, registration]), [
+    ["Dra. Ana", "Pronto Atendimento", "CRM 123"],
+    ["Dr. Bruno", "Pronto Atendimento", "CRM 456"],
+  ]);
+  assert.equal((await api(previewPath)).status, 401);
+
   const matched = await api(
     "/responses/response-pa/scheduled-professionals",
     { cookie },
@@ -99,6 +110,7 @@ test("importa escalas e cruza profissionais pelo setor, data e horário", async 
     matched.body.professionals.map((item) => item.name),
     ["Dra. Ana"],
   );
+  assert.equal(matched.body.professionals[0].importId, imported.body.imported.id);
   const estimated = await api(
     "/responses/response-estimated/scheduled-professionals",
     { cookie },
@@ -114,6 +126,7 @@ test("importa escalas e cruza profissionais pelo setor, data e horário", async 
     cookie,
   });
   assert.equal(removed.status, 200);
+  assert.equal((await api(previewPath, { cookie })).status, 404);
   assert.deepEqual(
     (await api("/responses/response-pa/scheduled-professionals", { cookie })).body
       .professionals,

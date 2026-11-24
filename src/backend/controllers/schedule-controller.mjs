@@ -13,6 +13,8 @@ export function createScheduleController({ schedules, readBody }) {
         201,
       );
     },
+    preview: async ({ user, params, url, send }) =>
+      send(await schedules.preview(user, params[0], url.searchParams)),
     remove: async ({ user, params, send }) =>
       send(await schedules.remove(user, params[0])),
     professionals: async ({ user, params, send }) =>

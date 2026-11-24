@@ -20,7 +20,11 @@ export function createManagementController({
     bootstrap: async ({ user, send }) => send(await bootstrap(user)),
     async manifestations({ req, user, url, method, params, send }) {
       if (method === "GET")
-        return send({ manifestations: await manifestations.list(user, url) });
+        return send(
+          url.searchParams.has("page")
+            ? await manifestations.page(user, url)
+            : { manifestations: await manifestations.list(user, url) },
+        );
       return send(
         await manifestations.update(user, params[0], await readBody(req)),
       );

@@ -1496,6 +1496,75 @@ textarea.input {
   color: var(--muted);
 }
 
+.schedule-match > p {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.schedule-match > .text-action {
+  display: flex;
+  width: fit-content;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.record-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  scroll-margin-top: 100px;
+}
+
+.record-filters > .field {
+  flex: 1 1 145px;
+  min-width: 0;
+  max-width: 240px;
+}
+
+.record-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.record-pagination > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.record-pagination .button {
+  min-height: 44px;
+}
+
+.record-detail-start,
+.schedule-preview-start {
+  scroll-margin-top: 100px;
+}
+
+@media (max-width: 650px) {
+  .record-filters .input {
+    font-size: 16px;
+  }
+
+  .record-filters > .field {
+    max-width: none;
+  }
+
+  .schedule-match > div:first-child {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+}
+
 .schedule-match > div:first-child p,
 .schedule-match > small {
   font-size: 12px;

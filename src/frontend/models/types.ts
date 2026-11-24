@@ -161,13 +161,25 @@ export interface ScheduleImport {
   importedByName: string;
 }
 
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
 export interface ScheduledProfessional {
   id: string;
+  importId: string;
   name: string;
   registration: string;
   specialty: string;
   startsAt: string;
   endsAt: string;
+}
+export interface SchedulePreviewData {
+  imported: ScheduleImport;
+  rows: (ScheduledProfessional & { sectorName: string })[];
+  pagination: PaginationInfo;
 }
 export interface Manifestation {
   id: string;

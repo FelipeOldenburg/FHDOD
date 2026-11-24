@@ -893,6 +893,40 @@
   font-size: 12px;
 }
 
+.schedule-import-list article > .schedule-import-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.schedule-preview-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.schedule-preview-heading > div {
+  overflow-wrap: anywhere;
+}
+
+.schedule-preview-heading p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.schedule-preview-table {
+  table-layout: fixed;
+}
+
+.schedule-preview-table td {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 650px) {
   .settings-quick-actions {
     grid-template-columns: 1fr;
@@ -909,5 +943,67 @@
 
   .schedule-sector-warning {
     grid-column: 1 / -1;
+  }
+
+  .schedule-import-list article {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .schedule-import-actions {
+    grid-column: 2;
+  }
+
+  .schedule-import-actions .button {
+    min-height: 44px;
+  }
+
+  .schedule-preview .schedule-preview-table,
+  .schedule-preview-table tbody {
+    display: block;
+    min-width: 0;
+  }
+
+  .schedule-preview-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .schedule-preview-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .schedule-preview-table thead tr {
+    padding: 0;
+  }
+
+  .schedule-preview .schedule-preview-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    font-size: 13px;
+  }
+
+  .schedule-preview-table td::before {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    content: attr(data-label);
+  }
+
+  .schedule-preview-table td[data-label="Profissional"] {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    font-weight: 600;
+  }
+
+  .schedule-preview-table td small {
+    white-space: normal;
   }
 }

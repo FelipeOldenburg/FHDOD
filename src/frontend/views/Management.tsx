@@ -2,6 +2,7 @@ import {
   startTransition,
   useEffect,
   useId,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -31,11 +32,14 @@ import {
   Field,
   PasswordField,
 } from "../components/components";
+import { Pagination } from "../components/Pagination";
+import { ScheduleMatch } from "../components/ScheduleMatch";
 import type {
   Bootstrap,
   DashboardData,
   Filters,
   Manifestation,
+  PaginationInfo,
   Role,
   Sector,
   Settings,
@@ -960,34 +964,57 @@ export function Users({ data, onRefresh, notify }: CommonProps) {
   );
 }
 
-export function Ombudsman({ data, filters, notify }: CommonProps) {
+export function Ombudsman(props: CommonProps) {
+  return <OmbudsmanContent key={filterQuery(props.filters)} {...props} />;
+}
+
+function OmbudsmanContent({ data, filters, notify }: CommonProps) {
   const [records, setRecords] = useState<Manifestation[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [status, setStatus] = useState<Manifestation["status"]>("nova");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
-  const selected = records.find((row) => row.id === selectedId) ?? records[0];
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [counts, setCounts] = useState({ nova: 0, pendente: 0, em_atendimento: 0, resolvida: 0 });
+  const detailStart = useRef<HTMLDivElement>(null);
+  const listStart = useRef<HTMLDivElement>(null);
+  const selected = loading ? undefined : records.find((row) => row.id === selectedId);
   async function load(signal?: AbortSignal) {
     if (!data.permissions.canViewManifestations) {
       setLoading(false);
       return;
     }
     setLoading(true);
-    setError("");
+    setLoadError("");
     try {
-      const result = await api<{ manifestations: Manifestation[] }>(
-        `/api/manifestations${filterQuery(filters)}`,
+      const query = filterQuery({ ...filters, page: String(page), status: statusFilter, type: typeFilter });
+      const result = await api<{
+        manifestations: Manifestation[];
+        pagination: PaginationInfo;
+        counts: typeof counts;
+      }>(
+        `/api/manifestations${query}`,
         { signal },
       );
+      if (signal?.aborted) return;
       startTransition(() => {
         setRecords(result.manifestations);
+        setPagination(result.pagination);
+        setCounts(result.counts);
         setLoading(false);
       });
     } catch (err) {
       if (!signal?.aborted) {
-        setError(errorMessage(err));
+        setLoadError(errorMessage(err));
+        setRecords([]);
+        setPagination(null);
         setLoading(false);
       }
     }
@@ -997,10 +1024,12 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
     void load(controller.signal);
     return () => controller.abort();
   }, [
-    filters.sectorId,
-    filters.from,
-    filters.to,
-    data.permissions.canViewManifestations,
+    filters,
+    data,
+    page,
+    statusFilter,
+    typeFilter,
+    retry,
   ]);
   useEffect(() => {
     setStatus(selected?.status ?? "nova");
@@ -1043,16 +1072,15 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
             {[
               [
                 "Pendentes",
-                records.filter((r) => ["nova", "pendente"].includes(r.status))
-                  .length,
+                counts.nova + counts.pendente,
               ],
               [
                 "Em atendimento",
-                records.filter((r) => r.status === "em_atendimento").length,
+                counts.em_atendimento,
               ],
               [
                 "Resolvidas",
-                records.filter((r) => r.status === "resolvida").length,
+                counts.resolvida,
               ],
             ].map(([label, count]) => (
               <Card key={label}>
@@ -1064,12 +1092,38 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
           <div className="management-split ombudsman-layout">
             <Card
               title="Manifestações"
-              subtitle="O relato original do paciente é preservado."
             >
+              <div className="record-filters" ref={listStart}>
+                <Field label="Tipo">
+                  <select className="input" value={typeFilter} disabled={busy} onChange={(event) => {
+                    setPage(1);
+                    setSelectedId("");
+                    setTypeFilter(event.target.value);
+                  }}>
+                    <option value="">Todos os tipos</option>
+                    {Object.entries(typeNames).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </Field>
+                <Field label="Situação">
+                  <select className="input" value={statusFilter} disabled={busy} onChange={(event) => {
+                    setPage(1);
+                    setSelectedId("");
+                    setStatusFilter(event.target.value);
+                  }}>
+                    <option value="">Todas as situações</option>
+                    {Object.entries(statusNames).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </Field>
+              </div>
               {loading ? (
                 <p className="muted" role="status">
                   Carregando manifestações…
                 </p>
+              ) : loadError ? (
+                <>
+                  <FormError value={loadError} />
+                  <button type="button" className="text-button" onClick={() => setRetry((n) => n + 1)}>Tentar novamente</button>
+                </>
               ) : records.length ? (
                 <div className="table-wrap">
                   <table className="data-table">
@@ -1092,7 +1146,11 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
                           <td>
                             <button
                               className="table-choice"
-                              onClick={() => setSelectedId(row.id)}
+                              onClick={() => {
+                                setSelectedId(row.id);
+                                if (window.matchMedia("(max-width: 1100px)").matches)
+                                  requestAnimationFrame(() => detailStart.current?.scrollIntoView({ block: "start" }));
+                              }}
                               aria-pressed={selected?.id === row.id}
                             >
                               #{row.id.slice(0, 8).toUpperCase()}
@@ -1120,8 +1178,15 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
               ) : (
                 <EmptyState
                   title="Nenhuma manifestação neste período"
-                  description="Comentários enviados pelos pacientes aparecerão aqui."
+                  description="Escolha outro filtro para consultar os relatos recebidos."
                 />
+              )}
+              {pagination && (
+                <Pagination data={pagination} busy={loading || busy} label="Páginas de manifestações" onPage={(next) => {
+                  setPage(next);
+                  setSelectedId("");
+                  listStart.current?.scrollIntoView({ block: "start" });
+                }} />
               )}
             </Card>
             <Card
@@ -1136,6 +1201,7 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
                   : undefined
               }
             >
+              <div ref={detailStart} className="record-detail-start" />
               {selected ? (
                 <form
                   className="management-form manifestation-detail"
@@ -1158,6 +1224,7 @@ export function Ombudsman({ data, filters, notify }: CommonProps) {
                       </span>
                     </div>
                   )}
+                  <ScheduleMatch key={selected.responseId} responseId={selected.responseId} canOpenSchedule={data.permissions.canManageSettings} />
                   <Field label="Situação">
                     <select
                       className="input"
