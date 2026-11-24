@@ -4,6 +4,7 @@ export function filterQuery(filters: {
   to?: string;
   page?: string;
   review?: string;
+  sort?: string;
   type?: string;
   status?: string;
 }) {

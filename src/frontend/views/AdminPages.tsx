@@ -2,7 +2,9 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
   ArrowDown,
+  ArrowDownToLine,
   ArrowUp,
+  ArrowUpDown,
   ArrowUpRight,
   Check,
   Eye,
@@ -18,6 +20,7 @@ import {
   Card,
   EmptyState,
   Field,
+  FilterHeader,
   Loading,
   Modal,
   PageTitle,
@@ -57,6 +60,10 @@ const types: Record<QuestionType, string> = {
 export function Evolution({ items }: { items: DashboardData["monthly"] }) {
   const safeItems = Array.isArray(items) ? items : [];
   const max = Math.max(1, ...safeItems.map((item) => item.count));
+  const magnitude = 10 ** Math.floor(Math.log10(max / 6));
+  const step = Math.max(1, magnitude * ([1, 2, 5, 10].find((value) => value * magnitude >= max / 6) ?? 10));
+  const top = Math.ceil(max / step) * step;
+  const ticks = Array.from({ length: top / step + 1 }, (_, index) => top - index * step);
   return (
     <div
       className="evolution-chart"
@@ -65,34 +72,49 @@ export function Evolution({ items }: { items: DashboardData["monthly"] }) {
         .map((item) => `${item.label}: ${item.count} respostas`)
         .join(", ")}
     >
-      {safeItems.map((item, index) => (
-        <div className="chart-column" key={item.month}>
-          <div className="bar-track">
-            <span
-              className={`chart-bar ${index === safeItems.length - 1 ? "current" : ""}`}
-              style={{
-                height: `${item.count ? Math.max(6, (item.count / max) * 100) : 0}%`,
-              }}
-              title={`${item.count} respostas`}
-            >
-              <span>{item.count}</span>
-            </span>
+      {safeItems.some((item) => item.count) ? (
+        <>
+          <div className="chart-scale" aria-hidden="true">
+            {ticks.map((tick) => <span key={tick}>{formatNumber(tick)}</span>)}
           </div>
-          <span>{item.label}</span>
-        </div>
-      ))}
-      {!safeItems.some((item) => item.count) && (
+          <div className="chart-columns">
+            {safeItems.map((item, index) => (
+              <div className="chart-column" key={item.month}>
+                <div className="bar-track">
+                  <span
+                    className={`chart-bar ${index === safeItems.length - 1 ? "current" : ""}`}
+                    style={{ height: `${(item.count / top) * 100}%` }}
+                    title={`${item.count} respostas`}
+                  >
+                    <span>{formatNumber(item.count)}</span>
+                  </span>
+                </div>
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
         <p className="chart-empty">As respostas aparecerão aqui.</p>
       )}
     </div>
   );
 }
+const responseSortColumns = [
+  { label: "Respondido em", descending: "recent", ascending: "oldest" },
+  { label: "NPS", descending: "nps-high", ascending: "nps-low" },
+  { label: "Situação", descending: "status-desc", ascending: "status-asc" },
+] as const;
+type ResponseSort = (typeof responseSortColumns)[number]["descending" | "ascending"];
+
 export function ResponseTable({
   responses,
   onSelect,
+  ordering,
 }: {
   responses: ResponseRow[];
   onSelect?: (response: ResponseRow) => void;
+  ordering?: { value: ResponseSort; onChange: (sort: ResponseSort) => void };
 }) {
   const safeResponses = Array.isArray(responses) ? responses : [];
   return safeResponses.length ? (
@@ -101,9 +123,20 @@ export function ResponseTable({
         <thead>
           <tr>
             <th>Setor</th>
-            <th>Respondido em</th>
-            <th>NPS</th>
-            <th>Situação</th>
+            {responseSortColumns.map(({ label, ascending, descending }) => {
+              const direction =
+                ordering?.value === ascending ? "ascending" : ordering?.value === descending ? "descending" : undefined;
+              const Icon = direction === "ascending" ? ArrowUp : direction === "descending" ? ArrowDown : ArrowUpDown;
+              return (
+                <th key={label} scope="col" aria-sort={direction}>
+                  {ordering ? (
+                    <button type="button" className="table-sort" onClick={() => ordering.onChange(direction === "descending" ? ascending : descending)}>
+                      {label} <Icon size={14} aria-hidden="true" />
+                    </button>
+                  ) : label}
+                </th>
+              );
+            })}
             {onSelect && (
               <th>
                 <span className="sr-only">Detalhes</span>
@@ -428,40 +461,38 @@ export function Surveys({ data, onRefresh, notify, onNavigate }: AdminProps) {
           )
         }
       />
-      <div className="filter-card">
-        <label className="search-field">
-          <Search size={17} />
-          <input
-            aria-label="Buscar pesquisa"
-            placeholder="Buscar pesquisa…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <section className="catalog-filters" aria-label="Filtrar pesquisas">
+        <FilterHeader title="Filtrar pesquisas" onReset={() => {
+          setSearch("");
+          setSector("");
+          setStatus("");
+        }} />
+        <label className="catalog-search">
+          <span>Pesquisa</span>
+          <span className="search-field">
+            <Search size={17} aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Buscar pesquisa…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </span>
         </label>
-        <select
-          className="input"
-          aria-label="Filtrar setor da pesquisa"
-          value={sector}
-          onChange={(e) => setSector(e.target.value)}
-        >
-          <option value="">Todos os setores</option>
-          {data.sectors.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="input"
-          aria-label="Status da pesquisa"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="">Todos os status</option>
-          <option value="active">Ativas</option>
-          <option value="inactive">Rascunhos / pausadas</option>
-        </select>
-      </div>
+        <Field label="Setor">
+          <select className="input" value={sector} onChange={(e) => setSector(e.target.value)}>
+            <option value="">Todos os setores</option>
+            {data.sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Situação">
+          <select className="input" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="">Todos os status</option>
+            <option value="active">Ativas</option>
+            <option value="inactive">Rascunhos / pausadas</option>
+          </select>
+        </Field>
+      </section>
       <Card
         title="Pesquisas cadastradas"
         subtitle="Selecione uma pesquisa para editar suas perguntas, ordem e publicação."
@@ -934,21 +965,32 @@ export function QuestionEditor({
   );
 }
 
-function ResultResponses({ filters, data }: Pick<AdminProps, "filters" | "data">) {
+function ResultResponses({
+  filters,
+  data,
+  page,
+  review,
+  onPage,
+  onReview,
+}: Pick<AdminProps, "filters" | "data"> & {
+  page: number;
+  review: string;
+  onPage: (page: number) => void;
+  onReview: (review: string) => void;
+}) {
   const [result, setResult] = useState<{ responses: ResponseRow[]; pagination: PaginationInfo } | null>(null);
   const [selected, setSelected] = useState<ResponseRow | null>(null);
-  const [page, setPage] = useState(1);
-  const [review, setReview] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const [sort, setSort] = useState<ResponseSort>("recent");
   const listStart = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     setError("");
     setLoading(true);
-    const query = filterQuery({ ...filters, page: String(page), review });
+    const query = filterQuery({ ...filters, page: String(page), review, sort });
     api<{ responses: ResponseRow[]; pagination: PaginationInfo }>(`/api/responses${query}`, {
       signal: controller.signal,
     }).then((next) => {
@@ -961,17 +1003,19 @@ function ResultResponses({ filters, data }: Pick<AdminProps, "filters" | "data">
       setLoading(false);
     });
     return () => controller.abort();
-  }, [filters, data, page, review, retry]);
+  }, [filters, data, page, review, retry, sort]);
 
   return (
-    <Card title="Avaliações recebidas" className="results-responses-card">
+    <Card
+      title="Avaliações recebidas"
+      subtitle="Abra uma avaliação para consultar as respostas originais."
+      className="results-responses-card"
+    >
       <div className="record-filters" ref={listStart}>
         <Field label="Tipo de avaliação">
-          <select className="input" value={review} onChange={(event) => {
-            setPage(1);
-            setReview(event.target.value);
-          }}>
+          <select className="input" value={review} onChange={(event) => onReview(event.target.value)}>
             <option value="">Todas as avaliações</option>
+            <option value="critical">Avaliações críticas</option>
             <option value="complaints">Com reclamação</option>
             <option value="submitted">Recebidas</option>
             <option value="partial">Parciais</option>
@@ -985,12 +1029,19 @@ function ResultResponses({ filters, data }: Pick<AdminProps, "filters" | "data">
             <button type="button" className="text-button" onClick={() => setRetry((n) => n + 1)}>Tentar novamente</button>
           </>
         ) : loading ? <Loading label="Carregando avaliações…" /> : (
-          <ResponseTable responses={result?.responses ?? []} onSelect={setSelected} />
+          <ResponseTable
+            responses={result?.responses ?? []}
+            onSelect={setSelected}
+            ordering={{ value: sort, onChange: (next) => {
+              setSort(next);
+              onPage(1);
+            } }}
+          />
         )}
       </div>
       {result && !error && (
         <Pagination data={result.pagination} busy={loading} label="Páginas de avaliações" onPage={(next) => {
-          setPage(next);
+          onPage(next);
           listStart.current?.scrollIntoView({ block: "start" });
         }} />
       )}
@@ -1002,12 +1053,16 @@ function ResultResponses({ filters, data }: Pick<AdminProps, "filters" | "data">
 }
 
 export function Results(props: AdminProps) {
+  const query = filterQuery(props.filters);
   const [stats, setStats] = useState<DashboardData | null>(null);
   const [error, setError] = useState("");
+  const [list, setList] = useState({ review: "", page: 1, query });
+  const listSection = useRef<HTMLDivElement>(null);
+  if (list.query !== query) setList({ ...list, page: 1, query });
   useEffect(() => {
     const controller = new AbortController();
     setError("");
-    api<DashboardData>(`/api/dashboard${filterQuery(props.filters)}`, {
+    api<DashboardData>(`/api/dashboard${query}`, {
       signal: controller.signal,
     })
       .then((d) => startTransition(() => setStats(d)))
@@ -1015,83 +1070,82 @@ export function Results(props: AdminProps) {
         if (!controller.signal.aborted) setError(e.message);
       });
     return () => controller.abort();
-  }, [props.filters, props.data]);
-  if (error)
-    return (
-      <p className="error-banner" role="alert">
-        {error}
-      </p>
-    );
-  if (!stats) return <Loading />;
+  }, [query, props.data]);
+  const title = (
+    <PageTitle
+      title="Resultados"
+      description="Analise as avaliações por setor e período."
+      mobileContext="Análise de experiência"
+      action={
+        <button
+          type="button"
+          className="button desktop-page-action"
+          onClick={() => props.onNavigate("/relatorios")}
+        >
+          <ArrowDownToLine size={17} aria-hidden="true" /> Exportar relatório
+        </button>
+      }
+    />
+  );
+  if (error) return <>{title}<p className="error-banner" role="alert">{error}</p></>;
+  if (!stats) return <>{title}<Loading /></>;
   const ratingDistribution = Array.isArray(stats.ratingDistribution)
     ? stats.ratingDistribution
     : [];
   const total = ratingDistribution.reduce((sum, d) => sum + d.count, 0);
-  const responseCount = stats.responseCount ?? 0;
   const criticalCount = stats.criticalCount ?? 0;
-  const resultStats = [
-    {
-      label: "Respostas",
-      value: formatNumber(responseCount),
-      description: "No período selecionado",
-      tone: "responses",
-    },
-    {
-      label: "Satisfação média",
-      value:
-        stats.satisfaction == null
-          ? "Sem dados"
-          : `${formatNumber(stats.satisfaction, 1)} / 5`,
-      description: "Média das notas de 1 a 5",
-      tone: "satisfaction",
-    },
-    {
-      label: "NPS",
-      value: stats.nps == null ? "Sem dados" : formatNumber(stats.nps),
-      description: "Promotores menos detratores",
-      tone: "nps",
-    },
-    {
-      label: "Avaliações críticas",
-      value: formatNumber(criticalCount),
-      description: `NPS de 0 a ${props.data.settings?.lowScoreThreshold ?? 6}`,
-      tone: "critical",
-    },
-  ];
+  const canViewResponses = props.data.permissions.canViewResponses;
+  const setReview = (review: string) => setList({ review, page: 1, query });
+  const openReviews = (review: string) => {
+    setReview(review);
+    listSection.current?.focus({ preventScroll: true });
+    listSection.current?.scrollIntoView({ block: "start" });
+  };
   return (
     <>
-      <PageTitle
-        title="Resultados"
-        description="Analise as avaliações por setor e período."
-        mobileContext="Análise de experiência"
-        action={
-          <button
-            className="button desktop-page-action"
-            onClick={() => props.onNavigate("/relatorios")}
-          >
-            Exportar relatório
-          </button>
-        }
-      />
-      <div className="stats-row">
-        {resultStats.map(({ label, value, description, tone }) => (
-          <Card
-            title={label}
-            className={`result-stat result-stat-${tone}`}
-            key={label}
-          >
-            <strong
-              className={`stat-value ${value === "Sem dados" ? "is-empty" : ""}`}
-            >
-              {value}
-            </strong>
-            <small className="stat-description">{description}</small>
-          </Card>
-        ))}
-      </div>
-      {props.data.permissions.canViewResponses && (
-        <ResultResponses key={filterQuery(props.filters)} filters={props.filters} data={props.data} />
-      )}
+      {title}
+      <dl className="results-metrics" aria-label="Resumo do período">
+          <div>
+            <dt>Respostas</dt>
+            <dd className="results-metric-value">{formatNumber(stats.responseCount ?? 0)}</dd>
+            <dd className="results-metric-note">
+              {canViewResponses ? (
+                <button type="button" className="text-button metric-link" onClick={() => openReviews("")}>
+                  Ver avaliações <ArrowDown size={13} aria-hidden="true" />
+                </button>
+              ) : "No período selecionado"}
+            </dd>
+          </div>
+          <div>
+            <dt>Satisfação média</dt>
+            <dd className={`results-metric-value${stats.satisfaction == null ? " is-empty" : ""}`}>
+              {stats.satisfaction == null ? "Sem dados" : (
+                <>{formatNumber(stats.satisfaction, 1)} <span>/ 5</span></>
+              )}
+            </dd>
+            <dd className="results-metric-note">Média das notas de 1 a 5</dd>
+          </div>
+          <div>
+            <dt>NPS</dt>
+            <dd className={`results-metric-value${stats.nps == null ? " is-empty" : ""}`}>
+              {stats.nps == null ? "Sem dados" : formatNumber(stats.nps)}
+            </dd>
+            <dd className="results-metric-note">Promotores menos detratores</dd>
+          </div>
+          <div>
+            <dt>Avaliações críticas</dt>
+            <dd className={`results-metric-value${criticalCount > 0 ? " is-critical" : ""}`}>
+              {formatNumber(criticalCount)}
+            </dd>
+            <dd className="results-metric-note">
+              {canViewResponses && criticalCount > 0 ? (
+                <button type="button" className="text-button metric-link" onClick={() => openReviews("critical")} aria-label="Ver críticas">
+                  NPS de 0 a {props.data.settings?.lowScoreThreshold ?? 6} <ArrowDown size={13} aria-hidden="true" />
+                </button>
+              ) : `NPS de 0 a ${props.data.settings?.lowScoreThreshold ?? 6}`}
+            </dd>
+          </div>
+      </dl>
       <div className="results-grid">
         <Card
           title="Evolução das respostas"
@@ -1107,7 +1161,7 @@ export function Results(props: AdminProps) {
             {[...ratingDistribution]
               .sort((a, b) => b.score - a.score)
               .map((d) => (
-                <div key={d.score}>
+                <div key={d.score} data-score={d.score}>
                   <span>
                     {d.score} ·{" "}
                     {
@@ -1123,12 +1177,25 @@ export function Results(props: AdminProps) {
                       }}
                     />
                   </div>
-                  <small>{d.count}</small>
+                  <small>{formatNumber(d.count)}</small>
                 </div>
               ))}
           </div>
         </Card>
       </div>
+      {canViewResponses && (
+        <div className="results-list-anchor" ref={listSection} tabIndex={-1} role="region" aria-label="Avaliações recebidas">
+          <ResultResponses
+            key={query}
+            filters={props.filters}
+            data={props.data}
+            page={list.page}
+            review={list.review}
+            onPage={(page) => setList({ ...list, page, query })}
+            onReview={setReview}
+          />
+        </div>
+      )}
     </>
   );
 }

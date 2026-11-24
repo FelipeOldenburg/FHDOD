@@ -1,7 +1,7 @@
 .tv-wall {
   --wall-ink: #232429;
   --wall-muted: #62646d;
-  --wall-surface: #f1f1f3;
+  --wall-surface: #f3f1f4;
   --wall-red: #9b001b;
   background: var(--wall-surface);
   color: var(--wall-ink);
@@ -41,7 +41,7 @@
 .tv-wall-heading {
   min-width: 0;
   padding-left: clamp(18px, 2vw, 30px);
-  border-left: 1px solid #d7d8dc;
+  border-left: 3px solid var(--wall-red);
 }
 
 .tv-wall-heading h1 {
@@ -287,6 +287,7 @@
 .tv-wall-participation {
   min-height: 0;
   background: #fff;
+  border: 1px solid #e6e2e7;
   border-radius: 16px;
   padding: clamp(22px, 2vw, 38px);
   overflow: hidden;

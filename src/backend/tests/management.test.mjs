@@ -127,7 +127,8 @@ test("pagina mais de mil avaliações e manifestações com contagens e isolamen
       db,
       `INSERT INTO responses(id,survey_id,sector_id,token_hash,status,questions_json,created_at,submitted_at,nps,comment,manifestation_type)
        SELECT concat(s.sector_id,'-',i),s.id,s.sector_id,concat(s.sector_id,'-',i),'submitted',
-              s.questions_json,'2040-01-01T12:00:00Z','2040-01-01T12:00:00Z',4,'Relato de teste',
+              s.questions_json,'2040-01-01T12:00:00Z','2040-01-01T12:00:00Z',
+              CASE WHEN i=1001 THEN NULL ELSE 4 END,'Relato de teste',
               CASE WHEN i=1001 THEN 'sugestao' ELSE 'reclamacao' END
        FROM surveys s CROSS JOIN generate_series(1, 1001) i WHERE s.sector_id=?`,
       sector,
@@ -152,8 +153,17 @@ test("pagina mais de mil avaliações e manifestações com contagens e isolamen
   const dashboard = await api("/dashboard?from=2040-01-01&to=2040-01-01", { cookie });
   assert.equal(dashboard.status, 200);
   assert.equal(dashboard.body.responseCount, 1001);
+  assert.equal(dashboard.body.criticalCount, 1000);
   assert.equal(dashboard.body.recent.length, 8);
   assert.equal(dashboard.body.manifestationCounts.reclamacao, 1000);
+  const critical = await api("/responses?page=1&review=critical", { cookie });
+  assert.equal(critical.status, 200);
+  assert.deepEqual(critical.body.pagination, { page: 1, pageSize: 25, total: 1000 });
+  assert.ok(critical.body.responses.every((row) => row.sectorId === "sector-a" && row.nps === 4));
+  const ranked = await api("/responses?page=1&sort=nps-high", { cookie });
+  assert.equal(ranked.status, 200);
+  assert.ok(ranked.body.responses.every((row) => row.nps === 4));
+  assert.equal((await api("/responses?page=1&sort=unexpected", { cookie })).status, 400);
   const cases = await api("/manifestations?page=40&type=reclamacao&status=nova", { cookie });
   assert.equal(cases.status, 200);
   assert.deepEqual(cases.body.pagination, { page: 40, pageSize: 25, total: 1000 });

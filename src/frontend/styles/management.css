@@ -15,7 +15,9 @@
 .ombudsman-layout {
   grid-template-columns: minmax(0, 1.6fr) minmax(310px, 1fr);
 }
-.reports-layout,
+.reports-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
 .settings-layout {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
@@ -36,6 +38,7 @@
 }
 .settings-quick-actions .tv-settings-callout {
   min-width: 0;
+  border: 1px solid var(--panel-line);
 }
 .settings-quick-actions .tv-settings-callout p {
   max-width: 42ch;
@@ -569,12 +572,41 @@
   margin: 8px 0 0;
 }
 .report-form {
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.1fr) repeat(2, minmax(0, 0.8fr)) minmax(0, 1.4fr);
+  gap: 16px;
+  align-items: end;
+  margin-top: 16px;
+}
+.report-form > .error-banner {
+  grid-column: 1 / -1;
+}
+.report-form > p:not(.error-banner) {
+  grid-column: 1 / -2;
 }
 .report-form .export-button {
-  justify-self: stretch;
-  justify-content: center;
-  margin-top: 22px;
+  justify-self: end;
+  margin: 0;
+}
+.report-form > .field { min-width: 0; }
+.report-form input[type="date"] { min-width: 0; }
+
+@media (min-width: 651px) {
+  .app-shell .management-stats .ombudsman-indicator {
+    background: #fff5f7;
+  }
+  .app-shell .management-stats .ombudsman-indicator:nth-child(2) {
+    background: #fffaf0;
+  }
+  .app-shell .management-stats .ombudsman-indicator:nth-child(3) {
+    background: #f3fbf4;
+  }
+  .management-stats .ombudsman-indicator .small {
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+.manifestation-panel {
+  align-self: start;
 }
 .export-inclusions {
   list-style: none;
@@ -704,9 +736,61 @@
   }
 }
 @media (max-width: 720px) {
-  .reports-layout {
+  .report-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .report-form > .field:first-of-type,
+  .report-form > .field:last-of-type,
+  .report-form > p,
+  .report-form > .export-button {
+    grid-column: 1 / -1;
+  }
+  .report-form .export-button {
+    justify-self: start;
+  }
+}
+@media (max-width: 650px) {
+  .sectors-layout .sector-management-stack .data-table {
+    min-width: 0;
+  }
+  .sectors-layout .sector-management-stack .data-table thead {
+    display: none;
+  }
+  .sectors-layout .sector-management-stack .data-table tbody {
+    display: grid;
+  }
+  .sectors-layout .sector-management-stack .data-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 8px;
+    padding-block: 10px;
+    border-top: 1px solid var(--panel-line);
+  }
+  .sectors-layout .sector-management-stack .data-table td {
+    padding: 5px 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .sectors-layout .sector-management-stack .data-table td:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .sectors-layout .sector-management-stack .data-table td[data-label] {
+    grid-column: 1 / -1;
+  }
+  .sectors-layout .sector-management-stack .data-table td[data-label]::before {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    content: attr(data-label);
+  }
+}
+@media (max-width: 360px) {
+  .report-form {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+@media (max-width: 720px) {
   .management-stats {
     gap: 8px;
   }

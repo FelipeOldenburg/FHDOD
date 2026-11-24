@@ -36,6 +36,7 @@ import {
   Brand,
   Card,
   Field,
+  FilterHeader,
   Loading,
   PageTitle,
   PasswordField,
@@ -72,13 +73,20 @@ const links = [
   { path: "/tv-wall", name: "TV Wall", icon: MonitorUp },
 ];
 function initialFilters(): Filters {
-  const date = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date());
+  const date = dateValue(new Date());
   return { sectorId: "", from: `${date.slice(0, 7)}-01`, to: date };
 }
 
-type PeriodPreset = "month" | "7days" | "30days" | "custom";
+const periodOptions = [
+  { value: "today", label: "Hoje" },
+  { value: "7days", label: "7 dias" },
+  { value: "month", label: "Este mês" },
+  { value: "30days", label: "30 dias" },
+  { value: "90days", label: "90 dias" },
+] as const;
+type DatePreset = (typeof periodOptions)[number]["value"];
+type PeriodPreset = DatePreset | "custom";
+const periodDays = { today: 1, "7days": 7, "30days": 30, "90days": 90 };
 
 function dateValue(date: Date) {
   return new Intl.DateTimeFormat("sv-SE", {
@@ -86,21 +94,20 @@ function dateValue(date: Date) {
   }).format(date);
 }
 
-function periodPreset(filters: Filters): PeriodPreset {
-  const today = new Date(`${dateValue(new Date())}T12:00:00`);
-  const current = initialFilters();
-  if (filters.from === current.from && filters.to === current.to) return "month";
-  for (const [days, preset] of [
-    [7, "7days"],
-    [30, "30days"],
-  ] as const) {
-    const from = new Date(today);
-    from.setDate(today.getDate() - days + 1);
-    if (filters.from === dateValue(from) && filters.to === dateValue(today)) {
-      return preset;
-    }
-  }
-  return "custom";
+function presetRange(preset: DatePreset, today: string) {
+  if (preset === "month") return { from: `${today.slice(0, 7)}-01`, to: today };
+  const from = new Date(`${today}T12:00:00Z`);
+  from.setUTCDate(from.getUTCDate() - periodDays[preset] + 1);
+  return { from: from.toISOString().slice(0, 10), to: today };
+}
+
+function periodPreset(filters: Filters, preferred: DatePreset, today: string): PeriodPreset {
+  const matches = (value: DatePreset) => {
+    const range = presetRange(value, today);
+    return filters.from === range.from && filters.to === range.to;
+  };
+  if (matches(preferred)) return preferred;
+  return periodOptions.find(({ value }) => matches(value))?.value ?? "custom";
 }
 
 function formattedPeriod(filters: Filters) {
@@ -111,7 +118,12 @@ function formattedPeriod(filters: Filters) {
       month: "short",
       year: "numeric",
     }).format(new Date(`${value}T00:00:00Z`));
-  return `${format(filters.from)} a ${format(filters.to)}`;
+  if (filters.from && filters.to && filters.from !== filters.to)
+    return `${format(filters.from)} a ${format(filters.to)}`;
+  if (filters.from && filters.to) return format(filters.from);
+  if (filters.from) return `A partir de ${format(filters.from)}`;
+  if (filters.to) return `Até ${format(filters.to)}`;
+  return "Qualquer data";
 }
 
 function Authentication({
@@ -382,6 +394,7 @@ function AdminApp() {
   const [menu, setMenu] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [mobileDateFiltersOpen, setMobileDateFiltersOpen] = useState(false);
+  const [preferredPeriod, setPreferredPeriod] = useState<DatePreset>("month");
   const notify = useCallback((message: string) => setToast(message), []);
   const refresh = useCallback(async () => {
     const auth = await api<{ user: User }>("/api/auth/me");
@@ -555,6 +568,7 @@ function AdminApp() {
     onNavigate: navigate,
   };
   const showFilters = ["/", "/resultados", "/ouvidoria"].includes(route);
+  const filterHeading = route === "/ouvidoria" ? "Filtrar manifestações" : "Filtrar resultados";
   const initials = user.name
     .split(" ")
     .filter(Boolean)
@@ -582,20 +596,20 @@ function AdminApp() {
     { path: "/configuracoes", name: "Perfil", icon: UserRound },
   ];
   const routeKey = route === "/" ? "overview" : route.split("/")[1];
+  const today = dateValue(new Date());
+  const selectedPeriod = periodPreset(filters, preferredPeriod, today);
+  const resetFilters = () => {
+    setFilters(initialFilters());
+    setPreferredPeriod("month");
+    setMobileDateFiltersOpen(false);
+  };
   const updatePeriodPreset = (preset: PeriodPreset) => {
-    if (preset === "month") {
-      setFilters(initialFilters());
-      setMobileDateFiltersOpen(false);
-      return;
-    }
     if (preset === "custom") {
       setMobileDateFiltersOpen(true);
       return;
     }
-    const today = new Date(`${dateValue(new Date())}T12:00:00`);
-    const from = new Date(today);
-    from.setDate(today.getDate() - (preset === "7days" ? 6 : 29));
-    setFilters({ ...filters, from: dateValue(from), to: dateValue(today) });
+    setFilters((current) => ({ ...current, ...presetRange(preset, today) }));
+    setPreferredPeriod(preset);
     setMobileDateFiltersOpen(false);
   };
   return (
@@ -758,7 +772,8 @@ function AdminApp() {
               tabIndex={-1}
             >
               {showFilters && (
-                <div className="global-filters">
+                <section className="global-filters" aria-label={filterHeading}>
+                  <FilterHeader title={filterHeading} onReset={resetFilters} />
                   <label>
                     <span>Setor</span>
                     <select
@@ -782,19 +797,27 @@ function AdminApp() {
                     </select>
                   </label>
                   <div className="filter-period">
+                    <fieldset className="desktop-period-presets">
+                      <legend>Período das respostas</legend>
+                      <div>
+                        {periodOptions.filter(({ value }) => value !== "30days").map(({ value, label }) => (
+                          <button key={value} type="button" aria-pressed={selectedPeriod === value} onClick={() => updatePeriodPreset(value)}>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </fieldset>
                     <label className="mobile-period-preset">
                       <span>Período</span>
                       <select
                         className="input"
                         aria-label="Período dos indicadores"
-                        value={periodPreset(filters)}
+                        value={selectedPeriod}
                         onChange={(event) =>
                           updatePeriodPreset(event.target.value as PeriodPreset)
                         }
                       >
-                        <option value="month">Este mês</option>
-                        <option value="7days">Últimos 7 dias</option>
-                        <option value="30days">Últimos 30 dias</option>
+                        {periodOptions.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
                         <option value="custom">Personalizado</option>
                       </select>
                     </label>
@@ -817,16 +840,6 @@ function AdminApp() {
                         mobileDateFiltersOpen ? " mobile-open" : ""
                       }`}
                     >
-                      <div className="filter-period-heading">
-                        <span>Período das respostas</span>
-                        <button
-                          type="button"
-                          className="text-button"
-                          onClick={() => setFilters(initialFilters())}
-                        >
-                          Este mês
-                        </button>
-                      </div>
                       <fieldset className="date-range">
                         <legend className="sr-only">Período das respostas</legend>
                         <label>
@@ -858,7 +871,7 @@ function AdminApp() {
                       </fieldset>
                     </div>
                   </div>
-                </div>
+                </section>
               )}
               {route === "/" ? (
                 <>

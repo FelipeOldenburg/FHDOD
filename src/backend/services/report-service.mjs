@@ -203,7 +203,7 @@ export function createReportService({ all }, { settings, audit }) {
       count: count(submittedRatings, (row) => row.score === i + 1),
     }));
     const lowScoreThreshold = (await settings()).lowScoreThreshold;
-    const criticalCount = count(submitted, (row) => row.nps <= lowScoreThreshold);
+    const criticalCount = count(submitted, (row) => row.nps != null && row.nps <= lowScoreThreshold);
     const responseCount = count(submitted);
     const previous = monthly.at(-2)?.count || 0;
     const recent = await responseRows(user, url, 8);
@@ -247,24 +247,38 @@ export function createReportService({ all }, { settings, audit }) {
     const review = url.searchParams.get("review");
     const predicates = {
       complaints: "r.manifestation_type='reclamacao' AND m.response_id IS NOT NULL",
+      critical: "r.status='submitted' AND r.nps<=?",
       submitted: "r.status='submitted'",
       partial: "r.status='partial'",
     };
     if (review && !Object.hasOwn(predicates, review))
       fail(400, "Filtro de avaliações inválido.");
+    const sort = url.searchParams.get("sort") || "recent";
+    const sorting = {
+      recent: "COALESCE(r.submitted_at,r.created_at) DESC",
+      oldest: "COALESCE(r.submitted_at,r.created_at) ASC",
+      "nps-high": "r.nps DESC NULLS LAST",
+      "nps-low": "r.nps ASC NULLS LAST",
+      "status-asc": "r.status ASC",
+      "status-desc": "r.status DESC",
+    };
+    if (!Object.hasOwn(sorting, sort)) fail(400, "Ordenação de avaliações inválida.");
     const where = review
       ? `${scope.sql || "WHERE TRUE"} AND ${predicates[review]}`
       : scope.sql;
+    const params = review === "critical"
+      ? [...scope.params, (await settings()).lowScoreThreshold]
+      : scope.params;
     const source = "FROM responses r JOIN sectors s ON s.id=r.sector_id JOIN surveys v ON v.id=r.survey_id LEFT JOIN manifestations m ON m.response_id=r.id";
     const [{ total }] = await all(
       `SELECT COUNT(*) AS total ${source} ${where}`,
-      ...scope.params,
+      ...params,
     );
     const pagination = paginate(url.searchParams, Number(total));
     const rows = await all(
       `SELECT r.*,s.name AS sector_name,v.title AS survey_title,m.status AS manifestation_status ${source} ${where}
-       ORDER BY COALESCE(r.submitted_at,r.created_at) DESC,r.id DESC LIMIT ? OFFSET ?`,
-      ...scope.params,
+       ORDER BY ${sorting[sort]},r.id DESC LIMIT ? OFFSET ?`,
+      ...params,
       pagination.pageSize,
       pageOffset(pagination),
     );

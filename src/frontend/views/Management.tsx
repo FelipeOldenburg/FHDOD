@@ -18,6 +18,7 @@ import {
   Plus,
   QrCode,
   Save,
+  Search,
   ShieldCheck,
 } from "lucide-react";
 import QRCode from "qrcode";
@@ -30,6 +31,7 @@ import {
   StatusBadge,
   PageTitle,
   Field,
+  FilterHeader,
   PasswordField,
 } from "../components/components";
 import { Pagination } from "../components/Pagination";
@@ -184,6 +186,8 @@ function CredentialModal({
 
 export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
   const [selectedId, setSelectedId] = useState(data.sectors[0]?.id ?? "");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
   const [editing, setEditing] = useState<Sector | "new" | null>(null);
   const [qr, setQr] = useState("");
   const [qrError, setQrError] = useState("");
@@ -202,8 +206,11 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
     editingAdmins.length > 1 ||
     editingAdmins.some((user) => user.sectorIds.length !== 1);
   const editingAdmin = legacyAccess ? undefined : editingAdmins[0];
-  const selected =
-    data.sectors.find((s) => s.id === selectedId) ?? data.sectors[0];
+  const sectors = data.sectors.filter((sector) =>
+    sector.name.toLocaleLowerCase("pt-BR").includes(search.trim().toLocaleLowerCase("pt-BR")) &&
+    (!status || sector.active === (status === "active")),
+  );
+  const selected = sectors.find((sector) => sector.id === selectedId) ?? sectors[0];
   const link = selected
     ? `${window.location.origin}/avaliar/${selected.slug}`
     : "";
@@ -322,13 +329,33 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
           )
         }
       />
+      <section className="catalog-filters" aria-label="Filtrar setores">
+        <FilterHeader title="Filtrar setores" onReset={() => {
+          setSearch("");
+          setStatus("");
+        }} />
+        <label className="catalog-search">
+          <span>Setor</span>
+          <span className="search-field">
+            <Search size={17} aria-hidden="true" />
+            <input type="search" placeholder="Buscar setor…" value={search} onChange={(event) => setSearch(event.target.value)} />
+          </span>
+        </label>
+        <Field label="Situação">
+          <select className="input" value={status} onChange={(event) => setStatus(event.target.value)}>
+            <option value="">Todos os setores</option>
+            <option value="active">Ativos</option>
+            <option value="inactive">Inativos</option>
+          </select>
+        </Field>
+      </section>
       <div className="management-split sectors-layout">
         <div className="sector-management-stack">
           <Card
             title="Setores do hospital"
             subtitle="Login administrativo e pesquisa para pacientes pertencem ao setor."
           >
-            {data.sectors.length ? (
+            {sectors.length ? (
               <div className="table-wrap">
                 <table className="data-table">
                   <thead>
@@ -343,7 +370,7 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.sectors.map((sector) => {
+                    {sectors.map((sector) => {
                       const admins = adminsFor(sector.id);
                       const admin =
                         admins.length === 1 && admins[0].sectorIds.length === 1
@@ -368,7 +395,7 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
                               {sector.name}
                             </button>
                           </td>
-                          <td>{survey?.title ?? "Sem pesquisa ativa"}</td>
+                          <td data-label="Pesquisa">{survey?.title ?? "Sem pesquisa ativa"}</td>
                           <td>
                             <StatusBadge
                               tone={sector.active ? "green" : "neutral"}
@@ -377,7 +404,7 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
                             </StatusBadge>
                           </td>
                           {data.permissions.canManageUsers && (
-                            <td>
+                            <td data-label="Login do setor">
                               {admin?.email ??
                                 (admins.length
                                   ? "Corrigir acesso em Usuários"
@@ -404,10 +431,11 @@ export function Sectors({ data, onRefresh, notify, onNavigate }: CommonProps) {
                 </table>
               </div>
             ) : (
-              <EmptyState
-                title="Cadastre o primeiro setor"
-                description="Depois, crie a pesquisa que os pacientes vão responder."
-              />
+              data.sectors.length ? (
+                <EmptyState title="Nenhum setor encontrado" description="Ajuste os filtros para ver outros setores." />
+              ) : (
+                <EmptyState title="Cadastre o primeiro setor" description="Depois, crie a pesquisa que os pacientes vão responder." />
+              )
             )}
           </Card>
           {selected && data.permissions.canManageSectors && (
@@ -1083,16 +1111,14 @@ function OmbudsmanContent({ data, filters, notify }: CommonProps) {
                 counts.resolvida,
               ],
             ].map(([label, count]) => (
-              <Card key={label}>
+              <Card key={label} className="ombudsman-indicator">
                 <span className="muted small">{label}</span>
                 <strong>{count}</strong>
               </Card>
             ))}
           </div>
           <div className="management-split ombudsman-layout">
-            <Card
-              title="Manifestações"
-            >
+            <Card title="Manifestações" subtitle="Abra um registro para acompanhar o atendimento.">
               <div className="record-filters" ref={listStart}>
                 <Field label="Tipo">
                   <select className="input" value={typeFilter} disabled={busy} onChange={(event) => {
@@ -1190,6 +1216,7 @@ function OmbudsmanContent({ data, filters, notify }: CommonProps) {
               )}
             </Card>
             <Card
+              className="manifestation-panel"
               title={
                 selected
                   ? `Manifestação #${selected.id.slice(0, 8).toUpperCase()}`
@@ -1473,39 +1500,18 @@ export function Reports({ data, filters, notify }: CommonProps) {
   return (
     <>
       <PageTitle
-        title="Relatórios e exportação"
+        title="Relatórios"
         description="Exporte os resultados respeitando os filtros e as permissões do seu perfil."
         mobileContext="Análise e dados"
       />
       <div className="management-split reports-layout">
-        <Card
-          title="Novo relatório"
-          subtitle="Escolha os critérios da exportação."
-        >
+        <Card className="report-filters">
+          <FilterHeader title="Configurar exportação" onReset={() => {
+            setCriteria({ ...filters });
+            setMode("summary");
+          }} />
           <form onSubmit={exportFile} className="management-form report-form">
             <FormError value={error} />
-            <div className="form-grid">
-              <Field label="Data inicial">
-                <input
-                  className="input"
-                  type="date"
-                  value={criteria.from}
-                  onChange={(e) =>
-                    setCriteria((c) => ({ ...c, from: e.target.value }))
-                  }
-                />
-              </Field>
-              <Field label="Data final">
-                <input
-                  className="input"
-                  type="date"
-                  value={criteria.to}
-                  onChange={(e) =>
-                    setCriteria((c) => ({ ...c, to: e.target.value }))
-                  }
-                />
-              </Field>
-            </div>
             <Field label="Setor">
               <select
                 className="input"
@@ -1521,6 +1527,14 @@ export function Reports({ data, filters, notify }: CommonProps) {
                   </option>
                 ))}
               </select>
+            </Field>
+            <Field label="De">
+              <input className="input" type="date" value={criteria.from} max={criteria.to || undefined}
+                onChange={(event) => setCriteria((current) => ({ ...current, from: event.target.value }))} />
+            </Field>
+            <Field label="Até">
+              <input className="input" type="date" value={criteria.to} min={criteria.from || undefined}
+                onChange={(event) => setCriteria((current) => ({ ...current, to: event.target.value }))} />
             </Field>
             <Field label="Conteúdo">
               <select

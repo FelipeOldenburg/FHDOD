@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
-import { Eye, EyeOff, Inbox, X, LoaderCircle } from "lucide-react";
+import { Eye, EyeOff, Inbox, X, LoaderCircle, RotateCw } from "lucide-react";
 
 export function usePageTransition(view: string) {
   const ref = useRef<HTMLElement>(null);
@@ -183,6 +183,17 @@ export function Card({
     </section>
   );
 }
+export function FilterHeader({ title, onReset }: { title: string; onReset: () => void }) {
+  return (
+    <header className="filters-header">
+      <h2>{title}</h2>
+      <button type="button" className="text-button filters-reset" onClick={onReset}>
+        <RotateCw size={16} aria-hidden="true" /> Limpar filtros
+      </button>
+    </header>
+  );
+}
+
 export function PageTitle({
   title,
   description,
