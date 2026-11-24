@@ -42,6 +42,7 @@ import type {
   Filters,
   Manifestation,
   PaginationInfo,
+  ResponseRow,
   Role,
   Sector,
   Settings,
@@ -1336,144 +1337,28 @@ export function Reports({ data, filters, notify }: CommonProps) {
         throw new Error("A data inicial deve anteceder a data final.");
       const params = filterQuery(criteria);
       const dashboard = await api<DashboardData>(`/api/dashboard${params}`);
-      const ExcelJS = (await import("exceljs")).default;
-      const workbook = new ExcelJS.Workbook();
-      workbook.creator = "FHDOD";
-      workbook.created = new Date();
-      const summary = workbook.addWorksheet("Resumo geral");
-      summary.addRows([
-        ["FHDOD — experiência do paciente"],
-        ["Período inicial", criteria.from || "Todos"],
-        ["Período final", criteria.to || "Todos"],
-        [
-          "Setor",
-          data.sectors.find((s) => s.id === criteria.sectorId)?.name ??
-            "Todos os setores autorizados",
-        ],
-        ["Base de data", "Envio da pesquisa"],
-        ["Exportado em", new Date().toISOString()],
-        [],
-        ["Indicador", "Valor"],
-        ["Respostas enviadas", dashboard.responseCount],
-        ["Respostas parciais", dashboard.partialCount],
-        ["NPS", dashboard.nps],
-        ["Satisfação (1 a 5)", dashboard.satisfaction],
-        ["Manifestações pendentes", dashboard.pendingCount],
-        [
-          "Ambiente",
-          data.demo
-            ? "Demonstração — dados fictícios"
-            : "Instalação do hospital",
-        ],
+      const detailed = mode === "detailed" && data.permissions.canExportDetails;
+      const [{ createReportWorkbook }, responseData, manifestationData] = await Promise.all([
+        import("../services/report-workbook"),
+        detailed ? api<{ responses: ResponseRow[] }>(`/api/responses${params}`) : undefined,
+        detailed && data.permissions.canViewManifestations
+          ? api<{ manifestations: Manifestation[] }>(`/api/manifestations${params}`)
+          : undefined,
       ]);
-      const sectors = workbook.addWorksheet("Resultados por setor");
-      sectors.addRow(["Setor", "Respostas", "NPS", "Satisfação (1 a 5)"]);
-      dashboard.bySector.forEach((sector) =>
-        sectors.addRow([
-          sector.name,
-          sector.count,
-          sector.nps,
-          sector.satisfaction,
-        ]),
-      );
-      const distribution = workbook.addWorksheet("Distribuição NPS");
-      distribution.addRow(["Nota", "Quantidade"]);
-      dashboard.distribution.forEach((item) =>
-        distribution.addRow([item.score, item.count]),
-      );
-      if (mode === "detailed" && data.permissions.canExportDetails) {
-        const { responses } = await api<{
-          responses: import("../models/types").ResponseRow[];
-        }>(`/api/responses${params}`);
-        const sheet = workbook.addWorksheet("Avaliações e respostas");
-        sheet.addRow([
-          "Registro",
-          "Setor",
-          "Pesquisa",
-          "Situação",
-          "Data do atendimento",
-          "Horário do atendimento",
-          "Turno",
-          "Início (UTC)",
-          "Envio (UTC)",
-          "NPS",
-          "Pergunta",
-          "Categoria",
-          "Tipo",
-          "Resposta",
-          "Respondido em (UTC)",
-        ]);
-        for (const row of responses) {
-          const base = [
-            row.id,
-            row.sectorName,
-            row.surveyTitle,
-            row.status === "submitted" ? "Enviada" : "Parcial",
-            row.attendedOn || "",
-            row.attendedTime || "",
-            row.shift || "",
-            row.createdAt,
-            row.submittedAt || "",
-            row.nps,
-          ];
-          if (row.answers.length)
-            for (const answer of row.answers)
-              sheet.addRow([
-                ...base,
-                answer.questionText,
-                answer.category,
-                answer.type,
-                typeof answer.value === "boolean"
-                  ? answer.value
-                    ? "Sim"
-                    : "Não"
-                  : answer.value,
-                answer.answeredAt,
-              ]);
-          else sheet.addRow(base);
-        }
-        if (data.permissions.canViewManifestations) {
-          const { manifestations } = await api<{
-            manifestations: Manifestation[];
-          }>(`/api/manifestations${params}`);
-          const sheet = workbook.addWorksheet("Ouvidoria");
-          sheet.addRow([
-            "Registro",
-            "Setor",
-            "Tipo",
-            "Relato original",
-            "Situação",
-            "Retorno solicitado",
-            ...(data.permissions.canViewContacts ? ["Telefone"] : []),
-            "Observação interna",
-            "Recebido em (UTC)",
-            "Atualizado em (UTC)",
-          ]);
-          for (const row of manifestations)
-            sheet.addRow([
-              row.id,
-              row.sectorName,
-              typeNames[row.type] ?? row.type,
-              row.comment,
-              statusNames[row.status],
-              row.wantsContact ? "Sim" : "Não",
-              ...(data.permissions.canViewContacts ? [row.phone || ""] : []),
-              row.internalNote,
-              row.createdAt,
-              row.updatedAt,
-            ]);
-        }
-      }
-      for (const sheet of workbook.worksheets) {
-        sheet.views = [{ state: "frozen", ySplit: 1 }];
-        sheet.getRow(1).font = { bold: true, color: { argb: "FFD92742" } };
-        sheet.columns.forEach((column) => {
-          column.width = 25;
-        });
-        sheet.eachRow((row) => {
-          row.alignment = { vertical: "top", wrapText: true };
-        });
-      }
+      const workbook = createReportWorkbook({
+        dashboard,
+        criteria,
+        sectorName: data.sectors.find((sector) => sector.id === criteria.sectorId)?.name ?? "Todos os setores autorizados",
+        hospitalName: data.settings?.hospitalName,
+        demo: data.demo,
+        responses: responseData?.responses,
+        ombudsman: manifestationData && {
+          records: manifestationData.manifestations,
+          includeContacts: data.permissions.canViewContacts,
+          statusNames,
+          typeNames,
+        },
+      });
       const bytes = await workbook.xlsx.writeBuffer();
       await api("/api/exports", {
         method: "POST",
