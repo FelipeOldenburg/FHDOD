@@ -153,7 +153,7 @@ Cartões comuns usam a diferença entre branco e cinza para separar áreas. Menu
 
 Botões administrativos mudam cor em 0.18s e deslocam 1px ao pressionar. Controles públicos mudam cor em 0.15s. `prefers-reduced-motion` reduz as transições e animações.
 
-As abas administrativas usam a transição de visualização do React no conteúdo principal: a tela anterior permanece opaca enquanto a próxima entra em 200ms, sem deslocamento vertical e com composição normal das imagens. Isso mantém o fundo coberto durante toda a troca. Cabeçalho e navegação permanecem estáveis. Cliques sucessivos são coordenados pelo React; a navegação de histórico continua funcional mesmo quando o navegador não anima essa troca. Com `prefers-reduced-motion`, não há animação.
+O conteúdo administrativo entra em 170ms, com uma variação leve de opacidade e posição fixa. O cabeçalho mantém sua posição e a navegação sinaliza a aba ativa pela cor. A troca de tela mantém os controles disponíveis e respeita o histórico do navegador e a preferência por movimento reduzido.
 
 As etapas e perguntas públicas entram em 200ms, com deslocamento vertical de 6px a 0 e opacidade constante, usando a mesma curva. Uma nova tela cancela a animação anterior; com redução de movimento, o conteúdo aparece diretamente. O foco acompanha o título ao carregar a pesquisa e ao trocar de etapa. Seleção também usa contorno e peso de texto, inclusive com cores forçadas do sistema.
 

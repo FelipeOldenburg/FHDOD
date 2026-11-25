@@ -1,9 +1,7 @@
 import {
-  startTransition,
   useCallback,
   useEffect,
   useState,
-  ViewTransition,
 } from "react";
 import type { FormEvent } from "react";
 import {
@@ -465,8 +463,8 @@ function AdminApp() {
         return;
       setDirty(false);
       setMenu(false);
-      startTransition(() => setRoute(path));
       window.history.pushState({}, "", path);
+      setRoute(path);
       window.scrollTo({ top: 0 });
     },
     [dirty],
@@ -478,7 +476,7 @@ function AdminApp() {
         return;
       }
       setDirty(false);
-      startTransition(() => setRoute(window.location.pathname));
+      setRoute(window.location.pathname);
     };
     window.addEventListener("popstate", pop);
     return () => window.removeEventListener("popstate", pop);
@@ -765,189 +763,188 @@ function AdminApp() {
               </button>
             </div>
           </aside>
-          <ViewTransition name="admin-content">
-            <main
-              id="conteudo"
-              className={`route-content route-${routeKey}`}
-              tabIndex={-1}
-            >
-              {showFilters && (
-                <section className="global-filters" aria-label={filterHeading}>
-                  <FilterHeader title={filterHeading} onReset={resetFilters} />
-                  <label>
-                    <span>Setor</span>
+          <main
+            key={route}
+            id="conteudo"
+            className={`route-content route-${routeKey}`}
+            tabIndex={-1}
+          >
+            {showFilters && (
+              <section className="global-filters" aria-label={filterHeading}>
+                <FilterHeader title={filterHeading} onReset={resetFilters} />
+                <label>
+                  <span>Setor</span>
+                  <select
+                    className="input"
+                    aria-label="Setor dos indicadores"
+                    value={filters.sectorId}
+                    onChange={(e) =>
+                      setFilters({ ...filters, sectorId: e.target.value })
+                    }
+                  >
+                    <option value="">
+                      {user.role === "superadmin"
+                        ? "Todos os setores"
+                        : "Setores autorizados"}
+                    </option>
+                    {data.sectors.map((sector) => (
+                      <option key={sector.id} value={sector.id}>
+                        {sector.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="filter-period">
+                  <fieldset className="desktop-period-presets">
+                    <legend>Período das respostas</legend>
+                    <div>
+                      {periodOptions.filter(({ value }) => value !== "30days").map(({ value, label }) => (
+                        <button key={value} type="button" aria-pressed={selectedPeriod === value} onClick={() => updatePeriodPreset(value)}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <label className="mobile-period-preset">
+                    <span>Período</span>
                     <select
                       className="input"
-                      aria-label="Setor dos indicadores"
-                      value={filters.sectorId}
-                      onChange={(e) =>
-                        setFilters({ ...filters, sectorId: e.target.value })
+                      aria-label="Período dos indicadores"
+                      value={selectedPeriod}
+                      onChange={(event) =>
+                        updatePeriodPreset(event.target.value as PeriodPreset)
                       }
                     >
-                      <option value="">
-                        {user.role === "superadmin"
-                          ? "Todos os setores"
-                          : "Setores autorizados"}
-                      </option>
-                      {data.sectors.map((sector) => (
-                        <option key={sector.id} value={sector.id}>
-                          {sector.name}
-                        </option>
-                      ))}
+                      {periodOptions.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+                      <option value="custom">Personalizado</option>
                     </select>
                   </label>
-                  <div className="filter-period">
-                    <fieldset className="desktop-period-presets">
-                      <legend>Período das respostas</legend>
-                      <div>
-                        {periodOptions.filter(({ value }) => value !== "30days").map(({ value, label }) => (
-                          <button key={value} type="button" aria-pressed={selectedPeriod === value} onClick={() => updatePeriodPreset(value)}>
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                    </fieldset>
-                    <label className="mobile-period-preset">
-                      <span>Período</span>
-                      <select
-                        className="input"
-                        aria-label="Período dos indicadores"
-                        value={selectedPeriod}
-                        onChange={(event) =>
-                          updatePeriodPreset(event.target.value as PeriodPreset)
-                        }
-                      >
-                        {periodOptions.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-                        <option value="custom">Personalizado</option>
-                      </select>
-                    </label>
-                    <div className="mobile-filter-summary">
-                      <span>{formattedPeriod(filters)}</span>
-                      <button
-                        type="button"
-                        className="mobile-filter-toggle"
-                        aria-expanded={mobileDateFiltersOpen}
-                        onClick={() =>
-                          setMobileDateFiltersOpen((current) => !current)
-                        }
-                      >
-                        <SlidersHorizontal size={18} />
-                        Mais filtros
-                      </button>
-                    </div>
-                    <div
-                      className={`filter-period-exact${
-                        mobileDateFiltersOpen ? " mobile-open" : ""
-                      }`}
+                  <div className="mobile-filter-summary">
+                    <span>{formattedPeriod(filters)}</span>
+                    <button
+                      type="button"
+                      className="mobile-filter-toggle"
+                      aria-expanded={mobileDateFiltersOpen}
+                      onClick={() =>
+                        setMobileDateFiltersOpen((current) => !current)
+                      }
                     >
-                      <fieldset className="date-range">
-                        <legend className="sr-only">Período das respostas</legend>
-                        <label>
-                          <span>De</span>
-                          <input
-                            className="input"
-                            type="date"
-                            aria-label="Data inicial"
-                            value={filters.from}
-                            max={filters.to || undefined}
-                            onChange={(e) =>
-                              setFilters({ ...filters, from: e.target.value })
-                            }
-                          />
-                        </label>
-                        <label>
-                          <span>Até</span>
-                          <input
-                            className="input"
-                            type="date"
-                            aria-label="Data final"
-                            value={filters.to}
-                            min={filters.from || undefined}
-                            onChange={(e) =>
-                              setFilters({ ...filters, to: e.target.value })
-                            }
-                          />
-                        </label>
-                      </fieldset>
-                    </div>
+                      <SlidersHorizontal size={18} />
+                      Mais filtros
+                    </button>
                   </div>
-                </section>
-              )}
-              {route === "/" ? (
-                <>
-                  <PageTitle
-                    title="Visão geral"
-                    description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
-                    mobileContext="Painel principal"
-                    mobileTitle="Visão geral"
-                    mobileDescription={`${greeting}, ${firstName}. Acompanhe a experiência dos pacientes.`}
-                    action={
-                      <>
+                  <div
+                    className={`filter-period-exact${
+                      mobileDateFiltersOpen ? " mobile-open" : ""
+                    }`}
+                  >
+                    <fieldset className="date-range">
+                      <legend className="sr-only">Período das respostas</legend>
+                      <label>
+                        <span>De</span>
+                        <input
+                          className="input"
+                          type="date"
+                          aria-label="Data inicial"
+                          value={filters.from}
+                          max={filters.to || undefined}
+                          onChange={(e) =>
+                            setFilters({ ...filters, from: e.target.value })
+                          }
+                        />
+                      </label>
+                      <label>
+                        <span>Até</span>
+                        <input
+                          className="input"
+                          type="date"
+                          aria-label="Data final"
+                          value={filters.to}
+                          min={filters.from || undefined}
+                          onChange={(e) =>
+                            setFilters({ ...filters, to: e.target.value })
+                          }
+                        />
+                      </label>
+                    </fieldset>
+                  </div>
+                </div>
+              </section>
+            )}
+            {route === "/" ? (
+              <>
+                <PageTitle
+                  title="Visão geral"
+                  description="Acompanhe a experiência dos pacientes e as pesquisas do hospital."
+                  mobileContext="Painel principal"
+                  mobileTitle="Visão geral"
+                  mobileDescription={`${greeting}, ${firstName}. Acompanhe a experiência dos pacientes.`}
+                  action={
+                    <>
+                      <button
+                        className="button secondary dashboard-export-action"
+                        onClick={() => navigate("/relatorios")}
+                      >
+                        <ArrowDownToLine size={15} />
+                        Exportar Excel
+                      </button>
+                      <button
+                        className="button secondary dashboard-wall-action"
+                        onClick={() => navigate("/tv-wall")}
+                      >
+                        <MonitorUp size={15} />
+                        Abrir TV Wall
+                      </button>
+                      {data.permissions.canEditSurveys && (
                         <button
-                          className="button secondary dashboard-export-action"
-                          onClick={() => navigate("/relatorios")}
+                          className="button mobile-icon-action"
+                          onClick={() => navigate("/pesquisas")}
                         >
-                          <ArrowDownToLine size={15} />
-                          Exportar Excel
+                          <Plus size={15} />
+                          Nova pesquisa
                         </button>
-                        <button
-                          className="button secondary dashboard-wall-action"
-                          onClick={() => navigate("/tv-wall")}
-                        >
-                          <MonitorUp size={15} />
-                          Abrir TV Wall
-                        </button>
-                        {data.permissions.canEditSurveys && (
-                          <button
-                            className="button mobile-icon-action"
-                            onClick={() => navigate("/pesquisas")}
-                          >
-                            <Plus size={15} />
-                            Nova pesquisa
-                          </button>
-                        )}
-                      </>
-                    }
-                  />
-                  <Dashboard {...props} />
-                </>
-              ) : route === "/pesquisas" ? (
-                <Surveys {...props} />
-              ) : route.startsWith("/pesquisas/") ? (
-                <QuestionEditor
-                  key={route}
-                  {...props}
-                  surveyId={route.split("/")[2]}
-                  onDirtyChange={setDirty}
+                      )}
+                    </>
+                  }
                 />
-              ) : route === "/setores" ? (
-                <Sectors {...props} />
-              ) : route === "/resultados" ? (
-                <Results {...props} />
-              ) : route === "/ouvidoria" ? (
-                <Ombudsman {...props} />
-              ) : route === "/usuarios" ? (
-                <Users {...props} />
-              ) : route === "/relatorios" ? (
-                <Reports {...props} />
-              ) : route === "/configuracoes" ? (
-                <SettingsPanel {...props} />
-              ) : route === "/escalas" &&
-                data.permissions.canManageSettings ? (
-                <Schedules data={data} notify={notify} />
-              ) : route === "/tv-dispositivos" &&
-                data.permissions.canManageSettings ? (
-                <TVDevices data={data} notify={notify} />
-              ) : (
-                <Card title="Página não encontrada">
-                  <p>Escolha uma das áreas no menu para continuar.</p>
-                  <button className="button" onClick={() => navigate("/")}>
-                    Voltar à visão geral
-                  </button>
-                </Card>
-              )}
-            </main>
-          </ViewTransition>
+                <Dashboard {...props} />
+              </>
+            ) : route === "/pesquisas" ? (
+              <Surveys {...props} />
+            ) : route.startsWith("/pesquisas/") ? (
+              <QuestionEditor
+                key={route}
+                {...props}
+                surveyId={route.split("/")[2]}
+                onDirtyChange={setDirty}
+              />
+            ) : route === "/setores" ? (
+              <Sectors {...props} />
+            ) : route === "/resultados" ? (
+              <Results {...props} />
+            ) : route === "/ouvidoria" ? (
+              <Ombudsman {...props} />
+            ) : route === "/usuarios" ? (
+              <Users {...props} />
+            ) : route === "/relatorios" ? (
+              <Reports {...props} />
+            ) : route === "/configuracoes" ? (
+              <SettingsPanel {...props} />
+            ) : route === "/escalas" &&
+              data.permissions.canManageSettings ? (
+              <Schedules data={data} notify={notify} />
+            ) : route === "/tv-dispositivos" &&
+              data.permissions.canManageSettings ? (
+              <TVDevices data={data} notify={notify} />
+            ) : (
+              <Card title="Página não encontrada">
+                <p>Escolha uma das áreas no menu para continuar.</p>
+                <button className="button" onClick={() => navigate("/")}>
+                  Voltar à visão geral
+                </button>
+              </Card>
+            )}
+          </main>
         </div>
         <nav className="mobile-navigation" aria-label="Navegação principal">
           {mobileLinks.map((link) => {

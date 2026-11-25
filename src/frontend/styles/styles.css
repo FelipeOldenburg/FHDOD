@@ -584,7 +584,6 @@ textarea.input {
 .top-navigation button.active {
   background: var(--pink);
   color: var(--red-dark);
-  font-weight: 700;
 }
 .top-navigation button:hover {
   color: var(--red-dark);
@@ -719,33 +718,24 @@ textarea.input {
   font-size: clamp(16px, 1.25vw, 20px);
   line-height: 1.3;
 }
-::view-transition {
-  pointer-events: none;
-}
-::view-transition-group(admin-content) {
-  animation-duration: 200ms;
-  animation-timing-function: var(--ease);
-}
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-::view-transition-old(admin-content) {
-  animation: none;
-  opacity: 1;
-  mix-blend-mode: normal;
-}
-::view-transition-new(admin-content) {
-  animation: admin-content-in 200ms var(--ease) both;
-  mix-blend-mode: normal;
-}
-@keyframes admin-content-in {
-  from {
-    opacity: 0;
+@media (min-width: 651px) {
+  :root:has(.app-shell) {
+    scrollbar-gutter: stable;
   }
-  to {
-    opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .route-content {
+    animation: route-enter 170ms var(--ease);
+  }
+  .top-navigation button,
+  .rail-group button,
+  .mobile-navigation button {
+    transition: background-color 160ms var(--ease), color 160ms var(--ease);
+  }
+}
+@keyframes route-enter {
+  from {
+    opacity: 0.88;
   }
 }
 .global-filters {
@@ -2684,11 +2674,6 @@ th[aria-sort] .table-sort {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
-  }
   *,
   *::before,
   *::after {
