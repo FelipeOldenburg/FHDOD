@@ -16,6 +16,7 @@
     const spoken = [];
     let cancellations = 0;
     let requests = 0;
+    let paused = true;
     const content = document.getElementById("content");
     const screen = document.getElementById("screen");
     const reader = document.getElementById("reader");
@@ -25,8 +26,12 @@
 
     try {
       Object.defineProperty(window, "speechSynthesis", { configurable: true, value: {
-        getVoices: () => [],
-        speak: (utterance) => spoken.push(utterance),
+        get paused() { return paused; },
+        resume: () => { paused = false; },
+        speak: (utterance) => {
+          check(!paused, "Fila de voz não voltou da pausa");
+          spoken.push(utterance);
+        },
         cancel: () => { cancellations++; },
       } });
       Object.defineProperty(window, "SpeechSynthesisUtterance", {
@@ -52,8 +57,10 @@
         const utterance = spoken.at(-1);
         check(utterance.text.includes(expected), `${stage}: conteúdo incorreto`);
         check(!utterance.text.includes("VALOR_PRIVADO"), `${stage}: dado privado ou oculto entrou no áudio`);
-        check(!utterance.text.includes("Ouvir esta tela"), `${stage}: controle leu a si mesmo`);
+        check(!utterance.text.includes("Ouvir tela"), `${stage}: controle leu a si mesmo`);
         check(utterance.rate === 1.2 && utterance.lang === "pt-BR", `${stage}: velocidade ou idioma incorreto`);
+        check(reader.querySelector("button").textContent.includes("Cancelar leitura"), `${stage}: espera sinalizou áudio antes do início`);
+        await act(async () => utterance.onstart());
         check(reader.querySelector("button").textContent.includes("Parar leitura"), `${stage}: parada indisponível`);
       }
       check(requests === fixtures.length, "Callback executado sem pedido de leitura");
@@ -61,19 +68,26 @@
       await click();
       check(cancellations === cancelled + 1, "Parar não cancelou a leitura");
       await click();
+      await act(async () => spoken.at(-1).onstart());
       await act(async () => spoken.at(-1).onend());
-      check(reader.querySelector("button").textContent.includes("Ouvir esta tela"), "Fim da leitura não liberou o botão");
+      check(reader.querySelector("button").textContent.includes("Ouvir tela"), "Fim da leitura não liberou o botão");
       await click();
-      await act(async () => spoken.at(-1).onerror());
-      check(reader.querySelector('[role="status"]').textContent.includes("Não foi possível"), "Falha não foi informada");
+      await act(async () => spoken.at(-1).onerror({ error: "not-allowed" }));
+      check(reader.querySelector('[role="status"]').textContent.includes("bloqueou"), "Bloqueio não foi informado");
       await click();
       check(reader.querySelector('[role="status"]').textContent === "", "Nova tentativa não limpou o erro");
+      await act(async () => spoken.at(-1).onend());
+      check(reader.querySelector('[role="status"]').textContent.includes("não funcionou"), "Fim sem início não foi informado");
+      await click();
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 5200)));
+      check(reader.querySelector("button").textContent.includes("Ouvir tela"), "Motor de voz sem eventos travou o botão");
+      check(reader.querySelector('[role="status"]').textContent.includes("não funcionou"), "Tempo de espera excedido não foi informado");
       await act(async () => root.unmount());
       Object.defineProperty(window, "speechSynthesis", { configurable: true, value: undefined });
       root = createRoot(reader);
       await act(async () => root.render(createElement(ReadAloud, { contentRef: { current: content } })));
       check(!reader.querySelector("button"), "Navegador sem voz exibiu um controle inoperante");
-      document.getElementById("result").textContent = "PASSOU: cinco etapas; leitura manual; parada e troca de etapa; velocidade 1,2×; privacidade; conclusão; erro e nova tentativa; navegador sem suporte.";
+      document.getElementById("result").textContent = "PASSOU: cinco etapas; leitura manual; início confirmado; parada e troca de etapa; velocidade 1,2×; privacidade; bloqueio, fim sem início e ausência de eventos; nova tentativa; navegador sem suporte.";
       document.body.dataset.testResult = "passed";
     } catch (error) {
       document.getElementById("result").textContent = `FALHOU: ${error.message}`;

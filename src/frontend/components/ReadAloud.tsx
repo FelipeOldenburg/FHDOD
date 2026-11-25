@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { Square, Volume2 } from "lucide-react";
 
+const START_TIMEOUT_MS = 5000;
+const speechError = "A leitura em voz alta não funcionou. Tente novamente ou use o leitor de tela do seu dispositivo.";
+
 function readingText(element: HTMLElement) {
   const content = element.cloneNode(true) as HTMLElement;
   content.querySelectorAll(".patient-speech, input, textarea, [aria-hidden='true'], [hidden], .sr-only, [data-speech-ignore]")
@@ -19,67 +22,84 @@ export function ReadAloud({ contentRef, onRead }: {
   contentRef: RefObject<HTMLElement | null>;
   onRead?: () => void;
 }) {
-  const utterance = useRef<SpeechSynthesisUtterance | null>(null);
-  const [reading, setReading] = useState(false);
+  const pending = useRef<{ utterance: SpeechSynthesisUtterance; timeout: number } | null>(null);
+  const [state, setState] = useState<"idle" | "starting" | "reading">("idle");
   const [error, setError] = useState("");
-  const supported = typeof window.speechSynthesis?.speak === "function"
+  const synthesis = window.speechSynthesis;
+  const supported = typeof synthesis?.speak === "function"
+    && typeof synthesis.cancel === "function"
     && typeof window.SpeechSynthesisUtterance === "function";
 
-  const stop = useCallback(() => {
-    const current = utterance.current;
+  const clearSpeech = useCallback((cancel: boolean) => {
+    const current = pending.current;
     if (!current) return;
-    utterance.current = null;
-    current.onend = null;
-    current.onerror = null;
-    window.speechSynthesis.cancel();
-    setReading(false);
-  }, []);
+    pending.current = null;
+    window.clearTimeout(current.timeout);
+    current.utterance.onstart = null;
+    current.utterance.onend = null;
+    current.utterance.onerror = null;
+    if (cancel) synthesis.cancel();
+  }, [synthesis]);
 
-  useEffect(() => stop, [stop]);
+  useEffect(() => () => clearSpeech(true), [clearSpeech]);
 
   function read() {
-    if (utterance.current) return stop();
-    if (!contentRef.current) return;
+    if (pending.current) {
+      clearSpeech(true);
+      setState("idle");
+      return;
+    }
+    if (!supported || !contentRef.current) return;
     const text = readingText(contentRef.current);
     if (!text) return;
     onRead?.();
     setError("");
-    const current = new SpeechSynthesisUtterance(text);
-    current.lang = "pt-BR";
-    current.rate = 1.2;
-    const voices = window.speechSynthesis.getVoices();
-    const portugueseVoices = voices.filter((voice) => voice.lang.toLowerCase().startsWith("pt"));
-    const voice = portugueseVoices.find((voice) => voice.localService) ?? portugueseVoices[0];
-    if (voice) current.voice = voice;
-    current.onend = () => {
-      if (utterance.current !== current) return;
-      utterance.current = null;
-      setReading(false);
-    };
-    const failed = () => {
-      if (utterance.current !== current) return;
-      stop();
-      setError("Não foi possível iniciar a leitura. Tente novamente ou use o leitor de tela do seu dispositivo.");
-    };
-    current.onerror = failed;
-    utterance.current = current;
-    setReading(true);
+
     try {
-      window.speechSynthesis.speak(current);
+      const current = new SpeechSynthesisUtterance(text);
+      current.lang = "pt-BR";
+      current.rate = 1.2;
+      let started = false;
+      function finish(message = "", cancel = false) {
+        if (pending.current?.utterance !== current) return;
+        clearSpeech(cancel);
+        setState("idle");
+        setError(message);
+      }
+      current.onstart = () => {
+        if (pending.current?.utterance !== current) return;
+        started = true;
+        window.clearTimeout(pending.current.timeout);
+        setState("reading");
+      };
+      current.onend = () => finish(started ? "" : speechError);
+      current.onerror = (event) => finish(event.error === "not-allowed"
+        ? "O navegador bloqueou a leitura. Abra a pesquisa no Safari ou no Chrome e tente novamente."
+        : speechError);
+      pending.current = {
+        utterance: current,
+        timeout: window.setTimeout(() => finish(speechError, true), START_TIMEOUT_MS),
+      };
+      setState("starting");
+      // Keep this synchronous with the tap. iOS can block speech started later.
+      if (synthesis.paused) synthesis.resume();
+      synthesis.speak(current);
     } catch {
-      failed();
+      clearSpeech(false);
+      setState("idle");
+      setError(speechError);
     }
   }
 
   if (!supported) return null;
 
   return (
-    <div className="patient-speech">
-      <button className="patient-back" type="button" onClick={read}>
-        {reading ? <Square aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
-        {reading ? "Parar leitura" : "Ouvir esta tela"}
+    <>
+      <button className="patient-speech" type="button" data-active={state !== "idle"} onClick={read}>
+        {state === "idle" ? <Volume2 aria-hidden="true" /> : <Square aria-hidden="true" />}
+        {state === "reading" ? "Parar leitura" : state === "starting" ? "Cancelar leitura" : "Ouvir tela"}
       </button>
-      <p className="patient-question-hint" role="status">{error}</p>
-    </div>
+      <p className="patient-speech-status" role="status" data-speech-ignore>{error}</p>
+    </>
   );
 }

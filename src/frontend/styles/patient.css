@@ -25,13 +25,13 @@
   width: calc(100% - 144px);
   max-width: 1320px;
   border-bottom: 1px solid #dedee1;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 28px;
-  flex-wrap: wrap;
+  gap: 12px 24px;
 }
 .patient-sector {
+  grid-column: 2;
   color: #68696d;
   font-size: 0.9375rem;
   text-align: right;
@@ -366,17 +366,44 @@
   padding: 22px 0;
 }
 .patient-speech {
-  align-self: center;
-  text-align: center;
-  margin-bottom: 8px;
-}
-.patient-speech .patient-back {
-  padding: 12px;
-  border: 1px solid currentColor;
+  grid-column: 3;
+  position: relative;
+  min-height: 44px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #dedee1;
   border-radius: 10px;
+  background: #fff;
+  color: var(--red-dark);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
 }
-.patient-speech p:empty {
-  display: none;
+.patient-speech svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.patient-speech:hover,
+.patient-speech[data-active="true"] {
+  background: #faebef;
+  border-color: #e9cbd1;
+}
+.patient-speech-status {
+  grid-column: 1 / -1;
+  justify-self: end;
+  max-width: 48ch;
+  margin: 0;
+  color: var(--red-dark);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+.patient-speech-status:empty {
+  position: absolute;
 }
 .patient-answer-area .rating-faces {
   gap: 14px;
@@ -643,13 +670,27 @@
     width: calc(100% - 40px);
     padding: 20px 0 16px;
     min-height: 104px;
-    align-items: flex-start;
-    gap: 14px;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+    gap: 8px 12px;
+  }
+  .patient-header .brand-patient {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
   .patient-sector {
+    grid-column: 1;
+    grid-row: 2;
     font-size: 0.8125rem;
     text-align: left;
+  }
+  .patient-speech {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: 48vw;
+    text-align: left;
+  }
+  .patient-speech-status {
+    justify-self: start;
   }
   .patient-sector > span {
     padding: 0 4px;

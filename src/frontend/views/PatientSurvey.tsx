@@ -302,14 +302,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
     </div>
   );
 
-  const readAloud = (
-    <ReadAloud
-      key={`${stage}:${questionIndex}`}
-      contentRef={contentRef}
-      onRead={() => { if (stage === "thanks") setAutoResetPaused(true); }}
-    />
-  );
-
   return (
     <div
       className={`patient-app ${stage === "question" ? "patient-app--question" : ""}`}
@@ -335,6 +327,13 @@ export default function PatientSurvey({ slug }: { slug: string }) {
             )}
           </span>
         )}
+        {!loading && (
+          <ReadAloud
+            key={`${slug}:${stage}:${questionIndex}`}
+            contentRef={contentRef}
+            onRead={stage === "thanks" ? () => setAutoResetPaused(true) : undefined}
+          />
+        )}
       </header>
 
       {loading ? (
@@ -347,7 +346,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           <h1 ref={headingRef} tabIndex={-1}>
             Pesquisa indisponível
           </h1>
-          {readAloud}
           {errorMessage}
           <p>Confira o link ou procure a equipe do hospital.</p>
           <button className="btn" type="button" onClick={() => void load()}>
@@ -366,7 +364,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               <br />
               faz a diferença.
             </h1>
-            {readAloud}
             <p>
               Esta pesquisa é rápida e ajuda a melhorar o atendimento da
               Fundação Hospitalar Dr. Oswaldo Diesel.
@@ -387,7 +384,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           <h1 ref={headingRef} tabIndex={-1}>
             Sobre seu atendimento
           </h1>
-          {readAloud}
           <p>
             Essas informações ajudam a entender sua experiência. Se não lembrar,
             pode continuar sem informar.
@@ -493,7 +489,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
           <h1 id="patient-question-title" ref={headingRef} tabIndex={-1}>
             {currentQuestion.text}
           </h1>
-          {readAloud}
           {currentQuestion.type === "nps" && (
             <p id="patient-question-hint" className="patient-question-hint">
               Escolha uma nota de 0 a 10. Esta é a única pergunta obrigatória.
@@ -657,7 +652,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               </>
             )}
           </h1>
-          {readAloud}
           <p>
             {isLowNps
               ? "Se quiser, conte à ouvidoria o que aconteceu no seu atendimento. Seu comentário é opcional e ajuda a identificar o que precisa melhorar."
@@ -769,7 +763,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               <br />
               sua participação!
             </h1>
-            {readAloud}
             <p>
               <Check size={22} aria-hidden="true" /> Sua opinião foi registrada
               com sucesso.
@@ -799,7 +792,6 @@ export default function PatientSurvey({ slug }: { slug: string }) {
       ) : (
         <main ref={contentRef} className="patient-status">
           <h1 ref={headingRef} tabIndex={-1}>Pesquisa sem perguntas</h1>
-          {readAloud}
           <p>
             Procure a equipe do hospital para verificar a pesquisa deste setor.
           </p>

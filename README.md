@@ -58,7 +58,7 @@ Após o envio confirmado, a tela de agradecimento retorna ao início em **10 seg
 
 A pesquisa identifica as perguntas e mensagens para leitores de tela, mantém o foco no título de cada etapa e permite responder pelo teclado. O avanço automático é informado antes das alternativas. Texto ampliável, contraste, foco visível e controles de toque também fazem parte desse fluxo.
 
-**Ouvir esta tela** lê as instruções e alternativas desde as boas-vindas até a confirmação, usando uma voz em português do navegador e velocidade de 1,2×. **Parar leitura** interrompe o áudio; mudar de etapa também o encerra. Valores preenchidos, como comentários e telefone, ficam fora da leitura. Ouvir a confirmação pausa o retorno automático. O botão depende do suporte de voz do navegador.
+**Ouvir tela**, no cabeçalho da pesquisa, lê as instruções e alternativas desde as boas-vindas até a confirmação. A leitura solicita uma voz em português do Brasil ao navegador e usa velocidade de 1,2×. O botão permite cancelar a espera ou interromper o áudio, e mudar de etapa encerra a leitura. Se a fala falhar ou o navegador não confirmar o início, a tela mostra um aviso e permite tentar novamente. Valores preenchidos, como comentários e telefone, ficam fora da leitura. Ouvir a confirmação pausa o retorno automático. O botão depende do suporte de voz do navegador.
 
 <a name="telas"></a>
 
