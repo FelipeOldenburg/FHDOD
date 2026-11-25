@@ -58,7 +58,7 @@ Após o envio confirmado, a tela de agradecimento retorna ao início em **10 seg
 
 A pesquisa identifica as perguntas e mensagens para leitores de tela, mantém o foco no título de cada etapa e permite responder pelo teclado. O avanço automático é informado antes das alternativas. Texto ampliável, contraste, foco visível e controles de toque também fazem parte desse fluxo.
 
-**Ouvir tela**, no cabeçalho da pesquisa, lê as instruções e alternativas desde as boas-vindas até a confirmação. O backend do FHDOD gera um áudio em português do Brasil com [eSpeak NG](https://github.com/echogarden-project/espeak-ng-emscripten), e o navegador o reproduz como mídia. O botão permite cancelar a espera ou parar o áudio. Mudar de etapa também encerra a leitura. Valores preenchidos, como comentários e telefone, ficam fora do texto enviado para gerar o áudio. Ouvir a confirmação pausa o retorno automático.
+**Ouvir tela**, no cabeçalho da pesquisa, lê as instruções e alternativas desde as boas-vindas até a confirmação. O backend do FHDOD gera o áudio com a [voz neural Faber, do Piper](https://huggingface.co/rhasspy/piper-voices/blob/661e39caff61dcfcbbd2178a7c2dd0144b858b0e/pt/pt_BR/faber/medium/MODEL_CARD), em português do Brasil. O navegador reproduz o áudio como mídia. O botão permite cancelar a espera ou parar a reprodução, e mudar de etapa também a encerra. Valores preenchidos, como comentários e telefone, ficam fora do texto enviado para gerar o áudio. Ouvir a confirmação pausa o retorno automático.
 
 <a name="telas"></a>
 

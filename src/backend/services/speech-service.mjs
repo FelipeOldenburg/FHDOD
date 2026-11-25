@@ -1,43 +1,85 @@
+import { readFile } from "node:fs/promises";
+
 export const speechTextLimit = 2400;
+const segmenter = new Intl.Segmenter("pt-BR", { granularity: "sentence" });
+const decoder = new TextDecoder();
 const cache = new Map();
+const pending = new Map();
 let synthesizerPromise;
 
 async function createVoice() {
-  const { default: createSynthesizer } = await import("@echogarden/espeak-ng-emscripten");
-  const module = await createSynthesizer();
-  const voice = new module.eSpeakNGWorker();
-  if (voice.set_voice("", "pt-br") !== 0)
+  const [ort, { default: createPhonemizer }, model, configSource] = await Promise.all([
+    import("onnxruntime-web"),
+    import("@echogarden/espeak-ng-emscripten"),
+    readFile(new URL("../assets/voice/faber.onnx", import.meta.url)),
+    readFile(new URL("../assets/voice/faber.json", import.meta.url), "utf8"),
+  ]);
+  const config = JSON.parse(configSource);
+  ort.env.wasm.numThreads = 1;
+  const [session, module] = await Promise.all([
+    ort.InferenceSession.create(model, { executionProviders: ["wasm"] }),
+    createPhonemizer(),
+  ]);
+  const phonemizer = new module.eSpeakNGWorker();
+  if (phonemizer.set_voice("", config.espeak.voice) !== 0)
     throw new Error("Voz pt-BR indisponível.");
-  voice.set_rate(175);
-  return { module, voice };
+  return { module, phonemizer, ort, session, config };
 }
 
-export async function synthesizeSpeech(text) {
-  const cached = cache.get(text);
-  if (cached) return cached;
+function idsForText(text, { module, phonemizer, config }) {
+  const { ptr } = phonemizer.text_to_phonemes(text, true);
+  const end = module.HEAPU8.indexOf(0, ptr);
+  const ipa = decoder.decode(module.HEAPU8.subarray(ptr, end))
+    .replaceAll("_", "").replace(/\s*\|\s*/g, ", ").trim().normalize("NFD");
+  const punctuation = /[.!?]$/.test(text) ? text.at(-1) : ".";
+  const map = config.phoneme_id_map;
+  const ids = [...map["^"], ...map["_"]];
+  for (const phoneme of ipa + punctuation) {
+    if (map[phoneme]) ids.push(...map[phoneme], ...map["_"]);
+  }
+  ids.push(...map["$"]);
+  return BigInt64Array.from(ids, BigInt);
+}
+
+async function renderSpeech(text) {
   synthesizerPromise ??= createVoice().catch((error) => {
     synthesizerPromise = undefined;
     throw error;
   });
-  const { module, voice } = await synthesizerPromise;
-  // The engine calls this synchronously. Copy each chunk before it reuses memory.
+  const voice = await synthesizerPromise;
+  const { ort, session, config } = voice;
+  const sampleRate = config.audio.sample_rate;
+  const sampleLimit = sampleRate * 85;
   const chunks = [];
-  const sampleRate = voice.get_samplerate();
-  const byteLimit = sampleRate * 2 * 85;
-  let byteLength = 0;
-  const onSamples = module.addFunction((pointer, sampleCount) => {
-    if (!pointer || !sampleCount) return 0;
-    const length = Math.min(sampleCount * 2, byteLimit - byteLength);
-    chunks.push(Buffer.from(module.HEAPU8.subarray(pointer, pointer + length)));
-    byteLength += length;
-    return byteLength >= byteLimit ? 1 : 0;
-  }, "iiii");
-  try {
-    voice.synth_(text, onSamples);
-  } finally {
-    module.removeFunction(onSamples);
+  const pause = new Float32Array(Math.round(sampleRate * 0.17));
+  let length = 0;
+  const expanded = text.replace(/\bDra\./gi, "Doutora").replace(/\bDr\./gi, "Doutor");
+  const sentences = Array.from(segmenter.segment(expanded), ({ segment }) => segment)
+    .flatMap((sentence) => sentence.match(/.{1,210}(?:\s|$)|.{1,210}/gu) ?? []);
+
+  for (const sentence of sentences) {
+    const ids = idsForText(sentence.trim(), voice);
+    // Disable sampling noise so byte ranges generated on separate instances agree.
+    const { output } = await session.run({
+      input: new ort.Tensor("int64", ids, [1, ids.length]),
+      input_lengths: new ort.Tensor("int64", BigInt64Array.of(BigInt(ids.length)), [1]),
+      scales: new ort.Tensor("float32", Float32Array.of(0, 1.05, 0), [3]),
+    });
+    const audio = output.data.subarray(0, sampleLimit - length);
+    chunks.push(audio);
+    length += audio.length;
+    if (length + pause.length >= sampleLimit) break;
+    chunks.push(pause);
+    length += pause.length;
   }
-  if (!byteLength) throw new Error("O sintetizador não produziu áudio.");
+  if (!length) throw new Error("O sintetizador não produziu áudio.");
+  let peak = 0;
+  for (const audio of chunks) {
+    for (const sample of audio) peak = Math.max(peak, Math.abs(sample));
+  }
+  if (!Number.isFinite(peak) || peak === 0) throw new Error("O sintetizador produziu áudio inválido.");
+  const gain = 0.86 * 32767 / peak;
+  const byteLength = length * 2;
   const header = Buffer.alloc(44);
   header.write("RIFF", 0);
   header.writeUInt32LE(36 + byteLength, 4);
@@ -51,12 +93,30 @@ export async function synthesizeSpeech(text) {
   header.writeUInt16LE(16, 34);
   header.write("data", 36);
   header.writeUInt32LE(byteLength, 40);
-  const wave = Buffer.concat([header, ...chunks], 44 + byteLength);
-
-  // Media players may request several byte ranges of the same utterance.
-  if (cache.size >= 8) cache.delete(cache.keys().next().value);
-  cache.set(text, wave);
+  const wave = Buffer.allocUnsafe(44 + byteLength);
+  header.copy(wave);
+  let offset = 44;
+  for (const audio of chunks) {
+    for (const sample of audio) {
+      wave.writeInt16LE(Math.round(sample * gain), offset);
+      offset += 2;
+    }
+  }
   return wave;
+}
+
+export async function synthesizeSpeech(text) {
+  const cached = cache.get(text);
+  if (cached) return cached;
+  if (pending.has(text)) return pending.get(text);
+  // Media players may request several byte ranges of the same utterance.
+  const rendering = renderSpeech(text).then((wave) => {
+    if (cache.size >= 8) cache.delete(cache.keys().next().value);
+    cache.set(text, wave);
+    return wave;
+  }).finally(() => pending.delete(text));
+  pending.set(text, rendering);
+  return rendering;
 }
 
 export function sendSpeech(req, res, wave) {
