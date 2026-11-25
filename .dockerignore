@@ -1,0 +1,14 @@
+node_modules
+dist
+data
+tmp
+.git
+.env
+.env.*
+!.env.example
+.scratch
+.impeccable
+docs
+src/backend/tests
+*.log
+*.tsbuildinfo

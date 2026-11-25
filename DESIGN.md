@@ -36,7 +36,7 @@ typography:
     fontWeight: 500
   patient-question:
     fontFamily: "Inter, Arial, sans-serif"
-    fontSize: "clamp(29px, 3.2vw, 42px)"
+    fontSize: "clamp(1.8125rem, 3.2vw, 2.625rem)"
     fontWeight: 700
     lineHeight: 1.3
     letterSpacing: "-0.035em"
@@ -145,7 +145,7 @@ Até 1000px, o dashboard passa a duas colunas, resultados e editor ficam em uma 
 - A interface reduz carga cognitiva: uma ação primária por contexto, informação secundária em contraste neutro e cor vermelha reservada para ação, seleção ou atenção real.
 - O sistema deve ser verificado em tarefas reais e em diferentes larguras; aprovação visual em uma única captura não substitui o teste responsivo.
 
-A pesquisa usa cabeçalho e área de perguntas com largura máxima de 1320px. Em 640px, as avaliações ficam em três colunas e o NPS em seis; a numeração de 0 a 10 permanece completa. O botão público tem altura mínima de 72px no desktop e 62px no celular. Voltar e pular preservam áreas de interação próprias.
+A pesquisa usa cabeçalho e área de perguntas com largura máxima de 1320px. Até 640px, as avaliações ficam em três colunas. O NPS ajusta as colunas ao espaço disponível e à ampliação do texto, mantendo alvos mínimos de 44px e todas as notas de 0 a 10 sem quebrar os números. O botão público tem altura mínima de 72px no desktop e 62px no celular. Voltar e pular preservam áreas de interação próprias. O texto usa unidades relativas; ações podem quebrar linha quando o conteúdo é ampliado.
 
 ## Elevation & Depth
 
@@ -153,9 +153,9 @@ Cartões comuns usam a diferença entre branco e cinza para separar áreas. Menu
 
 Botões administrativos mudam cor em 0.18s e deslocam 1px ao pressionar. Controles públicos mudam cor em 0.15s. `prefers-reduced-motion` reduz as transições e animações.
 
-As abas administrativas usam a transição de visualização do React no conteúdo principal: a tela anterior desaparece em 150ms e a próxima entra em 320ms, com deslocamento vertical de 8px a 0 e `cubic-bezier(.16, 1, .3, 1)`. Cabeçalho e navegação permanecem estáveis. A chegada dos dados de indicadores, resultados e ouvidoria também participa dessa transição. Cliques sucessivos são coordenados pelo React; a navegação de histórico continua funcional mesmo quando o navegador não anima essa troca. Com `prefers-reduced-motion`, há apenas uma dissolução breve de 90–140ms, sem deslocamento ou animação de tamanho.
+As abas administrativas usam a transição de visualização do React no conteúdo principal: a tela anterior permanece opaca enquanto a próxima entra em 200ms, sem deslocamento vertical e com composição normal das imagens. Isso mantém o fundo coberto durante toda a troca. Cabeçalho e navegação permanecem estáveis. Cliques sucessivos são coordenados pelo React; a navegação de histórico continua funcional mesmo quando o navegador não anima essa troca. Com `prefers-reduced-motion`, não há animação.
 
-As etapas e perguntas públicas preservam a entrada em 260ms, com opacidade de 0.35 a 1 e deslocamento vertical de 6px a 0, usando a mesma curva. Uma nova tela cancela a animação anterior; com redução de movimento, o conteúdo aparece diretamente.
+As etapas e perguntas públicas entram em 200ms, com deslocamento vertical de 6px a 0 e opacidade constante, usando a mesma curva. Uma nova tela cancela a animação anterior; com redução de movimento, o conteúdo aparece diretamente. O foco acompanha o título ao carregar a pesquisa e ao trocar de etapa. Seleção também usa contorno e peso de texto, inclusive com cores forçadas do sistema.
 
 ## Shapes
 

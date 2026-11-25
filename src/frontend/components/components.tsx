@@ -19,10 +19,10 @@ export function usePageTransition(view: string) {
       return;
     const animation = element.animate(
       [
-        { opacity: 0.35, transform: "translateY(6px)" },
-        { opacity: 1, transform: "none" },
+        { transform: "translateY(6px)" },
+        { transform: "none" },
       ],
-      { duration: 260, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+      { duration: 200, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
     );
     return () => animation.cancel();
   }, [view]);

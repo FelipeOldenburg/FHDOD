@@ -125,9 +125,10 @@ if (
   const app = await createApplication();
   if (process.env.FHDOD_DEMO === "1") await app.seedDemo();
   const port = Number(process.env.PORT || 3001);
-  app.server.listen(port, "127.0.0.1", () =>
+  const host = process.env.HOST || "127.0.0.1";
+  app.server.listen(port, host, () =>
     console.log(
-      `FHDOD API: http://127.0.0.1:${port}${process.env.FHDOD_DEMO === "1" ? " (demonstração: dados fictícios)" : ""}`,
+      `FHDOD API: http://${host}:${port}${process.env.FHDOD_DEMO === "1" ? " (demonstração: dados fictícios)" : ""}`,
     ),
   );
   let stopping = false;

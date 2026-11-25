@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:${FHDOD_HTTP_PORT:-3001}:3001"
+    environment:
+      DATABASE_URL: "postgresql://db:5432/${POSTGRES_DB:-fhdod}"
+      PGUSER: ${POSTGRES_USER:-fhdod}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Informe POSTGRES_PASSWORD no .env}
+      FHDOD_ORIGIN: ${FHDOD_ORIGIN:-}
+      FHDOD_COOKIE_SECURE: ${FHDOD_COOKIE_SECURE:-0}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fhdod}
+      POSTGRES_USER: ${POSTGRES_USER:-fhdod}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Informe POSTGRES_PASSWORD no .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  postgres_data:

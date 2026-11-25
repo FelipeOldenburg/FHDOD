@@ -54,7 +54,9 @@ O **FHDOD** organiza a escuta dos pacientes em uma pesquisa digital por setor. A
 - **🤝 Ouvidoria:** manifestações com situação, notas internas e histórico próprios.
 - **🔐 Acesso definido por função:** cinco perfis, permissões aplicadas na API e registro de auditoria.
 
-Após o envio confirmado, a tela de agradecimento retorna ao início em **10 segundos por padrão**. O Super Admin pode ajustar esse tempo; o botão **Finalizar** permite voltar antes.
+Após o envio confirmado, a tela de agradecimento retorna ao início em **10 segundos por padrão**. O Super Admin pode ajustar esse tempo; o botão **Finalizar** permite voltar antes. **Preciso de mais tempo** pausa esse retorno para permitir a leitura da confirmação, e **Retomar retorno automático** inicia novamente a espera.
+
+A pesquisa identifica as perguntas e mensagens para leitores de tela, mantém o foco no título de cada etapa e permite responder pelo teclado. O avanço automático é informado antes das alternativas. Texto ampliável, contraste, foco visível e controles de toque também fazem parte desse fluxo.
 
 <a name="telas"></a>
 
@@ -92,6 +94,8 @@ Controles maiores, rótulos legíveis e cinco expressões para avaliar o atendim
 <a name="instalacao"></a>
 
 ## 🚀 Comece por aqui
+
+**Para entrega em VPS ou execução com Docker:** siga o [guia de implantação](docs/docker.md). Ele cobre aplicação e PostgreSQL persistente, primeiro administrador, HTTPS, atualização, backup e banco externo. O desenvolvimento local abaixo continua disponível.
 
 **Requisitos:** Node.js **24 ou superior**, npm, Git e uma instância PostgreSQL.
 
@@ -238,6 +242,7 @@ Os comandos `npm run dev`, `npm run dev:demo`, `npm start`, `npm test` e `npm ru
 | `FHDOD_TEST_DATABASE_URL` | URL de um banco de teste isolado para os testes integrados. |
 | `FHDOD_DEMO=1` | Ativa a demonstração; `dev:demo` já configura essa variável. |
 | `PORT` | Porta da API, com padrão `3001`. O proxy do Vite está configurado para `3001`. |
+| `HOST` | Endereço de escuta, com padrão local `127.0.0.1`; a imagem Docker usa `0.0.0.0`. |
 | `FHDOD_ORIGIN` | Origem adicional aceita na proteção contra requisições entre sites. |
 | `FHDOD_COOKIE_SECURE=1` | Exige HTTPS para envio do cookie de sessão. |
 

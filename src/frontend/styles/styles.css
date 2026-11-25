@@ -723,7 +723,7 @@ textarea.input {
   pointer-events: none;
 }
 ::view-transition-group(admin-content) {
-  animation-duration: 320ms;
+  animation-duration: 200ms;
   animation-timing-function: var(--ease);
 }
 ::view-transition-old(root),
@@ -732,27 +732,15 @@ textarea.input {
   mix-blend-mode: normal;
 }
 ::view-transition-old(admin-content) {
-  animation: admin-content-out 150ms ease-out both;
+  animation: none;
+  opacity: 1;
+  mix-blend-mode: normal;
 }
 ::view-transition-new(admin-content) {
-  animation: admin-content-in 320ms var(--ease) both;
-}
-@keyframes admin-content-out {
-  to {
-    opacity: 0;
-  }
+  animation: admin-content-in 200ms var(--ease) both;
+  mix-blend-mode: normal;
 }
 @keyframes admin-content-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes admin-content-fade-in {
   from {
     opacity: 0;
   }
@@ -2700,12 +2688,6 @@ th[aria-sort] .table-sort {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
-  }
-  ::view-transition-old(admin-content) {
-    animation: admin-content-out 90ms linear both !important;
-  }
-  ::view-transition-new(admin-content) {
-    animation: admin-content-fade-in 140ms linear both !important;
   }
   *,
   *::before,

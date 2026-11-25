@@ -50,6 +50,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [failedAnswer, setFailedAnswer] = useState<Value | undefined>();
+  const [autoResetPaused, setAutoResetPaused] = useState(false);
   const contentRef = usePageTransition(
     `${loading ? "loading" : stage}:${questionIndex}`,
   );
@@ -60,6 +61,13 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   const nps = npsQuestion ? values[npsQuestion.id] : undefined;
   const commentLimit = context?.settings?.commentLimit ?? 1000;
   const autoResetSeconds = context?.settings?.autoResetSeconds ?? 10;
+  const busyMessage = !busy
+    ? ""
+    : stage === "context"
+      ? "Iniciando pesquisa…"
+      : stage === "comment"
+        ? "Enviando pesquisa…"
+        : "Salvando sua resposta…";
   const isLowNps =
     typeof nps === "number" &&
     nps <= (context?.settings?.lowScoreThreshold ?? 6);
@@ -94,8 +102,12 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   }, [slug]);
 
   useEffect(() => {
+    if (loading) return;
     headingRef.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, behavior: "instant" });
+  }, [loading, stage, questionIndex]);
+
+  useEffect(() => {
     setError("");
     setFailedAnswer(undefined);
     setDraftText(
@@ -106,10 +118,10 @@ export default function PatientSurvey({ slug }: { slug: string }) {
   }, [stage, questionIndex]);
 
   useEffect(() => {
-    if (stage !== "thanks") return;
+    if (stage !== "thanks" || autoResetPaused) return;
     const timeout = window.setTimeout(reset, autoResetSeconds * 1000);
     return () => window.clearTimeout(timeout);
-  }, [stage, autoResetSeconds]);
+  }, [stage, autoResetSeconds, autoResetPaused]);
 
   function reset() {
     setSession(null);
@@ -126,6 +138,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
     setDraftText("");
     setError("");
     setFailedAnswer(undefined);
+    setAutoResetPaused(false);
     setStage("welcome");
   }
 
@@ -292,6 +305,9 @@ export default function PatientSurvey({ slug }: { slug: string }) {
     <div
       className={`patient-app ${stage === "question" ? "patient-app--question" : ""}`}
     >
+      <p className="sr-only" role="status" aria-atomic="true">
+        {busyMessage}
+      </p>
       {context?.demo && (
         <div className="patient-demo-banner">
           Demonstração · dados fictícios
@@ -313,9 +329,9 @@ export default function PatientSurvey({ slug }: { slug: string }) {
       </header>
 
       {loading ? (
-        <main ref={contentRef} className="patient-status" aria-live="polite">
-          <LoaderCircle className="spinner" size={28} />
-          <p>Carregando pesquisa…</p>
+        <main ref={contentRef} className="patient-status">
+          <LoaderCircle className="spinner" size={28} aria-hidden="true" />
+          <p role="status">Carregando pesquisa…</p>
         </main>
       ) : !context ? (
         <main ref={contentRef} className="patient-status">
@@ -401,11 +417,12 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                 Horário aproximado
                 <input
                   type="time"
+                    aria-describedby="patient-time-hint"
                   value={attendedTime}
                   disabled={!dateMode || dateMode === "unknown"}
                   onChange={(event) => setAttendedTime(event.target.value)}
                 />
-                <small>Opcional. Ajuda a localizar a equipe que estava de plantão.</small>
+                <small id="patient-time-hint">Opcional. Ajuda a localizar a equipe que estava de plantão.</small>
               </label>
               <label className="patient-field">
                 Em qual turno?
@@ -450,6 +467,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
             aria-label="Progresso da pesquisa"
             aria-valuemin={0}
             aria-valuemax={100}
+            aria-valuetext={`Pergunta ${questionIndex + 1} de ${questions.length}`}
             aria-valuenow={Math.round(
               ((questionIndex + 1) / (questions.length + 1)) * 100,
             )}
@@ -460,15 +478,26 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               }}
             />
           </div>
-          <h1 ref={headingRef} tabIndex={-1}>
+          <h1 id="patient-question-title" ref={headingRef} tabIndex={-1}>
             {currentQuestion.text}
           </h1>
           {currentQuestion.type === "nps" && (
-            <p className="patient-question-hint">
+            <p id="patient-question-hint" className="patient-question-hint">
               Escolha uma nota de 0 a 10. Esta é a única pergunta obrigatória.
             </p>
           )}
-          <div className="patient-answer-area" aria-busy={busy}>
+          <p id="patient-answer-hint" className="patient-question-hint">
+            Pergunta {questionIndex + 1} de {questions.length}.
+            {currentQuestion.type !== "nps" && " Resposta opcional."}
+            {currentQuestion.type !== "text" && " Ao escolher uma resposta, você passa para a próxima pergunta."}
+          </p>
+          <div
+            className="patient-answer-area"
+            role="group"
+            aria-labelledby="patient-question-title"
+            aria-describedby={currentQuestion.type === "nps" ? "patient-question-hint patient-answer-hint" : "patient-answer-hint"}
+            aria-busy={busy}
+          >
             {currentQuestion.type === "rating" ? (
               <RatingFaces
                 value={
@@ -513,17 +542,18 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                 }}
               >
                 <label className="sr-only" htmlFor="patient-question-text">
-                  Sua resposta
+                  {currentQuestion.text} (opcional)
                 </label>
                 <textarea
                   id="patient-question-text"
+                  aria-describedby="patient-answer-hint patient-question-limit"
                   maxLength={commentLimit}
                   placeholder="Escreva sua resposta, se quiser…"
                   value={draftText}
                   disabled={busy}
                   onChange={(event) => setDraftText(event.target.value)}
                 />
-                <small>
+                <small id="patient-question-limit">
                   {draftText.length}/{commentLimit}
                 </small>
                 <button
@@ -557,11 +587,11 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               </div>
             )}
           </div>
-          <div className="patient-save-state" aria-live="polite">
+          <div className="patient-save-state" aria-hidden="true">
             {busy ? (
               <>
                 <LoaderCircle size={18} className="spinner" />
-                Salvando sua resposta…
+                {busyMessage}
               </>
             ) : (
               <span>&nbsp;</span>
@@ -626,13 +656,14 @@ export default function PatientSurvey({ slug }: { slug: string }) {
             <div className="patient-comment-input">
               <textarea
                 id="patient-comment-text"
+                aria-describedby="patient-comment-limit"
                 maxLength={commentLimit}
                 disabled={busy}
                 placeholder="Digite seu comentário aqui…"
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
               />
-              <small>
+              <small id="patient-comment-limit">
                 {comment.length}/{commentLimit}
               </small>
             </div>
@@ -668,6 +699,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                 Telefone para retorno
                 <input
                   type="tel"
+                  aria-describedby="patient-phone-hint"
                   inputMode="tel"
                   autoComplete="off"
                   maxLength={25}
@@ -678,7 +710,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                   placeholder="DDD e telefone"
                   onChange={(event) => setPhone(event.target.value)}
                 />
-                <small>
+                <small id="patient-phone-hint">
                   Seu telefone será usado para o retorno e ficará restrito às
                   pessoas autorizadas.
                 </small>
@@ -734,15 +766,23 @@ export default function PatientSurvey({ slug }: { slug: string }) {
               Finalizar
               <ArrowRight aria-hidden="true" />
             </button>
-            <small>
-              Esta tela volta ao início automaticamente em {autoResetSeconds}{" "}
-              segundos.
-            </small>
+            <p className="patient-reset-status" role="status">
+              {autoResetPaused
+                ? "O retorno automático foi pausado. Selecione Finalizar quando terminar."
+                : `Esta tela volta ao início automaticamente em ${autoResetSeconds} segundos.`}
+            </p>
+            <button
+              className="patient-back"
+              type="button"
+              onClick={() => setAutoResetPaused((paused) => !paused)}
+            >
+              {autoResetPaused ? "Retomar retorno automático" : "Preciso de mais tempo"}
+            </button>
           </div>
         </main>
       ) : (
         <main ref={contentRef} className="patient-status">
-          <h1>Pesquisa sem perguntas</h1>
+          <h1 ref={headingRef} tabIndex={-1}>Pesquisa sem perguntas</h1>
           <p>
             Procure a equipe do hospital para verificar a pesquisa deste setor.
           </p>
