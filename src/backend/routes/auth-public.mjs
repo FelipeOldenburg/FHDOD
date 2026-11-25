@@ -8,6 +8,8 @@ export function createAuthPublicRoutes({ auth, publicSurvey, management, tvWall 
     ["POST", /^\/api\/public\/tv\/pair$/, tvWall.pair],
     ["GET", /^\/api\/public\/tv\/dashboard$/, tvWall.display],
     ["GET", /^\/api\/public\/sectors\/([^/]+)$/, publicSurvey.sector],
+    ["GET", /^\/api\/public\/survey-speech$/, publicSurvey.speech],
+    ["HEAD", /^\/api\/public\/survey-speech$/, publicSurvey.speech],
     ["POST", /^\/api\/public\/responses$/, publicSurvey.start],
     ["PUT", /^\/api\/public\/responses\/([^/]+)$/, publicSurvey.answer],
     [

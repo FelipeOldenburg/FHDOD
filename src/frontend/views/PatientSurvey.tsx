@@ -561,7 +561,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                   disabled={busy}
                   onChange={(event) => setDraftText(event.target.value)}
                 />
-                <small id="patient-question-limit">
+                <small id="patient-question-limit" data-speech-ignore>
                   {draftText.length}/{commentLimit}
                 </small>
                 <button
@@ -671,7 +671,7 @@ export default function PatientSurvey({ slug }: { slug: string }) {
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
               />
-              <small id="patient-comment-limit">
+              <small id="patient-comment-limit" data-speech-ignore>
                 {comment.length}/{commentLimit}
               </small>
             </div>

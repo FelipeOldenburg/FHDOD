@@ -3,7 +3,7 @@
   "framework": "vite",
   "functions": {
     "api/index.mjs": {
-      "includeFiles": "{src/backend/models/migrations/*.sql,src/shared/contracts.ts}",
+      "includeFiles": "{src/backend/models/migrations/*.sql,src/shared/contracts.ts,node_modules/@echogarden/espeak-ng-emscripten/espeak-ng.data}",
       "maxDuration": 30
     }
   },

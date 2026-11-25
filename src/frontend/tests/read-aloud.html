@@ -11,12 +11,11 @@
     import { ReadAloud } from "../components/ReadAloud.tsx";
 
     globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-    const original = Object.fromEntries(["speechSynthesis", "SpeechSynthesisUtterance"]
-      .map((name) => [name, Object.getOwnPropertyDescriptor(window, name)]));
-    const spoken = [];
+    const original = Object.getOwnPropertyDescriptor(window, "Audio");
+    const played = [];
     let cancellations = 0;
     let requests = 0;
-    let paused = true;
+    let rejectPlayback = false;
     const content = document.getElementById("content");
     const screen = document.getElementById("screen");
     const reader = document.getElementById("reader");
@@ -25,17 +24,17 @@
     const click = () => act(async () => reader.querySelector("button").click());
 
     try {
-      Object.defineProperty(window, "speechSynthesis", { configurable: true, value: {
-        get paused() { return paused; },
-        resume: () => { paused = false; },
-        speak: (utterance) => {
-          check(!paused, "Fila de voz não voltou da pausa");
-          spoken.push(utterance);
+      Object.defineProperty(window, "Audio", {
+        configurable: true,
+        value: class {
+          play() {
+            played.push(this);
+            return rejectPlayback ? Promise.reject(new Error("Reprodução bloqueada")) : Promise.resolve();
+          }
+          pause() { cancellations++; }
+          removeAttribute() {}
+          load() {}
         },
-        cancel: () => { cancellations++; },
-      } });
-      Object.defineProperty(window, "SpeechSynthesisUtterance", {
-        configurable: true, value: class { constructor(text) { this.text = text; } },
       });
       const fixtures = [
         ["welcome", "Sua opinião faz a diferença", "<h1>Sua opinião<br>faz a diferença.</h1><p>Você pode responder de forma anônima.</p>"],
@@ -45,22 +44,24 @@
         ["thanks", "Obrigado por participar", "<h1>Obrigado por participar!</h1><button>Finalizar</button><p data-speech-ignore>VALOR_PRIVADO_TEMPORIZADOR</p>"],
       ];
       for (const [stage, expected, html] of fixtures) {
-        const count = spoken.length;
+        const count = played.length;
         const cancelled = cancellations;
         screen.innerHTML = `${html}<p aria-hidden="true">VALOR_PRIVADO_DECORACAO</p><p class="sr-only">VALOR_PRIVADO_OCULTO</p>`;
         await act(async () => root.render(createElement(ReadAloud, {
           key: stage, contentRef: { current: content }, onRead: () => { requests++; },
         })));
-        check(spoken.length === count, `${stage}: leitura iniciou automaticamente`);
+        check(played.length === count, `${stage}: leitura iniciou automaticamente`);
         if (count) check(cancellations === cancelled + 1, `${stage}: leitura anterior não foi cancelada`);
         await click();
-        const utterance = spoken.at(-1);
-        check(utterance.text.includes(expected), `${stage}: conteúdo incorreto`);
-        check(!utterance.text.includes("VALOR_PRIVADO"), `${stage}: dado privado ou oculto entrou no áudio`);
-        check(!utterance.text.includes("Ouvir tela"), `${stage}: controle leu a si mesmo`);
-        check(utterance.rate === 1.2 && utterance.lang === "pt-BR", `${stage}: velocidade ou idioma incorreto`);
+        const audio = played.at(-1);
+        const url = new URL(audio.src, location.origin);
+        const text = url.searchParams.get("text");
+        check(url.origin === location.origin && url.pathname === "/api/public/survey-speech", "Rota de áudio incorreta");
+        check(text.includes(expected), `${stage}: conteúdo incorreto`);
+        check(!text.includes("VALOR_PRIVADO"), `${stage}: dado privado ou oculto entrou no áudio`);
+        check(!text.includes("Ouvir tela"), `${stage}: controle leu a si mesmo`);
         check(reader.querySelector("button").textContent.includes("Cancelar leitura"), `${stage}: espera sinalizou áudio antes do início`);
-        await act(async () => utterance.onstart());
+        await act(async () => audio.onplaying());
         check(reader.querySelector("button").textContent.includes("Parar leitura"), `${stage}: parada indisponível`);
       }
       check(requests === fixtures.length, "Callback executado sem pedido de leitura");
@@ -68,36 +69,35 @@
       await click();
       check(cancellations === cancelled + 1, "Parar não cancelou a leitura");
       await click();
-      await act(async () => spoken.at(-1).onstart());
-      await act(async () => spoken.at(-1).onend());
+      await act(async () => played.at(-1).onplaying());
+      await act(async () => played.at(-1).onended());
       check(reader.querySelector("button").textContent.includes("Ouvir tela"), "Fim da leitura não liberou o botão");
+      rejectPlayback = true;
       await click();
-      await act(async () => spoken.at(-1).onerror({ error: "not-allowed" }));
-      check(reader.querySelector('[role="status"]').textContent.includes("bloqueou"), "Bloqueio não foi informado");
+      check(reader.querySelector('[role="status"]').textContent.includes("Não foi possível"), "Bloqueio não foi informado");
+      rejectPlayback = false;
       await click();
       check(reader.querySelector('[role="status"]').textContent === "", "Nova tentativa não limpou o erro");
-      await act(async () => spoken.at(-1).onend());
-      check(reader.querySelector('[role="status"]').textContent.includes("não funcionou"), "Fim sem início não foi informado");
+      await act(async () => played.at(-1).onerror());
+      check(reader.querySelector('[role="status"]').textContent.includes("Não foi possível"), "Falha de mídia não foi informada");
       await click();
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 5200)));
-      check(reader.querySelector("button").textContent.includes("Ouvir tela"), "Motor de voz sem eventos travou o botão");
-      check(reader.querySelector('[role="status"]').textContent.includes("não funcionou"), "Tempo de espera excedido não foi informado");
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 12200)));
+      check(reader.querySelector("button").textContent.includes("Ouvir tela"), "Player sem eventos travou o botão");
+      check(reader.querySelector('[role="status"]').textContent.includes("Não foi possível"), "Tempo de espera excedido não foi informado");
       await act(async () => root.unmount());
-      Object.defineProperty(window, "speechSynthesis", { configurable: true, value: undefined });
+      Object.defineProperty(window, "Audio", { configurable: true, value: undefined });
       root = createRoot(reader);
       await act(async () => root.render(createElement(ReadAloud, { contentRef: { current: content } })));
       check(!reader.querySelector("button"), "Navegador sem voz exibiu um controle inoperante");
-      document.getElementById("result").textContent = "PASSOU: cinco etapas; leitura manual; início confirmado; parada e troca de etapa; velocidade 1,2×; privacidade; bloqueio, fim sem início e ausência de eventos; nova tentativa; navegador sem suporte.";
+      document.getElementById("result").textContent = "PASSOU: cinco etapas; reprodução solicitada; parada e troca de etapa; privacidade; bloqueio, falha de mídia e ausência de eventos; nova tentativa; navegador sem suporte.";
       document.body.dataset.testResult = "passed";
     } catch (error) {
       document.getElementById("result").textContent = `FALHOU: ${error.message}`;
       document.body.dataset.testResult = "failed";
     } finally {
       await act(async () => root.unmount());
-      for (const [name, descriptor] of Object.entries(original)) {
-        if (descriptor) Object.defineProperty(window, name, descriptor);
-        else delete window[name];
-      }
+      if (original) Object.defineProperty(window, "Audio", original);
+      else delete window.Audio;
     }
   </script>
 </html>

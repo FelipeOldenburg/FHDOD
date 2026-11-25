@@ -20,6 +20,38 @@ async function start(t) {
   return { ...app, api };
 }
 
+test("leitura pública entrega áudio WAV não vazio e aceita a leitura parcial de navegadores móveis", async (t) => {
+  const app = await createTestApplication();
+  await new Promise((resolve) => app.server.listen(0, "127.0.0.1", resolve));
+  t.after(() => app.close());
+  const base = `http://127.0.0.1:${app.server.address().port}/api/public/survey-speech`;
+  const url = `${base}?${new URLSearchParams({ text: "Sua opinião faz a diferença." })}`;
+
+  const probe = await fetch(url, { headers: { Range: "bytes=0-1" } });
+  assert.equal(probe.status, 206);
+  assert.equal(probe.headers.get("accept-ranges"), "bytes");
+  assert.match(probe.headers.get("content-range"), /^bytes 0-1\/\d+$/);
+  assert.equal(await probe.text(), "RI");
+
+  const response = await fetch(url);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "audio/wav");
+  const wave = Buffer.from(await response.arrayBuffer());
+  assert.equal(wave.toString("ascii", 0, 4), "RIFF");
+  assert.equal(wave.toString("ascii", 8, 12), "WAVE");
+  assert.equal(wave.readUInt32LE(40), wave.length - 44);
+  assert.ok(wave.subarray(44).some((byte) => byte !== 0));
+
+  const head = await fetch(url, { method: "HEAD" });
+  assert.equal(head.status, 200);
+  assert.equal(Number(head.headers.get("content-length")), wave.length);
+  const outOfRange = await fetch(url, { headers: { Range: `bytes=${wave.length}-` } });
+  assert.equal(outOfRange.status, 416);
+  assert.equal(outOfRange.headers.get("content-range"), `bytes */${wave.length}`);
+  assert.equal((await fetch(base)).status, 400);
+  assert.equal((await fetch(url, { headers: { "Sec-Fetch-Site": "cross-site" } })).status, 403);
+});
+
 test("login valida o setor antes de criar sessão e devolve o usuário resolvido", { skip: !hasTestDatabase }, async (t) => {
   const { db, api } = await start(t);
   const timestamp = new Date().toISOString();

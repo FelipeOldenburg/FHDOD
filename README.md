@@ -58,7 +58,7 @@ Após o envio confirmado, a tela de agradecimento retorna ao início em **10 seg
 
 A pesquisa identifica as perguntas e mensagens para leitores de tela, mantém o foco no título de cada etapa e permite responder pelo teclado. O avanço automático é informado antes das alternativas. Texto ampliável, contraste, foco visível e controles de toque também fazem parte desse fluxo.
 
-**Ouvir tela**, no cabeçalho da pesquisa, lê as instruções e alternativas desde as boas-vindas até a confirmação. A leitura solicita uma voz em português do Brasil ao navegador e usa velocidade de 1,2×. O botão permite cancelar a espera ou interromper o áudio, e mudar de etapa encerra a leitura. Se a fala falhar ou o navegador não confirmar o início, a tela mostra um aviso e permite tentar novamente. Valores preenchidos, como comentários e telefone, ficam fora da leitura. Ouvir a confirmação pausa o retorno automático. O botão depende do suporte de voz do navegador.
+**Ouvir tela**, no cabeçalho da pesquisa, lê as instruções e alternativas desde as boas-vindas até a confirmação. O backend do FHDOD gera um áudio em português do Brasil com [eSpeak NG](https://github.com/echogarden-project/espeak-ng-emscripten), e o navegador o reproduz como mídia. O botão permite cancelar a espera ou parar o áudio. Mudar de etapa também encerra a leitura. Valores preenchidos, como comentários e telefone, ficam fora do texto enviado para gerar o áudio. Ouvir a confirmação pausa o retorno automático.
 
 <a name="telas"></a>
 
@@ -262,7 +262,7 @@ npm test
 
 Os testes integrados cobrem os cinco perfis, isolamento de setores, troca e redefinição de senha, preservação de respostas e versões, indicadores, NPS, distribuição das avaliações, proteção contra requisições entre sites, datas em São Paulo e auditoria de exportações. Configure `FHDOD_TEST_DATABASE_URL` para executá-los; cada teste cria e remove seu próprio schema. Sem essa variável, a validação falha explicitamente em vez de terminar com todos os testes pulados. A suíte também verifica a migração SQLite, rollback, destino demo, concorrência dos cadastros e envios e preservação do histórico da ouvidoria.
 
-Com o Vite em execução, abra `/src/frontend/tests/read-aloud.html` para verificar a leitura em voz alta. O resultado esperado é **PASSOU**. Esse teste simula o motor de voz e cobre as cinco etapas, velocidade, privacidade dos campos, parada, falha e nova tentativa; a conferência com vozes reais e leitores de tela deve ser feita no navegador de destino.
+Com o Vite em execução, abra `/src/frontend/tests/read-aloud.html` para verificar a leitura em voz alta. O resultado esperado é **PASSOU**. Esse teste simula o player e cobre as cinco etapas, privacidade dos campos, parada, falha e nova tentativa. O teste da API verifica o WAV e as requisições parciais usadas por navegadores móveis.
 
 | Comando | Finalidade |
 | --- | --- |

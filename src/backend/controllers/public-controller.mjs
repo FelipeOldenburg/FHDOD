@@ -1,3 +1,6 @@
+import { sendSpeech, speechTextLimit, synthesizeSpeech } from "../services/speech-service.mjs";
+import { fail } from "../middleware/validation.mjs";
+
 export function createPublicController({ survey, readBody, rateLimit, demo }) {
   return {
     sector: async ({ params, send }) =>
@@ -5,6 +8,16 @@ export function createPublicController({ survey, readBody, rateLimit, demo }) {
         ...(await survey.loadPublicSector(decodeURIComponent(params[0]))),
         demo,
       }),
+    speech: async ({ req, res, url }) => {
+      // The client sends only the visible questionnaire labels, never field values.
+      const text = url.searchParams.get("text")?.replace(/[^\p{L}\p{N}\p{P}\p{Zs}]/gu, " ")
+        .replace(/[<>\[\]]/g, " ").replace(/\s+/g, " ").trim();
+      if (!text || text.length > speechTextLimit) fail(400, "Texto de leitura inválido.");
+      if (req.headers["sec-fetch-site"] === "cross-site")
+        fail(403, "Origem da solicitação não autorizada.");
+      rateLimit(req, "survey-speech", 400, 10 * 60 * 1000);
+      return sendSpeech(req, res, await synthesizeSpeech(text));
+    },
     start: async ({ req, send }) => {
       rateLimit(req, "survey-create", 300, 10 * 60 * 1000);
       return send(await survey.startResponse(await readBody(req)), 201);
