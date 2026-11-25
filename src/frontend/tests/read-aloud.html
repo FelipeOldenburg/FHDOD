@@ -81,7 +81,7 @@
       await act(async () => played.at(-1).onerror());
       check(reader.querySelector('[role="status"]').textContent.includes("Não foi possível"), "Falha de mídia não foi informada");
       await click();
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 12200)));
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 24200)));
       check(reader.querySelector("button").textContent.includes("Ouvir tela"), "Player sem eventos travou o botão");
       check(reader.querySelector('[role="status"]').textContent.includes("Não foi possível"), "Tempo de espera excedido não foi informado");
       await act(async () => root.unmount());

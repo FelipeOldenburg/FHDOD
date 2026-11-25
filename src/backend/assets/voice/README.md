@@ -2,6 +2,8 @@
 
 Modelo neural Piper para português do Brasil, com frequência de 22.050 Hz. O FHDOD usa o ONNX quantizado em uint8 por Pedro Berbis Freire para gerar a fala no servidor. A síntese usa os arquivos locais e o ONNX Runtime Web em modo WASM. O eSpeak NG fornece os fonemas em português.
 
+O arquivo `welcome.wav` foi gerado por esse mesmo modelo com o texto fixo das boas-vindas. A gravação fica pronta para o primeiro toque. Se o texto da tela mudar, o servidor gera o áudio atualizado.
+
 - [Ficha da voz original no catálogo MIT do Piper](https://huggingface.co/rhasspy/piper-voices/blob/661e39caff61dcfcbbd2178a7c2dd0144b858b0e/pt/pt_BR/faber/medium/MODEL_CARD). Faber foi treinada a partir da voz Lessac e de dados CC0 do [Nabu Casa Voice Datasets](https://github.com/NabuCasa/voice-datasets).
 - [Revisão de origem da versão quantizada](https://github.com/Pedro21062014/vozz/tree/ef2303bf0eb8cc47d1449d1958f4fbe479437855). O autor identifica o modelo de voz como MIT na seção de licenças.
 

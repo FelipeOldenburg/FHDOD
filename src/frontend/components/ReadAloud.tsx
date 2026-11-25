@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { Square, Volume2 } from "lucide-react";
 
-const START_TIMEOUT_MS = 12000;
+const START_TIMEOUT_MS = 24000;
 const speechError = "Não foi possível reproduzir a leitura. Tente novamente ou use o leitor de tela do seu dispositivo.";
 
 function readingText(element: HTMLElement) {

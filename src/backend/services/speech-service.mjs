@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 export const speechTextLimit = 2400;
 const segmenter = new Intl.Segmenter("pt-BR", { granularity: "sentence" });
 const decoder = new TextDecoder();
+const welcomeTranscript = "Sua opinião faz a diferença. Esta pesquisa é rápida e ajuda a melhorar o atendimento da Fundação Hospitalar Dr. Oswaldo Diesel. Iniciar pesquisa. Você pode responder de forma anônima.";
 const cache = new Map();
 const pending = new Map();
 let synthesizerPromise;
@@ -42,6 +43,9 @@ function idsForText(text, { module, phonemizer, config }) {
 }
 
 async function renderSpeech(text) {
+  // Avoid loading the voice model for the first, fixed screen.
+  if (text === welcomeTranscript)
+    return readFile(new URL("../assets/voice/welcome.wav", import.meta.url));
   synthesizerPromise ??= createVoice().catch((error) => {
     synthesizerPromise = undefined;
     throw error;
