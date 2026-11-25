@@ -69,7 +69,9 @@ function SchedulePreview({ id, onClose }: { id: string; onClose: () => void }) {
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
   const start = useRef<HTMLDivElement>(null);
-  useEffect(() => start.current?.scrollIntoView({ block: "start" }), []);
+  useEffect(() => {
+    start.current?.scrollIntoView({ block: "start" });
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
