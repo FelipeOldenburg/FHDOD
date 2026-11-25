@@ -365,6 +365,19 @@
   margin: auto;
   padding: 22px 0;
 }
+.patient-speech {
+  align-self: center;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.patient-speech .patient-back {
+  padding: 12px;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+}
+.patient-speech p:empty {
+  display: none;
+}
 .patient-answer-area .rating-faces {
   gap: 14px;
 }

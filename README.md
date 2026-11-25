@@ -58,6 +58,8 @@ Após o envio confirmado, a tela de agradecimento retorna ao início em **10 seg
 
 A pesquisa identifica as perguntas e mensagens para leitores de tela, mantém o foco no título de cada etapa e permite responder pelo teclado. O avanço automático é informado antes das alternativas. Texto ampliável, contraste, foco visível e controles de toque também fazem parte desse fluxo.
 
+**Ouvir esta tela** lê as instruções e alternativas desde as boas-vindas até a confirmação, usando uma voz em português do navegador e velocidade de 1,2×. **Parar leitura** interrompe o áudio; mudar de etapa também o encerra. Valores preenchidos, como comentários e telefone, ficam fora da leitura. Ouvir a confirmação pausa o retorno automático. O botão depende do suporte de voz do navegador.
+
 <a name="telas"></a>
 
 ## 🖥️ Conheça as telas
@@ -259,6 +261,8 @@ npm test
 ```
 
 Os testes integrados cobrem os cinco perfis, isolamento de setores, troca e redefinição de senha, preservação de respostas e versões, indicadores, NPS, distribuição das avaliações, proteção contra requisições entre sites, datas em São Paulo e auditoria de exportações. Configure `FHDOD_TEST_DATABASE_URL` para executá-los; cada teste cria e remove seu próprio schema. Sem essa variável, a validação falha explicitamente em vez de terminar com todos os testes pulados. A suíte também verifica a migração SQLite, rollback, destino demo, concorrência dos cadastros e envios e preservação do histórico da ouvidoria.
+
+Com o Vite em execução, abra `/src/frontend/tests/read-aloud.html` para verificar a leitura em voz alta. O resultado esperado é **PASSOU**. Esse teste simula o motor de voz e cobre as cinco etapas, velocidade, privacidade dos campos, parada, falha e nova tentativa; a conferência com vozes reais e leitores de tela deve ser feita no navegador de destino.
 
 | Comando | Finalidade |
 | --- | --- |
