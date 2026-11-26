@@ -50,7 +50,7 @@ const allMetrics: { id: TVMetric; label: string; description: string }[] = [
   { id: "nps", label: "NPS geral", description: "Recomendação dos pacientes" },
   { id: "pending", label: "Atenção necessária", description: "Manifestações pendentes" },
   { id: "trend", label: "Evolução mensal", description: "Gráfico dos últimos meses" },
-  { id: "sectors", label: "Setores", description: "Participação por setor" },
+  { id: "sectors", label: "QR Code", description: "Acesso à pesquisa do setor" },
 ];
 
 const statusInfo: Record<

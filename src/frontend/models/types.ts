@@ -138,6 +138,7 @@ export interface TVDevice {
   metrics: TVMetric[];
   period: "current_month" | "last_7_days" | "last_30_days";
   periodLabel?: string;
+  periodRange?: Pick<Filters, "from" | "to">;
   refreshSeconds: number;
   status: TVDeviceStatus;
   pairedAt: string | null;

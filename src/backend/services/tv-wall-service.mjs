@@ -375,6 +375,7 @@ export function createTvWallService(
       device: {
         ...view(updated, await sectorMap()),
         periodLabel: filters.label,
+        periodRange: { from: filters.from, to: filters.to },
       },
       dashboard,
       surveyTarget: surveyTarget
