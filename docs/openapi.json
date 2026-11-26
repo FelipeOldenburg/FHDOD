@@ -1,0 +1,4408 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API FHDOD",
+    "version": "0.1.0",
+    "description": "Laboratório com dados fictícios. Use **Try it out** e **Execute** para chamar a API. Comece por **Saúde → GET /api/health**. Em **Sessão**, rode **GET /api/auth/setup**. Se `needsSetup` for `true`, execute **POST /api/auth/setup** com o exemplo. Depois de criar a conta, use **POST /api/auth/login** nos próximos acessos. O navegador guarda o cookie da sessão automaticamente no mesmo endereço. Para o TV Wall, gere um código em **POST /api/tv-devices** e use **POST /api/public/tv/pair** antes de consultar o painel da TV."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Laboratório FHDOD na mesma origem"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "Saúde"
+        ],
+        "operationId": "get_api_health",
+        "summary": "Verificar o PostgreSQL",
+        "description": "Executa SELECT 1. HTTP 503 indica indisponibilidade.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/HTTP503"
+          }
+        }
+      }
+    },
+    "/api/auth/setup": {
+      "get": {
+        "tags": [
+          "Sessão"
+        ],
+        "operationId": "get_api_auth_setup",
+        "summary": "Verificar configuração inicial",
+        "description": "Indica se é necessário criar o primeiro administrador.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "needsSetup": {
+                      "type": "boolean"
+                    },
+                    "demo": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sessão"
+        ],
+        "operationId": "post_api_auth_setup",
+        "summary": "Criar o primeiro Super Admin local",
+        "description": "Cria o primeiro Super Admin somente quando needsSetup é true. A configuração inicial exige localhost. A resposta já inicia a sessão no navegador.",
+        "security": [],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "name": "Admin de demonstração",
+                "email": "admin@fhdod.example",
+                "password": "Senha-ficticia-swagger-2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Sessão"
+        ],
+        "operationId": "post_api_auth_login",
+        "summary": "Entrar na sessão",
+        "description": "Abre uma sessão e envia o cookie HttpOnly fhdod_session. Se você usou o exemplo do POST /api/auth/setup, este exemplo já tem os mesmos dados. No Swagger, execute o login aqui e use as rotas privadas na mesma aba.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  },
+                  "rememberMe": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "admin@fhdod.example",
+                "password": "Senha-ficticia-swagger-2026",
+                "rememberMe": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "Sessão"
+        ],
+        "operationId": "post_api_auth_logout",
+        "summary": "Encerrar sessão",
+        "description": "Invalida a sessão atual e limpa o cookie.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "loggedOut": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "Sessão"
+        ],
+        "operationId": "get_api_auth_me",
+        "summary": "Consultar sessão atual",
+        "description": "Disponível também para a sessão com troca de senha pendente.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      }
+    },
+    "/api/auth/password": {
+      "post": {
+        "tags": [
+          "Sessão"
+        ],
+        "operationId": "post_api_auth_password",
+        "summary": "Atualizar senha",
+        "description": "Exige a senha atual e uma nova senha. Retorna a sessão renovada.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  }
+                },
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ]
+              },
+              "example": {
+                "currentPassword": "Senha-ficticia-swagger-2026",
+                "newPassword": "Outra-senha-ficticia-2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/sectors/{slug}": {
+      "get": {
+        "tags": [
+          "Pesquisa pública"
+        ],
+        "operationId": "get_api_public_sectors_slug",
+        "summary": "Carregar questionário ativo",
+        "description": "Retorna setor e perguntas ativas. O slug de exemplo existe após o povoamento.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sector": {
+                      "$ref": "#/components/schemas/Sector"
+                    },
+                    "survey": {
+                      "$ref": "#/components/schemas/Survey"
+                    },
+                    "questions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Question"
+                      }
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/Settings"
+                    },
+                    "demo": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Slug do setor",
+            "example": "pronto-atendimento"
+          }
+        ]
+      }
+    },
+    "/api/public/survey-speech": {
+      "get": {
+        "tags": [
+          "Pesquisa pública"
+        ],
+        "operationId": "get_api_public_survey_speech",
+        "summary": "Gerar áudio da pesquisa",
+        "description": "Devolve a leitura em WAV. Use apenas texto fictício neste laboratório. O cabeçalho Range permite solicitar parte do arquivo.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "text",
+            "in": "query",
+            "required": true,
+            "description": "Texto a ser lido em português do Brasil.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2400
+            },
+            "example": "Sua opinião faz a diferença."
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "required": false,
+            "description": "Para testar uma resposta parcial, informe bytes=0-1.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Áudio completo",
+            "headers": {
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "bytes"
+                  ]
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Trecho do áudio",
+            "headers": {
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "bytes"
+                  ]
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "416": {
+            "description": "Intervalo de bytes inválido",
+            "headers": {
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "Pesquisa pública"
+        ],
+        "operationId": "head_api_public_survey_speech",
+        "summary": "Consultar metadados do áudio",
+        "description": "Devolve os cabeçalhos do áudio sem o corpo.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "text",
+            "in": "query",
+            "required": true,
+            "description": "Texto a ser lido em português do Brasil.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2400
+            },
+            "example": "Sua opinião faz a diferença."
+          },
+          {
+            "name": "Range",
+            "in": "header",
+            "required": false,
+            "description": "Para testar uma resposta parcial, informe bytes=0-1.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Áudio completo",
+            "headers": {
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "bytes"
+                  ]
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Trecho do áudio",
+            "headers": {
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Accept-Ranges": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "bytes"
+                  ]
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "416": {
+            "description": "Intervalo de bytes inválido",
+            "headers": {
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        }
+      }
+    },
+    "/api/public/responses": {
+      "post": {
+        "tags": [
+          "Pesquisa pública"
+        ],
+        "operationId": "post_api_public_responses",
+        "summary": "Iniciar avaliação",
+        "description": "Cria o rascunho e devolve id, token e cópia das perguntas. O horário requer a data de atendimento.",
+        "security": [],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "questions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Question"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sectorId": {
+                    "type": "string"
+                  },
+                  "attendedOn": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "attendedTime": {
+                    "type": "string"
+                  },
+                  "shift": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sectorId"
+                ]
+              },
+              "example": {
+                "sectorId": "SUBSTITUA_PELO_ID_DO_SETOR"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/responses/{id}": {
+      "put": {
+        "tags": [
+          "Pesquisa pública"
+        ],
+        "operationId": "put_api_public_responses_id",
+        "summary": "Salvar resposta parcial",
+        "description": "O token devolvido no início é obrigatório no corpo. A regra do valor depende do tipo de pergunta.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "saved": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "questionId": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "token",
+                  "questionId",
+                  "value"
+                ]
+              },
+              "example": {
+                "token": "SUBSTITUA_PELO_TOKEN_DE_TESTE",
+                "questionId": "SUBSTITUA_PELO_ID_DA_PERGUNTA",
+                "value": 4
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/responses/{id}/submit": {
+      "post": {
+        "tags": [
+          "Pesquisa pública"
+        ],
+        "operationId": "post_api_public_responses_id_submit",
+        "summary": "Finalizar avaliação",
+        "description": "Envia o NPS, preserva o registro e cria uma manifestação se houver comentário. Pedido de retorno exige comentário e telefone válido.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "submitted": {
+                      "type": "boolean"
+                    },
+                    "autoResetSeconds": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "nps": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10
+                  },
+                  "comment": {
+                    "type": "string"
+                  },
+                  "manifestationType": {
+                    "type": "string"
+                  },
+                  "wantsContact": {
+                    "type": "boolean"
+                  },
+                  "phone": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "token",
+                  "nps"
+                ]
+              },
+              "example": {
+                "token": "SUBSTITUA_PELO_TOKEN_DE_TESTE",
+                "nps": 4,
+                "comment": "Relato fictício para demonstração.",
+                "wantsContact": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bootstrap": {
+      "get": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "get_api_bootstrap",
+        "summary": "Carregar dados iniciais do painel",
+        "description": "Retorna usuário, permissões, configurações, setores e pesquisas de acordo com o perfil.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "permissions": {
+                      "type": "object"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/Settings"
+                    },
+                    "sectors": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Sector"
+                      }
+                    },
+                    "surveys": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Survey"
+                      }
+                    },
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "demo": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      }
+    },
+    "/api/sectors": {
+      "get": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "get_api_sectors",
+        "summary": "Listar setores",
+        "description": "Lista setores disponíveis para o usuário da sessão.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sectors": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Sector"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "post_api_sectors",
+        "summary": "Cadastrar setor e administrador",
+        "description": "Super Admin. Cria setor e conta em transação.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sector": {
+                      "$ref": "#/components/schemas/Sector"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "admin": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string"
+                      },
+                      "temporaryPassword": {
+                        "type": "string",
+                        "format": "password",
+                        "writeOnly": true
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "slug",
+                  "admin"
+                ]
+              },
+              "example": {
+                "name": "Recepção de teste",
+                "slug": "recepcao-teste",
+                "active": true,
+                "admin": {
+                  "email": "setor@fhdod.example",
+                  "temporaryPassword": "Senha-setor-de-teste-2026"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sectors/{id}": {
+      "put": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "put_api_sectors_id",
+        "summary": "Editar setor",
+        "description": "Super Admin. Permite atualizar setor e acesso do administrador.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sector": {
+                      "$ref": "#/components/schemas/Sector"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "admin": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string"
+                      },
+                      "temporaryPassword": {
+                        "type": "string",
+                        "format": "password",
+                        "writeOnly": true
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "description": "Descrição fictícia."
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "patch_api_sectors_id",
+        "summary": "Editar setor",
+        "description": "Super Admin. Permite atualizar setor e acesso do administrador.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sector": {
+                      "$ref": "#/components/schemas/Sector"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "admin": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string"
+                      },
+                      "temporaryPassword": {
+                        "type": "string",
+                        "format": "password",
+                        "writeOnly": true
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "description": "Descrição fictícia."
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "delete_api_sectors_id",
+        "summary": "Desativar setor",
+        "description": "Super Admin. Bloqueia o acesso associado ao setor.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deactivated": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "get_api_users",
+        "summary": "Listar usuários",
+        "description": "Super Admin. Lista contas administrativas.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "post_api_users",
+        "summary": "Cadastrar usuário",
+        "description": "Super Admin. Define perfil e setores associados.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "superadmin",
+                      "sector_admin",
+                      "management",
+                      "ombudsman",
+                      "viewer"
+                    ]
+                  },
+                  "sectorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "temporaryPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  }
+                },
+                "required": [
+                  "name",
+                  "email",
+                  "role",
+                  "temporaryPassword"
+                ]
+              },
+              "example": {
+                "name": "Gestão fictícia",
+                "email": "gestao@fhdod.example",
+                "role": "management",
+                "sectorIds": [
+                  "SUBSTITUA_PELO_ID_DO_SETOR"
+                ],
+                "temporaryPassword": "Senha-gestao-de-teste-2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "put": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "put_api_users_id",
+        "summary": "Editar usuário e acesso",
+        "description": "Super Admin. Atualiza perfil, estado ou setores conforme as regras de vínculo.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "superadmin",
+                      "sector_admin",
+                      "management",
+                      "ombudsman",
+                      "viewer"
+                    ]
+                  },
+                  "sectorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "temporaryPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  }
+                }
+              },
+              "example": {
+                "name": "Nome revisado"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "patch_api_users_id",
+        "summary": "Editar usuário e acesso",
+        "description": "Super Admin. Atualiza perfil, estado ou setores conforme as regras de vínculo.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "superadmin",
+                      "sector_admin",
+                      "management",
+                      "ombudsman",
+                      "viewer"
+                    ]
+                  },
+                  "sectorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "temporaryPassword": {
+                    "type": "string",
+                    "format": "password",
+                    "writeOnly": true
+                  }
+                }
+              },
+              "example": {
+                "name": "Nome revisado"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/surveys": {
+      "get": {
+        "tags": [
+          "Pesquisas"
+        ],
+        "operationId": "get_api_surveys",
+        "summary": "Listar pesquisas",
+        "description": "Lista pesquisas dentro do escopo autorizado.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "surveys": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Survey"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Pesquisas"
+        ],
+        "operationId": "post_api_surveys",
+        "summary": "Criar pesquisa",
+        "description": "Apenas perfis editores. Use active=false para criar um rascunho.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "survey": {
+                      "$ref": "#/components/schemas/Survey"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sectorId": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Question"
+                    }
+                  }
+                },
+                "required": [
+                  "sectorId",
+                  "title"
+                ]
+              },
+              "example": {
+                "sectorId": "SUBSTITUA_PELO_ID_DO_SETOR",
+                "title": "Pesquisa fictícia",
+                "active": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/surveys/{id}": {
+      "put": {
+        "tags": [
+          "Pesquisas"
+        ],
+        "operationId": "put_api_surveys_id",
+        "summary": "Editar ou publicar pesquisa",
+        "description": "Use active=true para publicar. O banco preserva uma pesquisa ativa por setor.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "survey": {
+                      "$ref": "#/components/schemas/Survey"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sectorId": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Question"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "title": "Pesquisa fictícia revisada",
+                "active": false
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Pesquisas"
+        ],
+        "operationId": "patch_api_surveys_id",
+        "summary": "Editar ou publicar pesquisa",
+        "description": "Use active=true para publicar. O banco preserva uma pesquisa ativa por setor.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "survey": {
+                      "$ref": "#/components/schemas/Survey"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sectorId": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "questions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Question"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "title": "Pesquisa fictícia revisada",
+                "active": false
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Pesquisas"
+        ],
+        "operationId": "delete_api_surveys_id",
+        "summary": "Pausar pesquisa",
+        "description": "Desativa o questionário para novas avaliações.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deactivated": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ]
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "tags": [
+          "Indicadores"
+        ],
+        "operationId": "get_api_dashboard",
+        "summary": "Consultar indicadores",
+        "description": "O resumo usa o recorte solicitado. A série mensal cobre seis meses até o mês da data final.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SectorFilter"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/DateBasis"
+          }
+        ]
+      }
+    },
+    "/api/responses": {
+      "get": {
+        "tags": [
+          "Indicadores"
+        ],
+        "operationId": "get_api_responses",
+        "summary": "Listar avaliações",
+        "description": "Com page, devolve lista paginada, filtros review e ordenação. Sem page, atende à exportação detalhada.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "responses": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Response"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Page"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SectorFilter"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/DateBasis"
+          },
+          {
+            "$ref": "#/components/parameters/PageNumber"
+          },
+          {
+            "name": "review",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "complaints",
+                "critical",
+                "submitted",
+                "partial"
+              ]
+            },
+            "description": "Filtro da lista paginada."
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "recent",
+                "oldest",
+                "nps-high",
+                "nps-low",
+                "status-asc",
+                "status-desc"
+              ]
+            },
+            "description": "Ordenação da lista paginada."
+          }
+        ]
+      }
+    },
+    "/api/exports": {
+      "post": {
+        "tags": [
+          "Indicadores"
+        ],
+        "operationId": "post_api_exports",
+        "summary": "Auditar a geração do Excel",
+        "description": "Registra o modo e os filtros da exportação. O arquivo XLSX é gerado no navegador.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recorded": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "summary",
+                      "detailed"
+                    ]
+                  },
+                  "filters": {
+                    "type": "object",
+                    "properties": {
+                      "sectorId": {
+                        "type": "string"
+                      },
+                      "from": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "to": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "dateBasis": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "mode"
+                ]
+              },
+              "example": {
+                "mode": "summary",
+                "filters": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/manifestations": {
+      "get": {
+        "tags": [
+          "Ouvidoria"
+        ],
+        "operationId": "get_api_manifestations",
+        "summary": "Listar manifestações",
+        "description": "O GET responde uma listagem. O identificador no GET é aceito pela rota, mas atualmente não seleciona um item individual.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "manifestations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Manifestation"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Page"
+                    },
+                    "counts": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SectorFilter"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/DateBasis"
+          },
+          {
+            "$ref": "#/components/parameters/PageNumber"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nova",
+                "pendente",
+                "em_atendimento",
+                "resolvida"
+              ]
+            },
+            "description": "Situação da lista paginada."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "elogio",
+                "reclamacao",
+                "sugestao",
+                "outro"
+              ]
+            },
+            "description": "Tipo da lista paginada."
+          }
+        ]
+      }
+    },
+    "/api/manifestations/{id}": {
+      "get": {
+        "tags": [
+          "Ouvidoria"
+        ],
+        "operationId": "get_api_manifestations_id",
+        "summary": "Listar manifestações",
+        "description": "O GET responde uma listagem. O identificador no GET é aceito pela rota, mas atualmente não seleciona um item individual.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "manifestations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Manifestation"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Page"
+                    },
+                    "counts": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          },
+          {
+            "$ref": "#/components/parameters/SectorFilter"
+          },
+          {
+            "$ref": "#/components/parameters/From"
+          },
+          {
+            "$ref": "#/components/parameters/To"
+          },
+          {
+            "$ref": "#/components/parameters/DateBasis"
+          },
+          {
+            "$ref": "#/components/parameters/PageNumber"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nova",
+                "pendente",
+                "em_atendimento",
+                "resolvida"
+              ]
+            },
+            "description": "Situação da lista paginada."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "elogio",
+                "reclamacao",
+                "sugestao",
+                "outro"
+              ]
+            },
+            "description": "Tipo da lista paginada."
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Ouvidoria"
+        ],
+        "operationId": "put_api_manifestations_id",
+        "summary": "Registrar encaminhamento",
+        "description": "Atualiza situação e observação. Guarda histórico e preserva o relato original.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "nova",
+                      "pendente",
+                      "em_atendimento",
+                      "resolvida"
+                    ]
+                  },
+                  "internalNote": {
+                    "type": "string",
+                    "maxLength": 3000
+                  }
+                }
+              },
+              "example": {
+                "status": "em_atendimento",
+                "internalNote": "Registro fictício da demonstração."
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Ouvidoria"
+        ],
+        "operationId": "patch_api_manifestations_id",
+        "summary": "Registrar encaminhamento",
+        "description": "Atualiza situação e observação. Guarda histórico e preserva o relato original.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "nova",
+                      "pendente",
+                      "em_atendimento",
+                      "resolvida"
+                    ]
+                  },
+                  "internalNote": {
+                    "type": "string",
+                    "maxLength": 3000
+                  }
+                }
+              },
+              "example": {
+                "status": "em_atendimento",
+                "internalNote": "Registro fictício da demonstração."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "get_api_settings",
+        "summary": "Consultar configurações",
+        "description": "Somente Super Admin.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "$ref": "#/components/schemas/Settings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "put_api_settings",
+        "summary": "Atualizar configurações",
+        "description": "Somente Super Admin. Envie os parâmetros da instalação.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "$ref": "#/components/schemas/Settings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hospitalName": {
+                    "type": "string"
+                  },
+                  "commentLimit": {
+                    "type": "integer"
+                  },
+                  "lowScoreThreshold": {
+                    "type": "integer"
+                  },
+                  "autoResetSeconds": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "hospitalName": "Hospital de demonstração",
+                "commentLimit": 1000,
+                "lowScoreThreshold": 6,
+                "autoResetSeconds": 10
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "tags": [
+          "Administração"
+        ],
+        "operationId": "get_api_audit",
+        "summary": "Consultar auditoria",
+        "description": "Somente Super Admin. Retorna operações administrativas registradas.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "description": "Quantidade de eventos; padrão 100."
+          }
+        ]
+      }
+    },
+    "/api/schedules": {
+      "get": {
+        "tags": [
+          "Escalas"
+        ],
+        "operationId": "get_api_schedules",
+        "summary": "Listar importações",
+        "description": "Somente Super Admin.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imports": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ScheduleImport"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Escalas"
+        ],
+        "operationId": "post_api_schedules",
+        "summary": "Importar linhas da escala",
+        "description": "O navegador lê o Excel e envia JSON. A API aceita até 5.000 linhas e 2 MiB por importação.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imported": {
+                      "$ref": "#/components/schemas/ScheduleImport"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": {
+                    "type": "string"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "sectorId": {
+                          "type": "string"
+                        },
+                        "shiftDate": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "startsAt": {
+                          "type": "string"
+                        },
+                        "endsAt": {
+                          "type": "string"
+                        },
+                        "professionalName": {
+                          "type": "string"
+                        },
+                        "registration": {
+                          "type": "string"
+                        },
+                        "specialty": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "sectorId",
+                        "shiftDate",
+                        "startsAt",
+                        "endsAt",
+                        "professionalName"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "filename",
+                  "rows"
+                ]
+              },
+              "example": {
+                "filename": "escala-ficticia.xlsx",
+                "rows": [
+                  {
+                    "sectorId": "SUBSTITUA_PELO_ID_DO_SETOR",
+                    "shiftDate": "2026-11-25",
+                    "startsAt": "23:00",
+                    "endsAt": "05:00",
+                    "professionalName": "Profissional fictício"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/schedules/{id}": {
+      "get": {
+        "tags": [
+          "Escalas"
+        ],
+        "operationId": "get_api_schedules_id",
+        "summary": "Visualizar plantões importados",
+        "description": "Mostra os dados normalizados da planilha em páginas.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "imported": {
+                      "$ref": "#/components/schemas/ScheduleImport"
+                    },
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Professional"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Page"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          },
+          {
+            "$ref": "#/components/parameters/PageNumber"
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Escalas"
+        ],
+        "operationId": "delete_api_schedules_id",
+        "summary": "Excluir importação",
+        "description": "Remove a importação e os plantões associados.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ]
+      }
+    },
+    "/api/responses/{id}/scheduled-professionals": {
+      "get": {
+        "tags": [
+          "Escalas"
+        ],
+        "operationId": "get_api_responses_id_scheduled_professionals",
+        "summary": "Cruzar avaliação com plantões",
+        "description": "Exige acesso às respostas e ao setor. A precisão distingue horário informado, estimado, apenas data ou indisponível.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "professionals": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Professional"
+                      }
+                    },
+                    "precision": {
+                      "type": "string",
+                      "enum": [
+                        "time",
+                        "response_time",
+                        "date",
+                        "none"
+                      ]
+                    },
+                    "attendedAt": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ]
+      }
+    },
+    "/api/tv-devices": {
+      "get": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "get_api_tv_devices",
+        "summary": "Listar dispositivos",
+        "description": "Super Admin. Devolve configuração e estado de cada dispositivo.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "devices": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TvDevice"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "post_api_tv_devices",
+        "summary": "Cadastrar TV",
+        "description": "Gera código temporário de uso único.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "$ref": "#/components/schemas/TvDevice"
+                    },
+                    "pairingCode": {
+                      "type": "string"
+                    },
+                    "pairingExpiresAt": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "allSectors": {
+                    "type": "boolean"
+                  },
+                  "sectorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "qrSectorId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "period": {
+                    "type": "string"
+                  },
+                  "refreshSeconds": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "example": {
+                "name": "TV fictícia",
+                "allSectors": true,
+                "metrics": [
+                  "responses",
+                  "satisfaction"
+                ],
+                "period": "current_month",
+                "refreshSeconds": 30
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tv-devices/{id}": {
+      "put": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "put_api_tv_devices_id",
+        "summary": "Editar TV",
+        "description": "Atualiza somente o dispositivo indicado.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "$ref": "#/components/schemas/TvDevice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "allSectors": {
+                    "type": "boolean"
+                  },
+                  "sectorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "qrSectorId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "period": {
+                    "type": "string"
+                  },
+                  "refreshSeconds": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "name": "TV fictícia revisada"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "patch_api_tv_devices_id",
+        "summary": "Editar TV",
+        "description": "Atualiza somente o dispositivo indicado.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "$ref": "#/components/schemas/TvDevice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "allSectors": {
+                    "type": "boolean"
+                  },
+                  "sectorIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "qrSectorId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "period": {
+                    "type": "string"
+                  },
+                  "refreshSeconds": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "name": "TV fictícia revisada"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "delete_api_tv_devices_id",
+        "summary": "Revogar TV",
+        "description": "Revoga o acesso do dispositivo indicado.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "$ref": "#/components/schemas/TvDevice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ]
+      }
+    },
+    "/api/tv-devices/{id}/pairing-code": {
+      "post": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "post_api_tv_devices_id_pairing_code",
+        "summary": "Gerar código de vinculação",
+        "description": "Substitui o código anterior para esta TV.",
+        "security": [
+          {
+            "administrativa": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "$ref": "#/components/schemas/TvDevice"
+                    },
+                    "pairingCode": {
+                      "type": "string"
+                    },
+                    "pairingExpiresAt": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          }
+        ]
+      }
+    },
+    "/api/public/tv/pair": {
+      "post": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "post_api_public_tv_pair",
+        "summary": "Vincular dispositivo",
+        "description": "Consome o código de seis dígitos e emite o cookie fhdod_tv.",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "device": {
+                      "$ref": "#/components/schemas/TvDevice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/HTTP400"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          },
+          "409": {
+            "$ref": "#/components/responses/HTTP409"
+          },
+          "413": {
+            "$ref": "#/components/responses/HTTP413"
+          },
+          "415": {
+            "$ref": "#/components/responses/HTTP415"
+          },
+          "429": {
+            "$ref": "#/components/responses/HTTP429"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^[0-9]{6}$"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              },
+              "example": {
+                "code": "000000"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/tv/dashboard": {
+      "get": {
+        "tags": [
+          "TV Wall"
+        ],
+        "operationId": "get_api_public_tv_dashboard",
+        "summary": "Consultar dados para a TV",
+        "description": "Requer cookie próprio da TV. Entrega configuração e indicadores consolidados.",
+        "security": [
+          {
+            "televisao": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/HTTP401"
+          },
+          "403": {
+            "$ref": "#/components/responses/HTTP403"
+          },
+          "404": {
+            "$ref": "#/components/responses/HTTP404"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "administrativa": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "fhdod_session"
+      },
+      "televisao": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "fhdod_tv"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "superadmin",
+              "sector_admin",
+              "management",
+              "ombudsman",
+              "viewer"
+            ]
+          },
+          "sectorIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "mustChangePassword": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Sector": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "rating",
+              "nps",
+              "yes_no",
+              "choice",
+              "text"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "Survey": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sectorId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          }
+        }
+      },
+      "Page": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer",
+            "enum": [
+              25
+            ]
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "total"
+        ]
+      },
+      "Answer": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "answeredAt": {
+            "type": "string"
+          }
+        }
+      },
+      "Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sectorId": {
+            "type": "string"
+          },
+          "sectorName": {
+            "type": "string"
+          },
+          "surveyId": {
+            "type": "string"
+          },
+          "surveyTitle": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "partial",
+              "submitted"
+            ]
+          },
+          "attendedOn": {
+            "type": "string",
+            "nullable": true
+          },
+          "attendedTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "shift": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "nps": {
+            "type": "integer",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string"
+          },
+          "wantsContact": {
+            "type": "boolean"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Answer"
+            }
+          }
+        }
+      },
+      "Manifestation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "responseId": {
+            "type": "string"
+          },
+          "sectorId": {
+            "type": "string"
+          },
+          "sectorName": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "wantsContact": {
+            "type": "boolean"
+          },
+          "internalNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Settings": {
+        "type": "object",
+        "properties": {
+          "hospitalName": {
+            "type": "string"
+          },
+          "commentLimit": {
+            "type": "integer"
+          },
+          "lowScoreThreshold": {
+            "type": "integer"
+          },
+          "autoResetSeconds": {
+            "type": "integer"
+          }
+        }
+      },
+      "ScheduleImport": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer"
+          },
+          "importedAt": {
+            "type": "string"
+          },
+          "importedByName": {
+            "type": "string"
+          }
+        }
+      },
+      "Professional": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "importId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "registration": {
+            "type": "string"
+          },
+          "specialty": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string"
+          }
+        }
+      },
+      "TvDevice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "qrSectorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "sectorIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allSectors": {
+            "type": "boolean"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "period": {
+            "type": "string"
+          },
+          "refreshSeconds": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "Metric": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "month": {
+            "type": "string"
+          }
+        }
+      },
+      "Dashboard": {
+        "type": "object",
+        "properties": {
+          "responseCount": {
+            "type": "integer"
+          },
+          "partialCount": {
+            "type": "integer"
+          },
+          "criticalCount": {
+            "type": "integer"
+          },
+          "pendingCount": {
+            "type": "integer"
+          },
+          "nps": {
+            "type": "integer",
+            "nullable": true
+          },
+          "satisfaction": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthly": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Metric"
+            }
+          },
+          "bySector": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Response"
+            }
+          },
+          "ratingDistribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "score": {
+                  "type": "integer"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "score": {
+                  "type": "integer"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "HTTP503": {
+        "description": "Banco indisponível",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ok": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "HTTP400": {
+        "description": "Entrada inválida",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP403": {
+        "description": "Origem ou perfil sem permissão",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP409": {
+        "description": "Conflito de estado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP413": {
+        "description": "Corpo acima do limite",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP415": {
+        "description": "Corpo deve ser JSON",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP429": {
+        "description": "Limite de requisições",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP401": {
+        "description": "Sessão necessária",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "HTTP404": {
+        "description": "Registro não encontrado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "ResourceId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identificador retornado pela API"
+      },
+      "SectorFilter": {
+        "name": "sectorId",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "description": "Identificador de setor autorizado. Vazio usa o escopo permitido."
+      },
+      "From": {
+        "name": "from",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date"
+        },
+        "description": "Data inicial inclusiva."
+      },
+      "To": {
+        "name": "to",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "format": "date"
+        },
+        "description": "Data final inclusiva."
+      },
+      "DateBasis": {
+        "name": "dateBasis",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "attendance",
+            "submission"
+          ]
+        },
+        "description": "Atendimento ou envio. O padrão é envio."
+      },
+      "PageNumber": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "description": "Quando informado, pagina 25 registros.",
+        "example": 1
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Saúde"
+    },
+    {
+      "name": "Sessão"
+    },
+    {
+      "name": "Pesquisa pública"
+    },
+    {
+      "name": "Administração"
+    },
+    {
+      "name": "Pesquisas"
+    },
+    {
+      "name": "Indicadores"
+    },
+    {
+      "name": "Ouvidoria"
+    },
+    {
+      "name": "Escalas"
+    },
+    {
+      "name": "TV Wall"
+    }
+  ]
+}

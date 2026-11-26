@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
     "dev:demo": "node --env-file-if-exists=.env scripts/dev.mjs --demo",
+    "swagger": "node --env-file-if-exists=.env scripts/swagger.mjs",
     "build": "tsc -b && vite build",
     "start": "node --env-file-if-exists=.env src/backend/app.mjs",
     "test": "node --env-file-if-exists=.env --test src/backend/tests/*.test.mjs",
@@ -31,6 +32,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "swagger-ui-dist": "5.36.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.5"
   },

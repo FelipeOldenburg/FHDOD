@@ -232,6 +232,24 @@ As migrações são registradas em `schema_migrations` e executadas uma vez, sob
 
 `GET /api/health` verifica o PostgreSQL e retorna `503` quando o banco está indisponível. A API fornece `X-Request-Id` e inclui esse identificador nos erros internos do servidor, sem expor detalhes do banco na resposta. Conexões aguardam até 5 segundos e consultas até 15 segundos por padrão; parâmetros explícitos na URL PostgreSQL podem substituir esses valores.
 
+### Testar rotas no Swagger UI
+
+Configure `FHDOD_TEST_DATABASE_URL` no `.env` com um PostgreSQL de teste cujo usuário possa criar esquemas. Na raiz do projeto, execute:
+
+```sh
+npm ci
+npm run swagger
+```
+
+Abra o [Swagger UI em 127.0.0.1:4177](http://127.0.0.1:4177/swagger). O comando sobe a API e o Swagger no mesmo endereço, em um esquema temporário com setores, pesquisas e avaliações fictícias. Ao encerrar pelo terminal com `Ctrl+C`, o esquema da sessão é removido.
+
+1. Em **Saúde**, abra `GET /api/health`, clique em **Try it out** e depois em **Execute**. O resultado esperado é **200** com `"ok": true`.
+2. Em **Sessão**, execute `GET /api/auth/setup`. Se `needsSetup` for `true`, execute `POST /api/auth/setup` com o exemplo. Isso cria o administrador fictício e já abre a sessão. Para entrar de novo use `POST /api/auth/login` com o e-mail e a senha definidos na configuração inicial.
+3. Execute `GET /api/sectors` ou `GET /api/auth/me` para conferir a sessão. O navegador envia o cookie automaticamente. Depois de `POST /api/auth/logout`, essas rotas devem responder **401**.
+4. Para testar uma avaliação, execute `GET /api/public/sectors/{slug}` com `pronto-atendimento`. Use `sector.id` no início da avaliação e os identificadores e o token retornados pela API nas etapas seguintes.
+
+A [especificação OpenAPI](docs/openapi.json) também pode ser [aberta ou baixada no laboratório](http://127.0.0.1:4177/openapi.json).
+
 <details>
 <summary><strong>⚙️ Variáveis de ambiente</strong></summary>
 
