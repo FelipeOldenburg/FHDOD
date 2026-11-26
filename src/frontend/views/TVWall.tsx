@@ -2,15 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import {
   ArrowLeft,
-  Frown,
   Maximize2,
-  Meh,
   Minimize2,
   QrCode,
   RefreshCw,
-  Smile,
 } from "lucide-react";
-import { Brand } from "../components/components";
+import { Brand, RatingFaceIcon, ratingFaceLabels } from "../components/components";
 import { Evolution } from "../components/Evolution";
 import { filterQuery } from "../controllers/api";
 import type {
@@ -201,17 +198,14 @@ export function TVWall({
   const showParticipation = metrics.includes("sectors");
   const hasIndicators = showSatisfaction || showTrend || keyMetrics.length > 0;
   const satisfaction = data?.satisfaction ?? null;
+  const displayedSatisfaction = satisfaction == null ? null : Math.round(satisfaction * 10) / 10;
+  const satisfactionRating = displayedSatisfaction == null ? null : Math.round(displayedSatisfaction);
+  const satisfactionTone = satisfactionRating == null || satisfactionRating === 3
+    ? "neutral"
+    : satisfactionRating >= 4 ? "positive" : "negative";
   const ratings = data?.ratingDistribution ?? [];
   const ratingCount = ratings.reduce((sum, item) => sum + item.count, 0);
   const positiveRatings = ratings.reduce((sum, item) => item.score >= 4 ? sum + item.count : sum, 0);
-  const satisfactionTone = satisfaction == null || (satisfaction >= 2.5 && satisfaction < 3.5)
-    ? "neutral"
-    : satisfaction >= 3.5 ? "positive" : "negative";
-  const SatisfactionIcon = satisfactionTone === "positive" ? Smile : satisfactionTone === "negative" ? Frown : Meh;
-  const satisfactionLabel = satisfaction == null ? "Aguardando avaliações"
-    : satisfaction >= 4.5 ? "Ótima satisfação"
-    : satisfaction >= 3.5 ? "Boa satisfação"
-    : satisfaction >= 2.5 ? "Satisfação regular" : "Satisfação baixa";
   const periodLabel = publicDisplay
     ? device?.periodRange ? formatPeriod(device.periodRange) : device?.periodLabel || "Período configurado"
     : filters
@@ -346,14 +340,20 @@ export function TVWall({
                     <div className="tv-wall-satisfaction-summary">
                       <div>
                         <p className="tv-wall-satisfaction-value">
-                          <strong>{formatMetric(satisfaction, 1)}</strong>
+                          <strong>{formatMetric(displayedSatisfaction, 1)}</strong>
                           <span>/ 5,0</span>
                         </p>
-                        <p className="tv-wall-satisfaction-label">{satisfactionLabel}</p>
+                        <p className="tv-wall-satisfaction-label">
+                          {satisfactionRating == null
+                            ? "Aguardando avaliações"
+                            : ratingFaceLabels[satisfactionRating - 1]}
+                        </p>
                       </div>
-                      <span className="tv-wall-satisfaction-icon" aria-hidden="true">
-                        <SatisfactionIcon strokeWidth={1.3} />
-                      </span>
+                      {satisfactionRating != null && (
+                        <span className="tv-wall-satisfaction-face">
+                          <RatingFaceIcon index={satisfactionRating - 1} />
+                        </span>
+                      )}
                     </div>
                     <div className="tv-wall-satisfaction-track" aria-hidden="true">
                       <span style={{ width: `${((satisfaction ?? 0) / 5) * 100}%` }} />

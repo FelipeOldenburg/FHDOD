@@ -49,7 +49,7 @@ export function Brand({ patient = false }: { patient?: boolean }) {
   );
 }
 
-const faceLabels = ["Muito ruim", "Ruim", "Regular", "Bom", "Muito bom"];
+export const ratingFaceLabels = ["Muito ruim", "Ruim", "Regular", "Bom", "Muito bom"] as const;
 const facePalette = [
   { start: "#d7b7ff", end: "#bb8df1", ink: "#50377e" },
   { start: "#c4d9ff", end: "#9dbcf0", ink: "#26466f" },
@@ -58,7 +58,7 @@ const facePalette = [
   { start: "#c9e3bd", end: "#a8cc99", ink: "#46613f" },
 ] as const;
 
-function RatingFaceIcon({ index }: { index: number }) {
+export function RatingFaceIcon({ index }: { index: number }) {
   const gradientId = `rating-face-${useId().replaceAll(":", "")}`;
   const palette = facePalette[index];
 
@@ -143,7 +143,7 @@ export function RatingFaces({
 }) {
   return (
     <div className="rating-faces" role="group" aria-label="Avaliação de 1 a 5">
-      {faceLabels.map((label, index) => (
+      {ratingFaceLabels.map((label, index) => (
         <button
           key={label}
           type="button"
